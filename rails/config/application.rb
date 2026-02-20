@@ -11,6 +11,8 @@ require "action_mailer/railtie"
 require "action_mailbox/engine"
 require "action_text/engine"
 require "action_view/railtie"
+# respecのため追加
+require "cgi"
 # require "action_cable/engine"
 # require "rails/test_unit/railtie"
 

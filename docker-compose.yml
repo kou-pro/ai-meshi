@@ -14,15 +14,15 @@ services:
   rails:
     build:
       context: ./rails
-    command: bash -c "tail -f log/development.log"
+    command: bash -c "bundle exec rails s -b 0.0.0.0"
     volumes:
       - ./rails:/myapp
     ports:
-      - 3000:3000
+      - "3000:3000"
     depends_on:
       - db
     environment:
-      RAILS_ENV: development # ← これを追加
+      RAILS_ENV: development
     tty: true
     stdin_open: true
 

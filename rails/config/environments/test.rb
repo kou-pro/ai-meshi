@@ -1,6 +1,6 @@
 require "active_support/core_ext/integer/time"
 
-# The test environment is used exclusively to run your application's
+# The test environment is used exclusively to run your application'st
 # test suite. You never need to work with it otherwise. Remember that
 # your test database is "scratch space" for the test suite and is wiped
 # and recreated between test runs. Don't rely on the data there!
@@ -65,6 +65,10 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
-  #rspecを実行するために追加
-  config.hosts << "www.example.com"
+  
+
+  
+
+  # RSpec request spec 用
+  config.hosts.clear
 end

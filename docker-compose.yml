@@ -23,6 +23,7 @@ services:
       - db
     environment:
       RAILS_ENV: development
+      FRONT_DOMAIN: http://localhost:8000
     tty: true
     stdin_open: true
 

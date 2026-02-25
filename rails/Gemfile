@@ -3,6 +3,10 @@ git_source(:github) {|repo| "https://github.com/#{repo}.git" }
 
 ruby "3.2.10"
 
+#device_token_authを導入する
+gem 'devise'
+gem 'devise_token_auth'
+
 # railsの起動時間を短縮する（標準gem）
 gem "bootsnap", require: false
 
@@ -18,14 +22,22 @@ gem "rails", "~> 7.2.3"
 # タイムゾーン情報を提供する（標準gem）
 gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby]
 
+# coreの導入
+gem "rack-cors"
+
+group :test do
+  gem "factory_bot_rails"
+    # テストフレームワーク rspec を導入する
+  gem "rspec-rails"
+end
+
 group :development, :test do
   # pry コンソールを使えるようにする。
   gem "pry-byebug"
   gem "pry-doc"
   gem "pry-rails"
 
-  # テストフレームワーク rspec を導入する
-  gem "rspec-rails"
+
 
   # rubocop を使えるようにする。
   gem "rubocop-faker"
@@ -36,5 +48,7 @@ group :development, :test do
   gem "config"
 
 
-  gem "rack-cors"
+  
+
+  
 end

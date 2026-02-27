@@ -47,7 +47,8 @@ group :development, :test do
   # 環境毎の設定管理を行う
   gem "config"
 
-
+  # mail認証のためのletter_poenerを追加
+  gem 'letter_opener_web'
   
 
   

@@ -13,10 +13,8 @@ export default function Page() {
             p: 6,
             ml: 3,
             mt: 4,
-            color: 'white',
             textTransform: 'none',
             color: { xs: 'white', md: 'red' },
-            textTransform: 'none',
           }}
         >
           生成する

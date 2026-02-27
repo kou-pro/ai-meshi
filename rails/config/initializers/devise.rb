@@ -312,4 +312,6 @@ Devise.setup do |config|
   # config.sign_in_after_change_password = true
   # Devise が session に保存しないようにします。
   config.skip_session_storage = [:http_auth, :params_auth, :token_auth]
+
+  config.allow_unconfirmed_access_for = 0.days
 end

@@ -5,11 +5,19 @@ DeviseTokenAuth.setup do |config|
   # client is responsible for keeping track of the changing tokens. Change
   # this to false to prevent the Authorization header from changing after
   # each request.
+
+  # マイリクエストごとにトークンを更新する挙動を実行
   config.change_headers_on_each_request = true
 
   # By default, users will need to re-authenticate after 2 weeks. This setting
   # determines how long tokens will remain valid after they are issued.
+
+  # 発行したトークンが有効でいられる期間の設定
   config.token_lifespan = 2.hours
+
+
+  # confirmable有効時に確認メールを送る設定
+  config.send_confirmation_email = true
 
   # Limiting the token_cost to just 4 in testing will increase the performance of
   # your test suite dramatically. The possible cost value is within range from 4
@@ -62,5 +70,9 @@ DeviseTokenAuth.setup do |config|
   # By default DeviseTokenAuth will not send confirmation email, even when including
   # devise confirmable module. If you want to use devise confirmable module and
   # send email, set it to true. (This is a setting for compatibility)
-  # config.send_confirmation_email = true
+  config.send_confirmation_email = true
+
+  config.default_confirm_success_url = "http://localhost:8000/login"
+
+
 end

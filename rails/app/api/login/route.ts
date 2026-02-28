@@ -4,7 +4,10 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const res = await fetch("http://localhost:3000/auth/sign_in", {
+  console.log("LOGIN ROUTE HIT");
+  console.log("CALLING RAILS:", "http://rails:3000/auth/sign_in");
+
+  const res = await fetch("http://rails:3000/auth/sign_in", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

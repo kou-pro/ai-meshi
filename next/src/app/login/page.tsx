@@ -1,31 +1,29 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    try {
-      const response = await fetch('http://localhost:3000/auth/sign_in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      })
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+      credentials: 'include',
+    })
 
-      const data = await response.json()
-      console.log('response:', data)
-    } catch (error) {
-      console.error('login error:', error)
+    if (!response.ok) {
+      console.error('login failed')
+      return
     }
+
+    router.push('/protected')
   }
 
   return (

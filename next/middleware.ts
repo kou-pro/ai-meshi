@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
-  console.log('🔥 PROXY RUNNING:', request.nextUrl.pathname)
-
-  const token = request.cookies.get('access_token')
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('access-token')?.value
 
   console.log('🎟 TOKEN:', token)
 

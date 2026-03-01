@@ -50,6 +50,8 @@ group :development, :test do
   # mail認証のためのletter_poenerを追加
   gem 'letter_opener_web'
   
-
+  # Google auth認証のため
+  gem 'omniauth-google-oauth2'
+  gem 'omniauth-rails_csrf_protection'  
   
 end

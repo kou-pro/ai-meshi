@@ -314,4 +314,17 @@ Devise.setup do |config|
   config.skip_session_storage = [:http_auth, :params_auth, :token_auth]
 
   config.allow_unconfirmed_access_for = 0.days
+
+  # rails/config/initializers/devise.rb
+
+
+  config.omniauth :google_oauth2,
+  ENV['GOOGLE_CLIENT_ID'],
+  ENV['GOOGLE_CLIENT_SECRET'],
+  scope: 'email, profile'
+
+  config.omniauth :google_oauth2,
+  ENV['GOOGLE_CLIENT_ID'],
+  ENV['GOOGLE_CLIENT_SECRET'],
+  scope: 'email, profile'
 end

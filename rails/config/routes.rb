@@ -7,9 +7,9 @@ Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
   
   namespace :api do
-    get 'me', to: 'users#me'
-
     namespace :v1 do
+      get 'users/me', to: 'users#me'
+
       get "health_check", to: "health_check#index"
       resources :recipes, only: [:index, :create]
     end

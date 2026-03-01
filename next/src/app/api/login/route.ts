@@ -25,6 +25,13 @@ export async function POST(req: Request) {
     const uid = res.headers.get('uid')
     const expiry = res.headers.get('expiry')
 
+    console.log('LOGIN HEADER:', {
+      accessToken,
+      client,
+      uid,
+      expiry,
+    })
+
     if (!accessToken || !client || !uid || !expiry) {
       return NextResponse.json({ error: 'Token missing' }, { status: 500 })
     }

@@ -1,4 +1,8 @@
+// app/protected/page.tsx
+
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { LogoutButton } from '@/components/LogoutButton'
 
 export default async function ProtectedPage() {
   const cookieStore = await cookies()
@@ -7,12 +11,11 @@ export default async function ProtectedPage() {
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  console.log('accessToken:', accessToken)
-  console.log('client:', client)
-  console.log('uid:', uid)
-
   if (!accessToken || !client || !uid) {
-    return <div>Cookieがありません</div>
+    // ▼ Server Component内では redirect() を使う
+    // return <div>...</div> より redirect() の方が正しい
+    // middlewareで弾かれるケースがほとんどだが、二重チェックとして残す
+    redirect('/login')
   }
 
   const res = await fetch('http://rails:3000/api/v1/users/me', {
@@ -25,10 +28,8 @@ export default async function ProtectedPage() {
     },
   })
 
-  console.log('Rails response status:', res.status)
-
   if (!res.ok) {
-    return <div>Unauthorized</div>
+    redirect('/login')
   }
 
   const data = await res.json()
@@ -37,6 +38,8 @@ export default async function ProtectedPage() {
     <div>
       <h1>Protected</h1>
       <pre>{JSON.stringify(data, null, 2)}</pre>
+      {/* ▼ LogoutButtonはClient Component。Server Componentの中に置いてOK */}
+      <LogoutButton />
     </div>
   )
 }

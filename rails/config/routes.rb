@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  # ▼ カスタムルートを先に書く（優先される）
+  match '/omniauth/:provider/callback', to: 'auth/omniauth_callbacks#omniauth_success', via: [:get, :post]
+  get '/omniauth/failure', to: 'auth/omniauth_callbacks#omniauth_failure'
+  get '/omniauth/:provider', to: 'auth/omniauth_callbacks#passthru'
+
+  # ▼ 後ろに移動
   mount_devise_token_auth_for 'User', at: 'auth',
     controllers: {
       sessions: 'auth/sessions',
@@ -15,4 +21,3 @@ Rails.application.routes.draw do
     end
   end
 end
-

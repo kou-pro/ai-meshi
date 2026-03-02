@@ -38,7 +38,7 @@ DeviseTokenAuth.setup do |config|
   # This route will be the prefix for all oauth2 redirect callbacks. For
   # example, using the default '/omniauth', the github oauth2 provider will
   # redirect successful authentications to '/omniauth/github/callback'
-  # config.omniauth_prefix = "/omniauth"
+  #config.omniauth_prefix = "/auth/omniauth"
 
   # By default sending current password is not needed for the password update.
   # Uncomment to enforce current_password param to be checked before all
@@ -76,4 +76,15 @@ DeviseTokenAuth.setup do |config|
   config.default_confirm_success_url = "http://localhost:8000/login"
 
 
+  
+ 
+
 end
+
+ # ▼ CSRF検証を無効化（APIモードでセッションが使えないため）
+OmniAuth.config.before_callback_phase do |env|
+  env['omniauth.state'] = env.dig('rack.request.query_hash', 'state')
+end  
+
+OmniAuth.config.allowed_request_methods = [:get, :post]
+OmniAuth.config.silence_get_warning = true

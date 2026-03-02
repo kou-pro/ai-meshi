@@ -1,22 +1,31 @@
-# rails/app/controllers/auth/omniauth_callbacks_controller.rb
-
 class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksController
 
+  def passthru
+  # ▼ Googleの認証URLを直接生成してリダイレクト
+    client_id = ENV['GOOGLE_CLIENT_ID']
+    redirect_uri = 'http://localhost:3000/omniauth/google_oauth2/callback'
+    scope = 'email profile'
+  
+    google_auth_url = "https://accounts.google.com/o/oauth2/auth?" \
+        "client_id=#{client_id}" \
+        "&redirect_uri=#{CGI.escape(redirect_uri)}" \
+        "&response_type=code" \
+        "&scope=#{CGI.escape(scope)}"
+  
+    redirect_to google_auth_url, allow_other_host: true
+  end
+
   def omniauth_success
-    # ▼ Googleから返ってきた認証情報でユーザー取得 or 作成
     @resource = User.from_omniauth(request.env['omniauth.auth'])
 
     if @resource.persisted?
-      # ▼ devise_token_authのトークン生成
       @token = @resource.create_token
       @resource.save!
 
-      # ▼ クエリパラメータに安全に乗せる
       access_token = @token.token
       client       = @token.client
       uid          = URI.encode_www_form_component(@resource.uid)
 
-      # ▼ Next.jsのRoute Handlerへリダイレクト
       redirect_to(
         "http://localhost:8000/api/auth/google/callback?" \
         "access-token=#{access_token}" \
@@ -32,6 +41,5 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
     end
   end
 
-  # ▼ google_oauth2 アクション名を紐づけ
   alias_method :google_oauth2, :omniauth_success
 end

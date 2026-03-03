@@ -53,5 +53,8 @@ group :development, :test do
   # Google auth認証のため
   gem 'omniauth-google-oauth2'
   gem 'omniauth-rails_csrf_protection'  
-  
+
+  # gem ruby-openai
+  gem "ruby-openai"
+
 end

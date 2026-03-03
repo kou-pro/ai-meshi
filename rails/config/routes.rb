@@ -17,7 +17,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       get 'users/me', to: 'users#me'
       get "health_check", to: "health_check#index"
-      resources :recipes, only: [:index, :create]
+      resources :recipes, only: [:index, :create] do
+        collection do
+          post :generate
+        end
+      end
     end
   end
 end

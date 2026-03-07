@@ -5,6 +5,7 @@ export type Recipe = {
   id: number
   title: string
   content: string | null // contentはnullの可能性がある
+  is_published: boolean
   user_id: number
   created_at: string
   updated_at: string

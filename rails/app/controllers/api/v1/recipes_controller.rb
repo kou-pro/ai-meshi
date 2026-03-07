@@ -15,18 +15,45 @@ class Api::V1::RecipesController < ApplicationController
     end
   end
 
+  def update
+    # 自分のレシピだけ編集できる
+    recipe = current_user.recipes.find(params[:id])
+    if recipe.update(recipe_params)
+      render json: recipe
+    else
+      render json: { errors: recipe.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    # 自分のレシピだけ削除できる
+    recipe = current_user.recipes.find(params[:id])
+    recipe.destroy
+    render json: { message: '削除しました' }
+  end
+
+  def publish
+    # 自分のレシピだけ公開できる
+    recipe = current_user.recipes.find(params[:id])
+    if recipe.update(is_published: true)
+      render json: recipe
+    else
+      render json: { errors: recipe.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def published
+    # 全ユーザーの公開済みレシピを取得
+    recipes = Recipe.where(is_published: true).order(created_at: :desc)
+    render json: recipes
+  end
+
   def generate
-    # ユーザーが入力した食材・条件を受け取る
     ingredients = params[:ingredients]
-
-    # OpenAIクライアントを初期化
-    # ENV['OPENAI_API_KEY']は.envから読み込まれる
     client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
-
-    # ChatGPT APIにリクエスト
     response = client.chat(
       parameters: {
-        model: 'gpt-4o-mini',   # 低コストなモデルを使用
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -37,33 +64,23 @@ class Api::V1::RecipesController < ApplicationController
             content: "以下の食材を使ったレシピを提案してください：#{ingredients}"
           }
         ],
-        temperature: 0.7   # 回答のランダム性（0〜1、高いほど多様な回答）
+        temperature: 0.7
       }
     )
-
-    # ChatGPTからの返答を取り出す
     raw_content = response.dig('choices', 0, 'message', 'content')
-
-    # JSON文字列をRubyのハッシュに変換
     recipe_data = JSON.parse(raw_content)
-
-    # DBに保存
     recipe = current_user.recipes.new(
       title: recipe_data['title'],
       content: recipe_data['content']
     )
-
     if recipe.save
       render json: recipe, status: :created
     else
       render json: { errors: recipe.errors.full_messages }, status: :unprocessable_entity
     end
-
   rescue JSON::ParserError
-    # ChatGPTがJSON形式で返さなかった場合
     render json: { error: 'レシピの生成に失敗しました' }, status: :unprocessable_entity
   rescue StandardError => e
-    # その他のエラー（APIキー不正など）
     render json: { error: e.message }, status: :internal_server_error
   end
 

@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 
 type Recipe = {
   id: number
@@ -49,7 +50,9 @@ export default async function HomePage() {
       <ul className="space-y-4">
         {recipes.map((recipe) => (
           <li key={recipe.id} className="p-4 border border-gray-200 rounded-lg">
-            <h2 className="text-lg font-semibold">{recipe.title}</h2>
+            <Link href={`/recipes/${recipe.id}`}>
+              <h2 className="text-lg font-semibold">{recipe.title}</h2>
+            </Link>
             {recipe.content && (
               <p className="text-gray-600 mt-1">{recipe.content}</p>
             )}

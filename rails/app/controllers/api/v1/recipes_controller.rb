@@ -6,6 +6,20 @@ class Api::V1::RecipesController < ApplicationController
     render json: recipes
   end
 
+  def show
+    recipe = Recipe.find(params[:id])
+    render json: {
+      id: recipe.id,
+      title: recipe.title,
+      content: recipe.content,
+      created_at: recipe.created_at,
+      user: {
+        id: recipe.user.id,
+        name: recipe.user.name
+      }
+    }
+  end
+
   def create
     recipe = current_user.recipes.new(recipe_params)
     if recipe.save

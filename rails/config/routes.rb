@@ -27,6 +27,7 @@ Rails.application.routes.draw do
         member do
           patch :publish
         end
+        resource :likes, only: [:create, :destroy]
       end
     end
   end

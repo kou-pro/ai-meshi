@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 
 type RecipeDetail = {
   id: number
@@ -45,13 +46,19 @@ export default async function RecipeDetailPage({
   const recipe = await fetchRecipe(id)
 
   if (!recipe) return notFound()
-
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>
       <p className="text-sm text-gray-500 mb-6">
-        投稿者: {recipe.user.name} ／{' '}
-        {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
+        {/* 投稿者名をLinkで囲む */}
+        投稿者:
+        <Link
+          href={`/users/${recipe.user.id}`}
+          className="hover:text-blue-600 ml-1"
+        >
+          {recipe.user.name}
+        </Link>
+        ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
       </p>
       <div className="whitespace-pre-wrap text-gray-700">{recipe.content}</div>
     </div>

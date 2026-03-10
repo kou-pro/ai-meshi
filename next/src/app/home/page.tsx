@@ -15,18 +15,21 @@ async function fetchPublishedRecipes(): Promise<Recipe[]> {
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  if (!accessToken || !client || !uid) {
-    return []
+  // ヘッダーを組み立てる（未ログインでも空ヘッダーでリクエストする）
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  // ログイン済みの場合だけ認証ヘッダーを追加する
+  if (accessToken && client && uid) {
+    headers['access-token'] = accessToken
+    headers['client'] = client
+    headers['uid'] = uid
   }
 
   const res = await fetch('http://rails:3000/api/v1/recipes/published', {
     method: 'GET',
-    headers: {
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-      'Content-Type': 'application/json',
-    },
+    headers,
     cache: 'no-store',
   })
 

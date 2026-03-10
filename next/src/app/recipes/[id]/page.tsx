@@ -19,16 +19,21 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  if (!accessToken || !client || !uid) return null
+  // ヘッダーを組み立てる（未ログインでも空ヘッダーでリクエストする）
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  // ログイン済みの場合だけ認証ヘッダーを追加する
+  if (accessToken && client && uid) {
+    headers['access-token'] = accessToken
+    headers['client'] = client
+    headers['uid'] = uid
+  }
 
   const res = await fetch(`http://rails:3000/api/v1/recipes/${id}`, {
     method: 'GET',
-    headers: {
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-      'Content-Type': 'application/json',
-    },
+    headers,
     cache: 'no-store',
   })
 
@@ -46,11 +51,11 @@ export default async function RecipeDetailPage({
   const recipe = await fetchRecipe(id)
 
   if (!recipe) return notFound()
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>
       <p className="text-sm text-gray-500 mb-6">
-        {/* 投稿者名をLinkで囲む */}
         投稿者:
         <Link
           href={`/users/${recipe.user.id}`}

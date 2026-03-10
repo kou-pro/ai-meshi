@@ -1,7 +1,7 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :authenticate_user!
+      before_action :authenticate_user!,only: [:me]
 
       def me
         render json: {
@@ -28,7 +28,7 @@ module Api
           }
         }
       end
-      
+
     end
   end
 end

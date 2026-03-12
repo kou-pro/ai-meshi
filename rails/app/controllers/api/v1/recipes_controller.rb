@@ -8,6 +8,9 @@ class Api::V1::RecipesController < ApplicationController
 
   def show
     recipe = Recipe.find(params[:id])
+     # ログイン済みの場合だけ自分がいいねしているか確認する
+    liked_by_current_user = current_user ? current_user.likes.exists?(recipe: recipe) : false
+
     render json: {
       id: recipe.id,
       title: recipe.title,
@@ -16,7 +19,9 @@ class Api::V1::RecipesController < ApplicationController
       user: {
         id: recipe.user.id,
         name: recipe.user.name
-      }
+      },
+      likes_count: recipe.likes.count,
+      liked_by_current_user: liked_by_current_user
     }
   end
 

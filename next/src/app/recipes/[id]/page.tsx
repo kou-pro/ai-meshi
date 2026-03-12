@@ -1,12 +1,15 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import LikeButton from '@/components/LikeButton'
 
 type RecipeDetail = {
   id: number
   title: string
   content: string | null
   created_at: string
+  likes_count: number
+  liked_by_current_user: boolean
   user: {
     id: number
     name: string
@@ -19,12 +22,10 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  // ヘッダーを組み立てる（未ログインでも空ヘッダーでリクエストする）
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
 
-  // ログイン済みの場合だけ認証ヘッダーを追加する
   if (accessToken && client && uid) {
     headers['access-token'] = accessToken
     headers['client'] = client
@@ -38,7 +39,6 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
   })
 
   if (!res.ok) return null
-
   return res.json()
 }
 
@@ -48,8 +48,15 @@ export default async function RecipeDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const recipe = await fetchRecipe(id)
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const client = cookieStore.get('client')?.value
+  const uid = cookieStore.get('uid')?.value
 
+  // ログイン済みかどうかを判定する
+  const isLoggedIn = !!(accessToken && client && uid)
+
+  const recipe = await fetchRecipe(id)
   if (!recipe) return notFound()
 
   return (
@@ -65,7 +72,15 @@ export default async function RecipeDetailPage({
         </Link>
         ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
       </p>
-      <div className="whitespace-pre-wrap text-gray-700">{recipe.content}</div>
+      <div className="whitespace-pre-wrap text-gray-700 mb-6">
+        {recipe.content}
+      </div>
+      <LikeButton
+        recipeId={recipe.id}
+        initialLikesCount={recipe.likes_count}
+        initialLiked={recipe.liked_by_current_user}
+        isLoggedIn={isLoggedIn}
+      />
     </div>
   )
 }

@@ -1,12 +1,13 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
+import RecipeCard from '@/components/RecipeCard'
 
 type Recipe = {
   id: number
   title: string
   content: string | null
   created_at: string
+  likes_count: number
 }
 
 type UserRecipesResponse = {
@@ -25,12 +26,10 @@ async function fetchUserRecipes(
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  // ヘッダーを組み立てる（未ログインでも空ヘッダーでリクエストする）
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
 
-  // ログイン済みの場合だけ認証ヘッダーを追加する
   if (accessToken && client && uid) {
     headers['access-token'] = accessToken
     headers['client'] = client
@@ -66,20 +65,20 @@ export default async function UserRecipesPage({
         <p className="text-gray-500">まだ公開レシピがありません</p>
       )}
 
-      <ul className="space-y-4">
+      <div className="space-y-4">
         {data.recipes.map((recipe) => (
-          <li key={recipe.id} className="p-4 border border-gray-200 rounded-lg">
-            <Link href={`/recipes/${recipe.id}`}>
-              <h2 className="text-lg font-semibold hover:text-blue-600">
-                {recipe.title}
-              </h2>
-            </Link>
-            {recipe.content && (
-              <p className="text-gray-600 mt-1">{recipe.content}</p>
-            )}
-          </li>
+          <RecipeCard
+            key={recipe.id}
+            id={recipe.id}
+            title={recipe.title}
+            content={recipe.content}
+            userName={data.user.name}
+            userId={data.user.id}
+            createdAt={recipe.created_at}
+            likesCount={recipe.likes_count}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   )
 }

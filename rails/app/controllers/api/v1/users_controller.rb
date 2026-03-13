@@ -23,7 +23,8 @@ module Api
               id: r.id,
               title: r.title,
               content: r.content,
-              created_at: r.created_at
+              created_at: r.created_at,
+              likes_count: r.likes.count
             }
           }
         }

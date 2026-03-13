@@ -62,9 +62,19 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def published
-    # 全ユーザーの公開済みレシピを取得
     recipes = Recipe.where(is_published: true).order(created_at: :desc)
-    render json: recipes
+    render json: recipes.map { |recipe|
+     {
+      id: recipe.id,
+      title: recipe.title,
+      content: recipe.content,
+      created_at: recipe.created_at,
+      likes_count: recipe.likes.count,
+      user: {
+        id: recipe.user.id,
+        name: recipe.user.name
+      }
+    }}
   end
 
   def generate

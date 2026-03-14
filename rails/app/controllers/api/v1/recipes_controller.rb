@@ -21,7 +21,8 @@ class Api::V1::RecipesController < ApplicationController
         name: recipe.user.name
       },
       likes_count: recipe.likes.count,
-      liked_by_current_user: liked_by_current_user
+      liked_by_current_user: liked_by_current_user,
+      image_url: recipe.image.attached? ? url_for(recipe.image) : nil
     }
   end
 
@@ -116,6 +117,6 @@ class Api::V1::RecipesController < ApplicationController
   private
 
   def recipe_params
-    params.require(:recipe).permit(:title, :content)
+    params.require(:recipe).permit(:title, :content, :image)
   end
 end

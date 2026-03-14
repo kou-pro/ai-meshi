@@ -25,6 +25,9 @@ gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby]
 # coreの導入
 gem "rack-cors"
 
+# S3への画像アップロードに使用する
+gem 'aws-sdk-s3', require: false
+
 group :test do
   gem "factory_bot_rails"
     # テストフレームワーク rspec を導入する
@@ -36,8 +39,6 @@ group :development, :test do
   gem "pry-byebug"
   gem "pry-doc"
   gem "pry-rails"
-
-
 
   # rubocop を使えるようにする。
   gem "rubocop-faker"
@@ -56,5 +57,4 @@ group :development, :test do
 
   # gem ruby-openai
   gem "ruby-openai"
-
 end

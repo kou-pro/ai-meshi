@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
@@ -10,6 +9,7 @@ export default function EditRecipePage() {
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+  const [image, setImage] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
 
@@ -34,10 +34,18 @@ export default function EditRecipePage() {
     if (!title.trim()) return
     setLoading(true)
 
+    // FormDataを使って画像も一緒に送る
+    const formData = new FormData()
+    formData.append('recipe[title]', title)
+    formData.append('recipe[content]', content)
+    if (image) {
+      formData.append('recipe[image]', image)
+    }
+
     const res = await fetch(`/api/recipes/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, content }),
+      body: formData,
+      // Content-Typeはあえて指定しない
     })
 
     if (res.ok) {
@@ -77,6 +85,19 @@ export default function EditRecipePage() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={10}
+          className="w-full border border-gray-300 rounded px-3 py-2"
+        />
+      </div>
+
+      {/* 画像アップロード */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          画像
+        </label>
+        <input
+          type="file"
+          accept="image/png, image/jpeg"
+          onChange={(e) => setImage(e.target.files?.[0] ?? null)}
           className="w-full border border-gray-300 rounded px-3 py-2"
         />
       </div>

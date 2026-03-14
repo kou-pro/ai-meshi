@@ -58,7 +58,7 @@ export default function RecipeList({ recipes }: Props) {
       <ul className="space-y-4">
         {recipes.map((recipe) => (
           <li key={recipe.id} className="p-4 border border-gray-200 rounded-lg">
-            <Link href={'/recipes/${recipe.id}'}>
+            <Link href={`/recipes/${recipe.id}`}>
               <h2 className="text-lg font-semibold">{recipe.title}</h2>
             </Link>
             {recipe.content && (

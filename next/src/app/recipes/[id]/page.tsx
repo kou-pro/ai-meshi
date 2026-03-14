@@ -10,6 +10,7 @@ type RecipeDetail = {
   created_at: string
   likes_count: number
   liked_by_current_user: boolean
+  image_url: string | null
   user: {
     id: number
     name: string
@@ -72,6 +73,16 @@ export default async function RecipeDetailPage({
         </Link>
         ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
       </p>
+      {recipe.image_url && (
+        <img
+          src={recipe.image_url.replace(
+            'http://rails:3000',
+            'http://localhost:3000',
+          )}
+          alt={recipe.title}
+          className="w-full rounded-lg mb-6"
+        />
+      )}
       <div className="whitespace-pre-wrap text-gray-700 mb-6">
         {recipe.content}
       </div>

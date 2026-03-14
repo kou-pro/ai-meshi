@@ -2,6 +2,6 @@ class Overrides::RegistrationsController < DeviseTokenAuth::RegistrationsControl
   private
 
   def sign_up_params
-    params.permit(:email, :password, :password_confirmation, :confirm_success_url)
+    params.permit(:name, :email, :password, :password_confirmation, :confirm_success_url)
   end
 end

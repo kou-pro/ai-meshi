@@ -29,6 +29,7 @@ Rails.application.routes.draw do
           patch :publish
         end
         resource :likes, only: [:create, :destroy]
+        resources :comments, only: [:index, :create, :destroy]
       end
     end
   end

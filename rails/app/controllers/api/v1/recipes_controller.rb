@@ -63,19 +63,41 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def published
-    recipes = Recipe.where(is_published: true).order(created_at: :desc)
-    render json: recipes.map { |recipe|
-     {
-      id: recipe.id,
-      title: recipe.title,
-      content: recipe.content,
-      created_at: recipe.created_at,
-      likes_count: recipe.likes.count,
-      user: {
-        id: recipe.user.id,
-        name: recipe.user.name
-      }
-    }}
+    # ソート順の決定（不正値はnewestにフォールバック）
+    sort_order = params[:sort] == 'popular' ? 'popular' : 'newest'
+
+    recipes = Recipe.where(is_published: true).includes(:user, image_attachment: :blob)
+
+    # ソート切り替え
+    recipes = if sort_order == 'popular'
+                recipes.order(likes_count: :desc, created_at: :desc)
+              else
+                recipes.order(created_at: :desc)
+              end
+
+    # ページネーション（1ページ12件）
+    recipes = recipes.page(params[:page]).per(12)
+
+    render json: {
+      items: recipes.map { |recipe|
+        {
+
+          id: recipe.id,
+          title: recipe.title,
+          created_at: recipe.created_at,
+          likes_count: recipe.likes_count,
+          image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+          user: {
+            id: recipe.user.id,
+            name: recipe.user.name
+          }
+        }
+      },
+      current_page: recipes.current_page,
+      next_page: recipes.next_page,
+      has_next_page: !recipes.last_page?,
+      total_count: recipes.total_count
+    }
   end
 
   def generate

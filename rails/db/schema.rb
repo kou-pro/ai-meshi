@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_15_004658) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_18_001439) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -67,6 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_15_004658) do
     t.datetime "updated_at", null: false
     t.boolean "is_published", default: false, null: false
     t.integer "comments_count", default: 0, null: false
+    t.integer "likes_count", default: 0, null: false
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 

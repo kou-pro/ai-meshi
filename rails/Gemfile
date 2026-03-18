@@ -28,6 +28,9 @@ gem "rack-cors"
 # S3への画像アップロードに使用する
 gem 'aws-sdk-s3', require: false
 
+# pageネーションに利用
+gem 'kaminari'
+
 group :test do
   gem "factory_bot_rails"
     # テストフレームワーク rspec を導入する

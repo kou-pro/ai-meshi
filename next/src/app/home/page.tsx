@@ -1,10 +1,9 @@
-import { cookies } from 'next/headers'
-import RecipeCard from '@/components/RecipeCard'
+import HomeFeed from '@/components/HomeFeed'
 
 type Recipe = {
   id: number
   title: string
-  content: string | null
+  image_url: string | null
   created_at: string
   likes_count: number
   user: {
@@ -13,59 +12,29 @@ type Recipe = {
   }
 }
 
-async function fetchPublishedRecipes(): Promise<Recipe[]> {
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-
-  if (accessToken && client && uid) {
-    headers['access-token'] = accessToken
-    headers['client'] = client
-    headers['uid'] = uid
-  }
-
-  const res = await fetch('http://rails:3000/api/v1/recipes/published', {
-    method: 'GET',
-    headers,
-    cache: 'no-store',
-  })
-
-  if (!res.ok) return []
-
-  const data: Recipe[] = await res.json()
-  return data
+async function fetchInitialRecipes() {
+  const res = await fetch(
+    'http://rails:3000/api/v1/recipes/published?sort=newest&page=1',
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    },
+  )
+  if (!res.ok) return { items: [], has_next_page: false }
+  return res.json()
 }
 
 export default async function HomePage() {
-  const recipes = await fetchPublishedRecipes()
+  const data = await fetchInitialRecipes()
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">みんなのレシピ</h1>
-
-      {recipes.length === 0 && (
-        <p className="text-gray-500">まだ投稿がありません</p>
-      )}
-
-      <div className="space-y-4">
-        {recipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            id={recipe.id}
-            title={recipe.title}
-            content={recipe.content}
-            userName={recipe.user.name}
-            userId={recipe.user.id}
-            createdAt={recipe.created_at}
-            likesCount={recipe.likes_count}
-          />
-        ))}
-      </div>
+      <HomeFeed
+        initialRecipes={data.items}
+        initialHasNextPage={data.has_next_page}
+      />
     </div>
   )
 }

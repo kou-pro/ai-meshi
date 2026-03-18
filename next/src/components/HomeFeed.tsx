@@ -29,6 +29,40 @@ export default function HomeFeed({
   const [page, setPage] = useState(1)
   const [sort, setSort] = useState<'newest' | 'popular'>('newest')
   const [loading, setLoading] = useState(false)
+  const [query, setQuery] = useState('')
+  const [inputValue, setInputValue] = useState('')
+
+  // 検索実行
+  const handleSearch = async () => {
+    setLoading(true)
+    setQuery(inputValue)
+
+    const queryParam = inputValue
+      ? `&query=${encodeURIComponent(inputValue)}`
+      : ''
+    const res = await fetch(`/api/home-feed?sort=${sort}&page=1${queryParam}`)
+    const data = await res.json()
+
+    setRecipes(data.items)
+    setHasNextPage(data.has_next_page)
+    setPage(1)
+    setLoading(false)
+  }
+
+  // 検索リセット
+  const handleReset = async () => {
+    setLoading(true)
+    setQuery('')
+    setInputValue('')
+
+    const res = await fetch(`/api/home-feed?sort=${sort}&page=1`)
+    const data = await res.json()
+
+    setRecipes(data.items)
+    setHasNextPage(data.has_next_page)
+    setPage(1)
+    setLoading(false)
+  }
 
   // ソート切り替え
   const handleSortChange = async (newSort: 'newest' | 'popular') => {
@@ -36,7 +70,10 @@ export default function HomeFeed({
     setSort(newSort)
     setLoading(true)
 
-    const res = await fetch(`/api/home-feed?sort=${newSort}&page=1`)
+    const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
+    const res = await fetch(
+      `/api/home-feed?sort=${newSort}&page=1${queryParam}`,
+    )
     const data = await res.json()
 
     setRecipes(data.items)
@@ -50,7 +87,10 @@ export default function HomeFeed({
     setLoading(true)
     const nextPage = page + 1
 
-    const res = await fetch(`/api/home-feed?sort=${sort}&page=${nextPage}`)
+    const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
+    const res = await fetch(
+      `/api/home-feed?sort=${sort}&page=${nextPage}${queryParam}`,
+    )
     const data = await res.json()
 
     setRecipes([...recipes, ...data.items])
@@ -61,6 +101,38 @@ export default function HomeFeed({
 
   return (
     <div>
+      {/* 検索フォーム */}
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="料理名で検索（例：親子丼 節約）"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm"
+          />
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 text-sm"
+          >
+            検索
+          </button>
+          {query && (
+            <button
+              onClick={handleReset}
+              className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 text-sm"
+            >
+              リセット
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 mt-1">
+          複数語はスペース区切りで検索できます
+        </p>
+      </div>
+
       {/* ソート切り替え */}
       <div className="flex gap-2 mb-6">
         <button
@@ -85,9 +157,18 @@ export default function HomeFeed({
         </button>
       </div>
 
+      {/* 検索結果件数 */}
+      {query && (
+        <p className="text-sm text-gray-500 mb-4">「{query}」の検索結果</p>
+      )}
+
       {/* レシピ一覧 */}
       {recipes.length === 0 ? (
-        <p className="text-gray-500">まだ投稿がありません</p>
+        <p className="text-gray-500">
+          {query
+            ? '該当するレシピが見つかりませんでした'
+            : 'まだ投稿がありません'}
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recipes.map((recipe) => (

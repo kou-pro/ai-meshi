@@ -4,9 +4,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const sort = searchParams.get('sort') ?? 'newest'
   const page = searchParams.get('page') ?? '1'
+  const query = searchParams.get('query') ?? '' // 追加
+
+  // queryがある場合だけURLに追加する
+  const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/published?sort=${sort}&page=${page}`,
+    `http://rails:3000/api/v1/recipes/published?sort=${sort}&page=${page}${queryParam}`,
     {
       method: 'GET',
       headers: {

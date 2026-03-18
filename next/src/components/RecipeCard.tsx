@@ -31,6 +31,7 @@ export default function RecipeCard({
           }
           alt={title}
           className="w-full h-48 object-cover"
+          style={{ objectFit: 'cover', height: '192px' }}
         />
       </Link>
 

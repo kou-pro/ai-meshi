@@ -63,25 +63,34 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def published
-    # ソート順の決定（不正値はnewestにフォールバック）
     sort_order = params[:sort] == 'popular' ? 'popular' : 'newest'
+    query = params[:query].presence
 
-    recipes = Recipe.where(is_published: true).includes(:user, image_attachment: :blob)
+    recipes = Recipe.where(is_published: true)
+                    .includes(:user, image_attachment: :blob)
 
-    # ソート切り替え
+    # 検索条件を追加
+    if query
+      keywords = query.split(/[\s　]+/)
+      keywords.each do |keyword|
+        recipes = recipes.where(
+          'recipes.title LIKE :kw OR recipes.content LIKE :kw',
+          kw: "%#{keyword}%"
+        )
+      end
+    end
+
     recipes = if sort_order == 'popular'
                 recipes.order(likes_count: :desc, created_at: :desc)
               else
                 recipes.order(created_at: :desc)
               end
 
-    # ページネーション（1ページ12件）
     recipes = recipes.page(params[:page]).per(12)
 
     render json: {
       items: recipes.map { |recipe|
         {
-
           id: recipe.id,
           title: recipe.title,
           created_at: recipe.created_at,

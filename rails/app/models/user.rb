@@ -27,5 +27,5 @@ class User < ApplicationRecord
   has_many :likes, dependent: :destroy
   has_many :liked_recipes, through: :likes, source: :recipe
   has_many :comments, dependent: :destroy
-
+  has_many :shopping_list_items, dependent: :destroy
 end

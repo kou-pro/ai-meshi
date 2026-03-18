@@ -8,13 +8,15 @@ class Api::V1::RecipesController < ApplicationController
 
   def show
     recipe = Recipe.find(params[:id])
-     # ログイン済みの場合だけ自分がいいねしているか確認する
+    # ログイン済みの場合だけ自分がいいねしているか確認する
     liked_by_current_user = current_user ? current_user.likes.exists?(recipe: recipe) : false
 
     render json: {
       id: recipe.id,
       title: recipe.title,
       content: recipe.content,
+      ingredients: recipe.ingredients,
+      steps: recipe.steps,
       created_at: recipe.created_at,
       user: {
         id: recipe.user.id,
@@ -118,7 +120,7 @@ class Api::V1::RecipesController < ApplicationController
         messages: [
           {
             role: 'system',
-            content: '必ず以下のJSON形式のみで返答してください。他の文章は一切含めないでください。マークダウンも使わないでください。{"title": "レシピ名", "content": "作り方の詳細"}'
+            content: '必ず以下のJSON形式のみで返答してください。他の文章は一切含めないでください。マークダウンも使わないでください。{"title": "レシピ名", "ingredients": [{"name": "食材名", "quantity": "量", "unit": "単位", "category": "カテゴリ"}], "steps": ["手順1", "手順2"]}'
           },
           {
             role: 'user',
@@ -132,7 +134,8 @@ class Api::V1::RecipesController < ApplicationController
     recipe_data = JSON.parse(raw_content)
     recipe = current_user.recipes.new(
       title: recipe_data['title'],
-      content: recipe_data['content']
+      ingredients: recipe_data['ingredients'],
+      steps: recipe_data['steps']
     )
     if recipe.save
       render json: recipe, status: :created

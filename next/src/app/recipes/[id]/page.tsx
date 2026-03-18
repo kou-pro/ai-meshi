@@ -4,10 +4,19 @@ import Link from 'next/link'
 import LikeButton from '@/components/LikeButton'
 import CommentSection from '@/components/CommentSection'
 
+type Ingredient = {
+  name: string
+  quantity: string
+  unit: string
+  category: string
+}
+
 type RecipeDetail = {
   id: number
   title: string
   content: string | null
+  ingredients: Ingredient[] | null
+  steps: string[] | null
   created_at: string
   likes_count: number
   liked_by_current_user: boolean
@@ -119,6 +128,7 @@ export default async function RecipeDetailPage({
         </Link>
         ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
       </p>
+
       {recipe.image_url && (
         <img
           src={recipe.image_url.replace(
@@ -127,11 +137,78 @@ export default async function RecipeDetailPage({
           )}
           alt={recipe.title}
           className="w-full rounded-lg mb-6"
+          style={{ objectFit: 'cover', height: '300px', width: '100%' }}
         />
       )}
-      <div className="whitespace-pre-wrap text-gray-700 mb-6">
-        {recipe.content}
-      </div>
+
+      {/* 構造化データがある場合 → 食材一覧・手順を表示 */}
+      {recipe.ingredients && recipe.steps ? (
+        <>
+          {/* 食材一覧 */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-3">材料</h2>
+            <ul
+              className="border border-gray-200 rounded-lg divide-y divide-gray-200"
+              style={{ listStyle: 'none', padding: 0 }}
+            >
+              {recipe.ingredients.map((ingredient, index) => {
+                const isUnitFirst = ['大さじ', '小さじ', 'カップ'].includes(
+                  ingredient.unit,
+                )
+                const amount =
+                  ingredient.quantity === '適量'
+                    ? '適量'
+                    : isUnitFirst
+                      ? `${ingredient.unit}${ingredient.quantity}`
+                      : `${ingredient.quantity}${ingredient.unit}`
+                return (
+                  <li
+                    key={index}
+                    className="flex justify-between px-4 py-2 text-sm"
+                  >
+                    <span className="text-gray-700">{ingredient.name}</span>
+                    <span className="text-gray-500">{amount}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+          {/* 手順 */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-3">作り方</h2>
+            <ol className="space-y-3" style={{ listStyle: 'none', padding: 0 }}>
+              {recipe.steps.map((step, index) => (
+                <li key={index} className="flex gap-3 text-sm text-gray-700">
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      width: '24px',
+                      height: '24px',
+                      backgroundColor: '#22c55e',
+                      color: 'white',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </>
+      ) : (
+        /* 構造化データがない場合 → 従来のcontentを表示 */
+        <div className="whitespace-pre-wrap text-gray-700 mb-6">
+          {recipe.content}
+        </div>
+      )}
+
       <LikeButton
         recipeId={recipe.id}
         initialLikesCount={recipe.likes_count}

@@ -17,6 +17,7 @@ type RecipeDetail = {
   content: string | null
   ingredients: Ingredient[] | null
   steps: string[] | null
+  hashtags: string[]
   created_at: string
   likes_count: number
   liked_by_current_user: boolean
@@ -201,6 +202,29 @@ export default async function RecipeDetailPage({
               ))}
             </ol>
           </div>
+          {/* タグ */}
+          {recipe.hashtags && recipe.hashtags.length > 0 && (
+            <div
+              className="mb-6"
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
+            >
+              {recipe.hashtags.map((tag, index) => (
+                <span
+                  key={index}
+                  style={{
+                    backgroundColor: '#f0fdf4',
+                    color: '#16a34a',
+                    padding: '4px 12px',
+                    borderRadius: '9999px',
+                    fontSize: '13px',
+                    border: '1px solid #bbf7d0',
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </>
       ) : (
         /* 構造化データがない場合 → 従来のcontentを表示 */

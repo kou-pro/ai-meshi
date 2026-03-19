@@ -17,6 +17,7 @@ class Api::V1::RecipesController < ApplicationController
       content: recipe.content,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
+      hashtags: recipe.hashtags,
       created_at: recipe.created_at,
       user: {
         id: recipe.user.id,
@@ -120,7 +121,7 @@ class Api::V1::RecipesController < ApplicationController
         messages: [
           {
             role: 'system',
-            content: '必ず以下のJSON形式のみで返答してください。他の文章は一切含めないでください。マークダウンも使わないでください。{"title": "レシピ名", "ingredients": [{"name": "食材名", "quantity": "量", "unit": "単位", "category": "カテゴリ"}], "steps": ["手順1", "手順2"]}'
+            content: '必ず以下のJSON形式のみで返答してください。他の文章は一切含めないでください。マークダウンも使わないでください。{"title": "レシピ名", "ingredients": [{"name": "食材名", "quantity": "量", "unit": "単位", "category": "カテゴリ"}], "steps": ["手順1", "手順2"], "hashtags": ["タグ1", "タグ2", "タグ3"]}'
           },
           {
             role: 'user',
@@ -135,7 +136,8 @@ class Api::V1::RecipesController < ApplicationController
     recipe = current_user.recipes.new(
       title: recipe_data['title'],
       ingredients: recipe_data['ingredients'],
-      steps: recipe_data['steps']
+      steps: recipe_data['steps'],
+      hashtags: recipe_data['hashtags']
     )
     if recipe.save
       render json: recipe, status: :created

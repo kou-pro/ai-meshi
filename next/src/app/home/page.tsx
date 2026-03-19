@@ -1,20 +1,13 @@
 import HomeFeed from '@/components/HomeFeed'
 
-type Recipe = {
-  id: number
-  title: string
-  image_url: string | null
-  created_at: string
-  likes_count: number
-  user: {
-    id: number
-    name: string
-  }
+type SearchParams = {
+  tag?: string
 }
 
-async function fetchInitialRecipes() {
+async function fetchInitialRecipes(tag?: string) {
+  const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : ''
   const res = await fetch(
-    'http://rails:3000/api/v1/recipes/published?sort=newest&page=1',
+    `http://rails:3000/api/v1/recipes/published?sort=newest&page=1${tagParam}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -25,8 +18,13 @@ async function fetchInitialRecipes() {
   return res.json()
 }
 
-export default async function HomePage() {
-  const data = await fetchInitialRecipes()
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const { tag } = await searchParams
+  const data = await fetchInitialRecipes(tag)
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -34,6 +32,7 @@ export default async function HomePage() {
       <HomeFeed
         initialRecipes={data.items}
         initialHasNextPage={data.has_next_page}
+        initialTag={tag ?? ''}
       />
     </div>
   )

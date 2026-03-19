@@ -68,12 +68,19 @@ class Api::V1::RecipesController < ApplicationController
   def published
     sort_order = params[:sort] == 'popular' ? 'popular' : 'newest'
     query = params[:query].presence
+    tag = params[:tag].presence
 
     recipes = Recipe.where(is_published: true)
                     .includes(:user, image_attachment: :blob)
 
-    # 検索条件を追加
-    if query
+    if tag
+      # タグ検索（hashtags）→ tag優先
+      recipes = recipes.where(
+        'JSON_CONTAINS(recipes.hashtags, ?)',
+        "\"##{tag}\""
+      )
+    elsif query
+      # キーワード検索（title・content）→ tagがない場合のみ
       keywords = query.split(/[\s　]+/)
       keywords.each do |keyword|
         recipes = recipes.where(

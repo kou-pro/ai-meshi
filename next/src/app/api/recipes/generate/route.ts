@@ -2,11 +2,11 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
-  // ① リクエストボディから食材を取り出す
+  // ① リクエストボディから食材・選択条件を取り出す
   const body = await request.json()
-  const { ingredients } = body
+  const { ingredients, servings, genre, scene, conditions } = body
 
-  // ② HTTPOnly CookieからトークンをG取得
+  // ② HTTPOnly CookieからトークンG取得
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value
@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
       uid: uid,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ ingredients }),
+    // 全パラメータをRailsに転送する
+    body: JSON.stringify({ ingredients, servings, genre, scene, conditions }),
   })
 
   // ⑤ Railsからのレスポンスをそのままフロントに返す

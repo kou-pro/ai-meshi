@@ -9,3 +9,25 @@ inherit_from:
 AllCops:
   TargetRubyVersion: 3.1.2
   NewCops: enable
+
+# 以下を追加
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/MethodLength:
+  Max: 60
+
+Metrics/AbcSize:
+  Max: 60
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
+Style/BlockDelimiters:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 300
+
+RSpec/ExampleLength:
+  Max: 20

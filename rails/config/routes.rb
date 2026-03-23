@@ -20,7 +20,7 @@ Rails.application.routes.draw do
           get :recipes
         end
       end
-      resources :recipes, only: [:index, :create, :update, :destroy, :show,] do
+      resources :recipes, only: [:index, :create, :update, :destroy, :show] do
         collection do
           post :generate
           get :published
@@ -31,6 +31,8 @@ Rails.application.routes.draw do
         resource :likes, only: [:create, :destroy]
         resources :comments, only: [:index, :create, :destroy]
       end
+      # 買い物リスト
+      resources :shopping_list_items, only: [:index, :create, :destroy, :update]
     end
   end
 end

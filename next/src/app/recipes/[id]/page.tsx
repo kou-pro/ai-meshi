@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import LikeButton from '@/components/LikeButton'
 import CommentSection from '@/components/CommentSection'
+import AddToShoppingListButton from '@/components/AddToShoppingListButton'
 
 type Ingredient = {
   name: string
@@ -173,6 +174,15 @@ export default async function RecipeDetailPage({
                 )
               })}
             </ul>
+            {/* ← ここに追加 */}
+            {isLoggedIn && (
+              <div className="mt-4">
+                <AddToShoppingListButton
+                  recipeId={recipe.id}
+                  ingredients={recipe.ingredients}
+                />
+              </div>
+            )}
           </div>
           {/* 手順 */}
           <div className="mb-6">
@@ -203,7 +213,7 @@ export default async function RecipeDetailPage({
             </ol>
           </div>
           {/* タグ */}
-          {recipe.hashtags.map((tag) => {
+          {(recipe.hashtags ?? []).map((tag) => {
             const tagWithoutHash = tag.replace(/^#/, '')
             return (
               <Link

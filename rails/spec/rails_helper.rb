@@ -2,6 +2,8 @@
 require 'spec_helper'
 ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
+
+
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 # Uncomment the line below in case you have `--require rails_helper` in the `.rspec` file
@@ -56,7 +58,7 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   # Devise を request spec で利用可能にする
-  config.include Devise::Test::IntegrationHelpers, type: :request
+  # config.include Devise::Test::IntegrationHelpers, type: :request
 
   # FactoryBot を create(:user) などで使えるようにする
   config.include FactoryBot::Syntax::Methods

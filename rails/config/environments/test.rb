@@ -65,6 +65,7 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
+
   # RSpec request spec 用
-  config.hosts.clear
+  config.hosts << "www.example.com"
 end

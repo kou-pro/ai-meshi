@@ -3,7 +3,6 @@ require "rails_helper"
 RSpec.describe "Api::V1::Recipes", type: :request do
   let(:user) { create(:user, password: "password", password_confirmation: "password") }
 
-
   describe "POST /api/v1/recipes" do
     context "未認証の場合" do
       it "401を返す" do
@@ -15,7 +14,6 @@ RSpec.describe "Api::V1::Recipes", type: :request do
 
     context "認証済みの場合" do
       it "レシピが作成される" do
-        # 🔽 ここが重要（ログインAPIを叩く）
         post "/api/v1/auth/sign_in", params: {
           email: user.email,
           password: "password",

@@ -38,6 +38,8 @@ jobs:
 
       - name: Run rspec
         run: bundle exec rspec
+        env:
+          FRONT_DOMAIN: http://localhost:8000
   rubocop:
     runs-on: ubuntu-latest
     defaults:

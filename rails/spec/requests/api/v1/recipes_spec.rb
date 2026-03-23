@@ -9,7 +9,7 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         post "/api/v1/recipes", params: { recipe: { title: "Test" } }
 
         expect(response).to have_http_status(:forbidden).or(
-          have_http_status(:unauthorized)
+          have_http_status(:unauthorized),
         )
       end
     end
@@ -23,8 +23,8 @@ RSpec.describe "Api::V1::Recipes", type: :request do
 
         auth_headers = {
           "access-token" => response.headers["access-token"],
-          "client"       => response.headers["client"],
-          "uid"          => response.headers["uid"],
+          "client" => response.headers["client"],
+          "uid" => response.headers["uid"],
         }
 
         expect {

@@ -1,12 +1,12 @@
 module Api
   module V1
     class UsersController < ApplicationController
-      before_action :authenticate_user!,only: [:me]
+      before_action :authenticate_user!, only: [:me]
 
       def me
         render json: {
           id: current_user.id,
-          email: current_user.email
+          email: current_user.email,
         }
       end
 
@@ -16,20 +16,19 @@ module Api
         render json: {
           user: {
             id: user.id,
-            name: user.name
+            name: user.name,
           },
-          recipes: recipes.map { |r|
+          recipes: recipes.map {|r|
             {
               id: r.id,
               title: r.title,
               content: r.content,
               created_at: r.created_at,
-              likes_count: r.likes.count
+              likes_count: r.likes.count,
             }
-          }
+          },
         }
       end
-
     end
   end
 end

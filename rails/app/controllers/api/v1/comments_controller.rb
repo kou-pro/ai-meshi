@@ -3,18 +3,18 @@ class Api::V1::CommentsController < ApplicationController
 
   def index
     recipe = Recipe.find(params[:recipe_id])
-    comments = recipe.comments
-                     .includes(:user)
-                     .order(created_at: :desc)
-    render json: comments.map { |comment|
+    comments = recipe.comments.
+                 includes(:user).
+                 order(created_at: :desc)
+    render json: comments.map {|comment|
       {
         id: comment.id,
         body: comment.body,
         created_at: comment.created_at,
         user: {
           id: comment.user.id,
-          name: comment.user.name
-        }
+          name: comment.user.name,
+        },
       }
     }
   end
@@ -30,11 +30,11 @@ class Api::V1::CommentsController < ApplicationController
         created_at: comment.created_at,
         user: {
           id: comment.user.id,
-          name: comment.user.name
-        }
+          name: comment.user.name,
+        },
       }, status: :created
     else
-      render json: { errors: comment.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: comment.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -42,16 +42,16 @@ class Api::V1::CommentsController < ApplicationController
     recipe = Recipe.find(params[:recipe_id])
     comment = recipe.comments.find(params[:id])
     if comment.user == current_user
-      comment.destroy
-      render json: { message: '削除しました' }
+      comment.destroy!
+      render json: { message: "削除しました" }
     else
-      render json: { error: '権限がありません' }, status: :forbidden
+      render json: { error: "権限がありません" }, status: :forbidden
     end
   end
 
   private
 
-  def comment_params
-    params.require(:comment).permit(:body)
-  end
+    def comment_params
+      params.require(:comment).permit(:body)
+    end
 end

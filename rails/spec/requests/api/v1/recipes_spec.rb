@@ -17,20 +17,20 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         # 🔽 ここが重要（ログインAPIを叩く）
         post "/api/v1/auth/sign_in", params: {
           email: user.email,
-          password: "password"
+          password: "password",
         }
 
         auth_headers = response.headers.slice(
           "uid",
           "client",
-          "access-token"
+          "access-token",
         )
 
         expect {
           post "/api/v1/recipes",
                params: { recipe: { title: "Test" } },
                headers: auth_headers
-        }.to change(user.recipes, :count).by(1)
+        }.to change { user.recipes.count }.by(1)
 
         expect(response).to have_http_status(:created)
       end

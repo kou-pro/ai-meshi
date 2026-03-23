@@ -8,14 +8,12 @@ DeviseTokenAuth.setup do |config|
 
   # マイリクエストごとにトークンを更新する挙動を実行
   config.change_headers_on_each_request = false
-  
 
   # By default, users will need to re-authenticate after 2 weeks. This setting
   # determines how long tokens will remain valid after they are issued.
 
   # 発行したトークンが有効でいられる期間の設定
   config.token_lifespan = 2.hours
-
 
   # confirmable有効時に確認メールを送る設定
   config.send_confirmation_email = true
@@ -38,7 +36,7 @@ DeviseTokenAuth.setup do |config|
   # This route will be the prefix for all oauth2 redirect callbacks. For
   # example, using the default '/omniauth', the github oauth2 provider will
   # redirect successful authentications to '/omniauth/github/callback'
-  #config.omniauth_prefix = "/auth/omniauth"
+  # config.omniauth_prefix = "/auth/omniauth"
 
   # By default sending current password is not needed for the password update.
   # Uncomment to enforce current_password param to be checked before all
@@ -74,17 +72,12 @@ DeviseTokenAuth.setup do |config|
   config.send_confirmation_email = true
 
   config.default_confirm_success_url = "http://localhost:8000/login"
-
-
-  
- 
-
 end
 
- # ▼ CSRF検証を無効化（APIモードでセッションが使えないため）
+# ▼ CSRF検証を無効化（APIモードでセッションが使えないため）
 OmniAuth.config.before_callback_phase do |env|
-  env['omniauth.state'] = env.dig('rack.request.query_hash', 'state')
-end  
+  env["omniauth.state"] = env.dig("rack.request.query_hash", "state")
+end
 
 OmniAuth.config.allowed_request_methods = [:get, :post]
 OmniAuth.config.silence_get_warning = true

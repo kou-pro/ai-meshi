@@ -1,19 +1,19 @@
 Rails.application.routes.draw do
   # ▼ カスタムルートを先に書く（優先される）
-  match '/omniauth/:provider/callback', to: 'auth/omniauth_callbacks#omniauth_success', via: [:get, :post]
-  get '/omniauth/failure', to: 'auth/omniauth_callbacks#omniauth_failure'
-  get '/omniauth/:provider', to: 'auth/omniauth_callbacks#passthru'
+  match "/omniauth/:provider/callback", to: "auth/omniauth_callbacks#omniauth_success", via: [:get, :post]
+  get "/omniauth/failure", to: "auth/omniauth_callbacks#omniauth_failure"
+  get "/omniauth/:provider", to: "auth/omniauth_callbacks#passthru"
   # ▼ 後ろに移動
-  mount_devise_token_auth_for 'User', at: 'auth',
-    controllers: {
-      sessions: 'auth/sessions',
-      omniauth_callbacks: 'auth/omniauth_callbacks',
-      registrations: 'overrides/registrations',
-    }
+  mount_devise_token_auth_for "User", at: "auth",
+                                      controllers: {
+                                        sessions: "auth/sessions",
+                                        omniauth_callbacks: "auth/omniauth_callbacks",
+                                        registrations: "overrides/registrations",
+                                      }
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
   namespace :api do
     namespace :v1 do
-      get 'users/me', to: 'users#me'
+      get "users/me", to: "users#me"
       get "health_check", to: "health_check#index"
       resources :users, only: [] do
         member do

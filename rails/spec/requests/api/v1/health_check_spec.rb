@@ -7,13 +7,9 @@ RSpec.describe "Api::V1::HealthCheck", type: :request do
     it "正常にレスポンスが返る" do
       subject
 
-      puts response.status
-      puts response.body
-
-      res = JSON.parse(response.body)
+      res = response.parsed_body
       expect(res["message"]).to eq "Success Health Check!"
       expect(response).to have_http_status(:success)
     end
   end
 end
-

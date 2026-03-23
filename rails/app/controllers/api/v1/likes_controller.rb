@@ -7,18 +7,18 @@ class Api::V1::LikesController < ApplicationController
 
     render json: {
       likes_count: recipe.likes.count,
-      liked_by_current_user: true
+      liked_by_current_user: true,
     }
   end
 
   def destroy
     recipe = Recipe.find(params[:recipe_id])
     like = current_user.likes.find_by(recipe: recipe)
-    like&.destroy
+    like&.destroy!
 
     render json: {
       likes_count: recipe.likes.count,
-      liked_by_current_user: false
+      liked_by_current_user: false,
     }
   end
 end

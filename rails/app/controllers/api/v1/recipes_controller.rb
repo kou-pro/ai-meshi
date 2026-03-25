@@ -127,7 +127,7 @@ class Api::V1::RecipesController < ApplicationController
     servings   = params[:servings].presence
     genre      = params[:genre].presence
     scene      = params[:scene].presence
-    conditions = Array(params[:conditions]).reject(&:blank?)
+    conditions = Array(params[:conditions]).compact_blank
 
     # 選択された条件だけ hints 配列に追加する
     hints = []
@@ -164,11 +164,11 @@ class Api::V1::RecipesController < ApplicationController
     recipe_data = JSON.parse(raw_content)
 
     recipe = current_user.recipes.new(
-      title:       recipe_data.fetch('title', '無題のレシピ'),
-      servings:    recipe_data['servings'].to_i > 0 ? recipe_data['servings'].to_i : 2,
-      ingredients: recipe_data.fetch('ingredients', []),
-      steps:       recipe_data.fetch('steps', []),
-      hashtags:    recipe_data.fetch('hashtags', [])
+      title: recipe_data.fetch("title", "無題のレシピ"),
+      servings: (recipe_data["servings"].to_i > 0) ? recipe_data["servings"].to_i : 2,
+      ingredients: recipe_data.fetch("ingredients", []),
+      steps: recipe_data.fetch("steps", []),
+      hashtags: recipe_data.fetch("hashtags", []),
     )
 
     if recipe.save

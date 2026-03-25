@@ -32,7 +32,12 @@ Rails.application.routes.draw do
         resources :comments, only: [:index, :create, :destroy]
       end
       # 買い物リスト
-      resources :shopping_list_items, only: [:index, :create, :destroy, :update]
+      resources :shopping_list_items, only: [:index, :create, :destroy, :update] do
+        collection do
+          delete :destroy_by_recipe
+          delete :destroy_checked
+        end
+      end
     end
   end
 end

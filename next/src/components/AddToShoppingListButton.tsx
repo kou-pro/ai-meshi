@@ -8,6 +8,7 @@ type Props = {
     name: string
     quantity: string
     unit: string
+    category: string
   }[]
 }
 

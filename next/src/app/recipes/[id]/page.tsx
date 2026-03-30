@@ -4,6 +4,7 @@ import Link from 'next/link'
 import LikeButton from '@/components/LikeButton'
 import CommentSection from '@/components/CommentSection'
 import AddToShoppingListButton from '@/components/AddToShoppingListButton'
+import SaveButton from '@/components/SaveButton'
 
 type Ingredient = {
   name: string
@@ -22,6 +23,7 @@ type RecipeDetail = {
   created_at: string
   likes_count: number
   liked_by_current_user: boolean
+  bookmarked_by_current_user: boolean
   image_url: string | null
   user: {
     id: number
@@ -247,6 +249,16 @@ export default async function RecipeDetailPage({
         initialLiked={recipe.liked_by_current_user}
         isLoggedIn={isLoggedIn}
       />
+
+      {isLoggedIn && (
+        <div className="mt-3">
+          <SaveButton
+            recipeId={recipe.id}
+            initialBookmarked={recipe.bookmarked_by_current_user}
+          />
+        </div>
+      )}
+
       <CommentSection
         recipeId={recipe.id}
         initialComments={comments}

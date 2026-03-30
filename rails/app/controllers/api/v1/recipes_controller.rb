@@ -10,6 +10,8 @@ class Api::V1::RecipesController < ApplicationController
     recipe = Recipe.find(params[:id])
     # ログイン済みの場合だけ自分がいいねしているか確認する
     liked_by_current_user = current_user ? current_user.likes.exists?(recipe: recipe) : false
+    # ログイン済みであれば、ログイン中のユーザーに詳細ページのレシピが保存されているかを問い合わせる
+    bookmarked_by_current_user = current_user ? current_user.bookmarks.exists?(recipe: recipe) : false
 
     render json: {
       id: recipe.id,
@@ -25,6 +27,7 @@ class Api::V1::RecipesController < ApplicationController
       },
       likes_count: recipe.likes.count,
       liked_by_current_user: liked_by_current_user,
+      bookmarked_by_current_user: bookmarked_by_current_user,
       image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
     }
   end

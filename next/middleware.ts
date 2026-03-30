@@ -14,5 +14,10 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/protected/:path*', '/recipes/new', '/recipes/:path*/edit'],
+  matcher: [
+    '/protected/:path*',
+    '/recipes/new',
+    '/recipes/:path*/edit',
+    '/saved-recipes',
+  ],
 }

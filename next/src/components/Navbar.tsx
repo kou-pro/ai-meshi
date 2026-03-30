@@ -24,7 +24,7 @@ export default async function Navbar() {
             href="/home"
             className="text-sm text-gray-600 hover:text-green-600"
           >
-            Home
+            ホーム
           </Link>
 
           {isLoggedIn ? (
@@ -33,13 +33,19 @@ export default async function Navbar() {
                 href="/recipes/new"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                Generate
+                作る
               </Link>
               <Link
                 href="/recipes"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                My Recipes
+                マイレシピ
+              </Link>
+              <Link
+                href="/saved-recipes"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                保存済み
               </Link>
               <LogoutButton />
             </>

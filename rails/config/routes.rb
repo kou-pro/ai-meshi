@@ -31,6 +31,7 @@ Rails.application.routes.draw do
         resource :likes, only: [:create, :destroy]
         resources :comments, only: [:index, :create, :destroy]
       end
+      resources :bookmarks, only: [:index, :create, :destroy]
       # 買い物リスト
       resources :shopping_list_items, only: [:index, :create, :destroy, :update] do
         collection do

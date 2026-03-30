@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 // コメント一覧取得
 export async function GET(
   request: NextRequest,
@@ -9,7 +11,7 @@ export async function GET(
   const { recipeId } = await params
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/${recipeId}/comments`,
+    `${RAILS_URL}/api/v1/recipes/${recipeId}/comments`,
     {
       method: 'GET',
       headers: {
@@ -42,7 +44,7 @@ export async function POST(
   const body = await request.json()
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/${recipeId}/comments`,
+    `${RAILS_URL}/api/v1/recipes/${recipeId}/comments`,
     {
       method: 'POST',
       headers: {

@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function POST() {
   // ▼ サーバーサイドでCookieを読み取る
   // Route HandlerはサーバーサイドなのでHTTPOnly Cookieにアクセスできる
@@ -14,7 +16,7 @@ export async function POST() {
   // 古いトークンで不正アクセスされるリスクが残る
   if (accessToken && client && uid) {
     try {
-      await fetch('http://rails:3000/auth/sign_out', {
+      await fetch(`${RAILS_URL}/auth/sign_out`, {
         method: 'DELETE',
         headers: {
           'access-token': accessToken,

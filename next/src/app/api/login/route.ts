@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    const res = await fetch('http://rails:3000/auth/sign_in', {
+    const res = await fetch(`${RAILS_URL}/auth/sign_in`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

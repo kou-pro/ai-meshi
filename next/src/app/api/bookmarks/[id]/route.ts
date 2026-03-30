@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.NEXT_PUBLIC_RAILS_API_URL
+const RAILS_URL = process.env.RAILS_API_URL
 
 export async function DELETE(
   _request: Request,

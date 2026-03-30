@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 // コメント削除
 export async function DELETE(
   request: NextRequest,
@@ -18,7 +20,7 @@ export async function DELETE(
   }
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/${recipeId}/comments/${commentId}`,
+    `${RAILS_URL}/api/v1/recipes/${recipeId}/comments/${commentId}`,
     {
       method: 'DELETE',
       headers: {

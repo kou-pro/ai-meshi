@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 // 取得
 export async function GET(
   request: NextRequest,
@@ -17,7 +19,7 @@ export async function GET(
     return NextResponse.json({ error: '認証エラー' }, { status: 401 })
   }
 
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
     method: 'GET',
     headers: {
       'access-token': accessToken,
@@ -48,7 +50,7 @@ export async function PATCH(
 
   const formData = await request.formData() // FormDataを受け取る
 
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
     method: 'PATCH',
     headers: {
       'access-token': accessToken,
@@ -78,7 +80,7 @@ export async function DELETE(
     return NextResponse.json({ error: '認証エラー' }, { status: 401 })
   }
 
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
     method: 'DELETE',
     headers: {
       'access-token': accessToken,

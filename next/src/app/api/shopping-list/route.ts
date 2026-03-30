@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 // 共通: Cookieからトークンを取得する
 async function getAuthHeaders() {
   const cookieStore = await cookies()
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '認証エラー' }, { status: 401 })
   }
 
-  const res = await fetch('http://rails:3000/api/v1/shopping_list_items', {
+  const res = await fetch(`${RAILS_URL}/api/v1/shopping_list_items`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -43,7 +45,7 @@ export async function GET() {
     return NextResponse.json({ error: '認証エラー' }, { status: 401 })
   }
 
-  const res = await fetch('http://rails:3000/api/v1/shopping_list_items', {
+  const res = await fetch(`${RAILS_URL}/api/v1/shopping_list_items`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -68,7 +70,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const res = await fetch(
-    `http://rails:3000/api/v1/shopping_list_items/${id}`,
+    `${RAILS_URL}/api/v1/shopping_list_items/${id}`,
     {
       method: 'PATCH',
       headers: {
@@ -99,13 +101,13 @@ export async function DELETE(request: NextRequest) {
   let url = ''
   if (type === 'item') {
     // 1件削除
-    url = `http://rails:3000/api/v1/shopping_list_items/${id}`
+    url = `${RAILS_URL}/api/v1/shopping_list_items/${id}`
   } else if (type === 'recipe') {
     // レシピごと削除
-    url = `http://rails:3000/api/v1/shopping_list_items/destroy_by_recipe?recipe_id=${recipe_id}`
+    url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_by_recipe?recipe_id=${recipe_id}`
   } else if (type === 'checked') {
     // チェック済み削除
-    url = `http://rails:3000/api/v1/shopping_list_items/destroy_checked`
+    url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_checked`
   }
 
   const res = await fetch(url, {

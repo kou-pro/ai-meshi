@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function POST(request: NextRequest) {
   // ① リクエストボディから食材・選択条件を取り出す
   const body = await request.json()
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ④ RailsのAI生成エンドポイントにリクエスト
-  const res = await fetch('http://rails:3000/api/v1/recipes/generate', {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/generate`, {
     method: 'POST',
     headers: {
       'access-token': accessToken,

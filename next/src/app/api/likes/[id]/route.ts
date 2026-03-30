@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 async function likeRequest(
   request: NextRequest,
   recipeId: string,
@@ -16,7 +18,7 @@ async function likeRequest(
   }
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/${recipeId}/likes`,
+    `${RAILS_URL}/api/v1/recipes/${recipeId}/likes`,
     {
       method,
       headers: {

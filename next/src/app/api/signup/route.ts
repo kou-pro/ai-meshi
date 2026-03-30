@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function POST(request: NextRequest) {
   const body = await request.json()
 
-  const res = await fetch('http://rails:3000/auth', {
+  const res = await fetch(`${RAILS_URL}/auth`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

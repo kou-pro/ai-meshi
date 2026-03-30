@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const sort = searchParams.get('sort') ?? 'newest'
@@ -14,7 +16,7 @@ export async function GET(request: NextRequest) {
   const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : ''
 
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/published?sort=${sort}&page=${page}${queryParam}${tagParam}`,
+    `${RAILS_URL}/api/v1/recipes/published?sort=${sort}&page=${page}${queryParam}${tagParam}`,
     {
       method: 'GET',
       headers: {

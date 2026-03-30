@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function GET() {
   const cookieStore = await cookies()
 
@@ -13,7 +15,7 @@ export async function GET() {
   }
 
   const railsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_RAILS_API_URL}/api/v1/users/me`,
+    `${RAILS_URL}/api/v1/users/me`,
     {
       method: 'GET',
       headers: {

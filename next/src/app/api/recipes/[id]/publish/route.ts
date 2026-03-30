@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -16,7 +18,7 @@ export async function PATCH(
     return NextResponse.json({ error: '認証エラー' }, { status: 401 })
   }
 
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}/publish`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}/publish`, {
     method: 'PATCH',
     headers: {
       'access-token': accessToken,

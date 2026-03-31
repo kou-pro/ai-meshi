@@ -24,7 +24,8 @@ export default function LoginPage() {
       return
     }
 
-    router.push('/protected')
+    router.refresh()
+    router.push('/home')
   }
 
   return (

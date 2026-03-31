@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function proxy(request: NextRequest) {
-  console.log('🔥 PROXY RUNNING:', request.nextUrl.pathname)
+export default function proxy(request: NextRequest) {
+  const accessToken = request.cookies.get('access-token')?.value
+  const client = request.cookies.get('client')?.value
+  const uid = request.cookies.get('uid')?.value
 
-  const token = request.cookies.get('access_token')
+  const isLoggedIn = !!(accessToken && client && uid)
+  const { pathname } = request.nextUrl
 
-  console.log('🎟 TOKEN:', token)
+  // ログイン済みユーザーが /login や /signup にアクセスしたら /home へ
+  if (isLoggedIn && (pathname === '/login' || pathname === '/signup')) {
+    return NextResponse.redirect(new URL('/home', request.url))
+  }
 
-  if (!token) {
+  // 未ログインユーザーが認証必須ページにアクセスしたら /login へ
+  if (!isLoggedIn && pathname !== '/login' && pathname !== '/signup') {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -16,5 +23,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/protected/:path*'],
+  matcher: [
+    '/protected/:path*',
+    '/recipes/new',
+    '/recipes/:path*/edit',
+    '/saved-recipes',
+    '/login',
+    '/signup',
+  ],
 }

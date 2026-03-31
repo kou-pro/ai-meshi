@@ -3,21 +3,25 @@ import Link from 'next/link'
 type Props = {
   id: number
   title: string
-  imageUrl: string | null // 追加
+  imageUrl: string | null
   userName: string
   userId: number
   createdAt: string
   likesCount: number
+  isPublished?: boolean
+  commentsCount?: number
 }
 
 export default function RecipeCard({
   id,
   title,
-  imageUrl, // 追加
+  imageUrl,
   userName,
   userId,
   createdAt,
   likesCount,
+  isPublished,
+  commentsCount,
 }: Props) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -36,6 +40,23 @@ export default function RecipeCard({
       </Link>
 
       <div className="p-4">
+        {/* 公開/未公開バッジ（isPublishedが渡された場合のみ表示） */}
+        {isPublished !== undefined && (
+          <span
+            style={{
+              display: 'inline-block',
+              marginBottom: '8px',
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              fontSize: '12px',
+              backgroundColor: isPublished ? '#dcfce7' : '#f3f4f6',
+              color: isPublished ? '#16a34a' : '#6b7280',
+            }}
+          >
+            {isPublished ? '公開中' : '未公開'}
+          </span>
+        )}
+
         {/* タイトル */}
         <Link href={`/recipes/${id}`}>
           <h2 className="text-lg font-bold text-gray-800 hover:text-green-600 mb-2">
@@ -52,9 +73,18 @@ export default function RecipeCard({
             <span className="mx-1">・</span>
             <span>{new Date(createdAt).toLocaleDateString('ja-JP')}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span>❤️</span>
-            <span>{likesCount}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <span>❤️</span>
+              <span>{likesCount}</span>
+            </div>
+            {/* コメント数（commentsCountが渡された場合のみ表示） */}
+            {commentsCount !== undefined && (
+              <div className="flex items-center gap-1">
+                <span>💬</span>
+                <span>{commentsCount}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -2,8 +2,25 @@ class Api::V1::RecipesController < ApplicationController
   before_action :authenticate_user!, except: [:published, :show]
 
   def index
-    recipes = current_user.recipes
-    render json: recipes
+    recipes = current_user.recipes.
+                includes(image_attachment: :blob).
+                order(created_at: :desc)
+
+    render json: recipes.map {|recipe|
+      {
+        id: recipe.id,
+        title: recipe.title,
+        is_published: recipe.is_published,
+        created_at: recipe.created_at,
+        likes_count: recipe.likes_count,
+        comments_count: recipe.comments_count,
+        image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+        user: {
+          id: recipe.user.id,
+          name: recipe.user.name,
+        },
+      }
+    }
   end
 
   def show

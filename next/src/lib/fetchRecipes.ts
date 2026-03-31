@@ -4,11 +4,15 @@ import { cookies } from 'next/headers'
 export type Recipe = {
   id: number
   title: string
-  content: string | null // contentはnullの可能性がある
   is_published: boolean
-  user_id: number
   created_at: string
-  updated_at: string
+  likes_count: number
+  comments_count: number
+  image_url: string | null
+  user: {
+    id: number
+    name: string
+  }
 }
 
 export async function fetchRecipes(): Promise<Recipe[]> {
@@ -19,12 +23,14 @@ export async function fetchRecipes(): Promise<Recipe[]> {
   const client = cookieStore.get('client')?.value
   const uid = cookieStore.get('uid')?.value
 
-  // トークンがなければ空配列を返す（middlewareが先にリダイレクトするので基本ここには来ない）
+  // トークンがなければ空配列を返す
   if (!accessToken || !client || !uid) {
     return []
   }
 
-  const res = await fetch('http://rails:3000/api/v1/recipes', {
+  const RAILS_URL = process.env.RAILS_API_URL
+
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes`, {
     method: 'GET',
     headers: {
       'access-token': accessToken,
@@ -32,12 +38,10 @@ export async function fetchRecipes(): Promise<Recipe[]> {
       uid: uid,
       'Content-Type': 'application/json',
     },
-    // Next.jsのキャッシュを無効化：常に最新データを取得する
     cache: 'no-store',
   })
 
   if (!res.ok) {
-    // fetchに失敗した場合は空配列を返す
     return []
   }
 

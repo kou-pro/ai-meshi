@@ -8,6 +8,7 @@ export default function proxy(request: NextRequest) {
 
   const isLoggedIn = !!(accessToken && client && uid)
   const { pathname } = request.nextUrl
+  const protectedRoutes = ['/saved-recipes', '/recipes/new', '/shopping-list']
 
   // ログイン済みユーザーが /login や /signup にアクセスしたら /home へ
   if (isLoggedIn && (pathname === '/login' || pathname === '/signup')) {
@@ -15,7 +16,10 @@ export default function proxy(request: NextRequest) {
   }
 
   // 未ログインユーザーが認証必須ページにアクセスしたら /login へ
-  if (!isLoggedIn && pathname !== '/login' && pathname !== '/signup') {
+  if (
+    !isLoggedIn &&
+    protectedRoutes.some((route) => pathname.startsWith(route))
+  ) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -26,8 +30,8 @@ export const config = {
   matcher: [
     '/protected/:path*',
     '/recipes/new',
-    '/recipes/:path*/edit',
     '/saved-recipes',
+    '/shopping-list',
     '/login',
     '/signup',
   ],

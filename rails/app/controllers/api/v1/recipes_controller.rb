@@ -189,6 +189,7 @@ class Api::V1::RecipesController < ApplicationController
       ingredients: recipe_data.fetch("ingredients", []),
       steps: recipe_data.fetch("steps", []),
       hashtags: recipe_data.fetch("hashtags", []),
+      is_published: params[:is_published] == true,
     )
 
     if recipe.save

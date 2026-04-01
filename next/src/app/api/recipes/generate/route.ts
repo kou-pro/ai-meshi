@@ -6,7 +6,7 @@ const RAILS_URL = process.env.RAILS_API_URL
 export async function POST(request: NextRequest) {
   // ① リクエストボディから食材・選択条件を取り出す
   const body = await request.json()
-  const { ingredients, servings, genre, scene, conditions } = body
+  const { ingredients, servings, genre, scene, conditions, is_published } = body // ← is_published を追加
 
   // ② HTTPOnly CookieからトークンG取得
   const cookieStore = await cookies()
@@ -28,8 +28,15 @@ export async function POST(request: NextRequest) {
       uid: uid,
       'Content-Type': 'application/json',
     },
-    // 全パラメータをRailsに転送する
-    body: JSON.stringify({ ingredients, servings, genre, scene, conditions }),
+    // is_published を追加してRailsに転送
+    body: JSON.stringify({
+      ingredients,
+      servings,
+      genre,
+      scene,
+      conditions,
+      is_published,
+    }),
   })
 
   // ⑤ Railsからのレスポンスをそのままフロントに返す

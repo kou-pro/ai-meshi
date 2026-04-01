@@ -1,16 +1,10 @@
 'use client'
-// フォームのsubmitはブラウザで発生するのでClient Component
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-// ── 人数の選択肢 ────────────────────────────────────────────────
 const SERVINGS_OPTIONS = [1, 2, 3, 4, 5]
-
-// ── 料理ジャンルの選択肢 ────────────────────────────────────────
 const GENRE_OPTIONS = ['和食', '洋食', '中華', '韓国風']
-
-// ── シーンの選択肢 ──────────────────────────────────────────────
 const SCENE_OPTIONS = [
   '朝ごはん',
   '昼ごはん',
@@ -19,8 +13,6 @@ const SCENE_OPTIONS = [
   '作り置き',
   'おつまみ',
 ]
-
-// ── こだわり条件の選択肢（複数選択） ────────────────────────────
 const CONDITION_OPTIONS = [
   '時短',
   '節約',
@@ -31,38 +23,23 @@ const CONDITION_OPTIONS = [
 ]
 
 export default function NewRecipePage() {
-  // 食材の入力値を管理
   const [ingredients, setIngredients] = useState('')
-  // 生成中のローディング状態を管理
   const [loading, setLoading] = useState(false)
-  // エラーメッセージを管理
   const [error, setError] = useState('')
-
-  // ── 選択条件の状態管理 ──────────────────────────────────────
-  // 人数：数値で管理（未選択はnull）
   const [servings, setServings] = useState<number | null>(null)
-  // 料理ジャンル：単一選択（未選択は空文字）
   const [genre, setGenre] = useState('')
-  // シーン：単一選択（未選択は空文字）
   const [scene, setScene] = useState('')
-  // こだわり条件：複数選択（選択中の条件を配列で管理）
   const [conditions, setConditions] = useState<string[]>([])
-
-  // ── アコーディオンの開閉状態を管理 ──────────────────────────
   const [openGenre, setOpenGenre] = useState(false)
   const [openScene, setOpenScene] = useState(false)
   const [openConditions, setOpenConditions] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
 
   const router = useRouter()
 
-  // こだわり条件のトグル処理（複数選択）
-  // クリックするたびに選択中↔未選択を切り替える
   const toggleCondition = (value: string) => {
-    setConditions(
-      (prev) =>
-        prev.includes(value)
-          ? prev.filter((c) => c !== value) // すでに選択中 → 除外
-          : [...prev, value], // 未選択 → 追加
+    setConditions((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value],
     )
   }
 
@@ -77,18 +54,19 @@ export default function NewRecipePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ingredients,
-        servings, // 人数
-        genre, // 料理ジャンル
-        scene, // シーン
-        conditions, // こだわり条件（配列）
+        servings,
+        genre,
+        scene,
+        conditions,
+        is_published: isPublished,
       }),
     })
 
+    const data = await res.json()
+
     if (res.ok) {
-      router.push('/recipes')
-      router.refresh()
+      router.push(`/recipes/${data.id}`)
     } else {
-      const data = await res.json()
       setError(data.error || 'レシピの生成に失敗しました')
     }
 
@@ -113,7 +91,7 @@ export default function NewRecipePage() {
         />
       </div>
 
-      {/* ── 人数（独立した基本条件） ──────────────────────────── */}
+      {/* 人数 */}
       <div className="mb-6">
         <p className="text-sm font-medium text-gray-700 mb-2">人数</p>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -138,7 +116,7 @@ export default function NewRecipePage() {
         </div>
       </div>
 
-      {/* ── 料理ジャンル（アコーディオン・単一選択） ────────────── */}
+      {/* 料理ジャンル */}
       <div className="mb-4">
         <button
           onClick={() => setOpenGenre(!openGenre)}
@@ -192,7 +170,7 @@ export default function NewRecipePage() {
         )}
       </div>
 
-      {/* ── シーン（アコーディオン・単一選択） ──────────────────── */}
+      {/* シーン */}
       <div className="mb-4">
         <button
           onClick={() => setOpenScene(!openScene)}
@@ -246,7 +224,7 @@ export default function NewRecipePage() {
         )}
       </div>
 
-      {/* ── こだわり条件（アコーディオン・複数選択） ────────────── */}
+      {/* こだわり条件 */}
       <div className="mb-6">
         <button
           onClick={() => setOpenConditions(!openConditions)}
@@ -302,6 +280,28 @@ export default function NewRecipePage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* 公開/非公開チェックボックス  */}
+      <div style={{ marginBottom: '24px' }}>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            color: '#374151',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={isPublished}
+            onChange={(e) => setIsPublished(e.target.checked)}
+            style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+          />
+          生成後に公開する
+        </label>
       </div>
 
       {/* エラーメッセージ */}

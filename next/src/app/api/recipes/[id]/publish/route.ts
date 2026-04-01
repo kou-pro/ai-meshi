@@ -7,7 +7,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params // ← awaitを追加
+  const { id } = await params
+  const body = await request.json()
 
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
@@ -26,6 +27,7 @@ export async function PATCH(
       uid: uid,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ is_published: body.is_published }),
   })
 
   const data = await res.json()

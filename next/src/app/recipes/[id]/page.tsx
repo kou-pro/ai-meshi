@@ -5,6 +5,7 @@ import LikeButton from '@/components/LikeButton'
 import CommentSection from '@/components/CommentSection'
 import AddToShoppingListButton from '@/components/AddToShoppingListButton'
 import SaveButton from '@/components/SaveButton'
+import RecipeOwnerActions from '@/components/RecipeOwnerActions'
 
 type Ingredient = {
   name: string
@@ -24,6 +25,7 @@ type RecipeDetail = {
   likes_count: number
   liked_by_current_user: boolean
   bookmarked_by_current_user: boolean
+  is_published: boolean
   image_url: string | null
   user: {
     id: number
@@ -41,6 +43,8 @@ type Comment = {
   }
 }
 
+const RAILS_URL = process.env.RAILS_API_URL
+
 async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
@@ -57,7 +61,7 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
     headers['uid'] = uid
   }
 
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
     method: 'GET',
     headers,
     cache: 'no-store',
@@ -68,7 +72,7 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
 }
 
 async function fetchComments(id: string): Promise<Comment[]> {
-  const res = await fetch(`http://rails:3000/api/v1/recipes/${id}/comments`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}/comments`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     cache: 'no-store',
@@ -82,7 +86,7 @@ async function fetchCurrentUserId(
   client: string,
   uid: string,
 ): Promise<number | null> {
-  const res = await fetch('http://rails:3000/api/v1/users/me', {
+  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -119,6 +123,7 @@ export default async function RecipeDetailPage({
     ? await fetchCurrentUserId(accessToken!, client!, uid!)
     : null
 
+  const isOwner = currentUserId === recipe.user.id
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>
@@ -132,6 +137,14 @@ export default async function RecipeDetailPage({
         </Link>
         ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
       </p>
+
+      {/* 管理メニュー（自分のレシピのときだけ表示） ← 追加 */}
+      {isOwner && (
+        <RecipeOwnerActions
+          recipeId={recipe.id}
+          isPublished={recipe.is_published}
+        />
+      )}
 
       {recipe.image_url && (
         <img

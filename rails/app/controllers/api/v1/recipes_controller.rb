@@ -38,6 +38,7 @@ class Api::V1::RecipesController < ApplicationController
       steps: recipe.steps,
       hashtags: recipe.hashtags,
       created_at: recipe.created_at,
+      is_published: recipe.is_published,
       user: {
         id: recipe.user.id,
         name: recipe.user.name,
@@ -76,9 +77,8 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def publish
-    # 自分のレシピだけ公開できる
     recipe = current_user.recipes.find(params[:id])
-    if recipe.update(is_published: true)
+    if recipe.update(is_published: ActiveModel::Type::Boolean.new.cast(params[:is_published]))
       render json: recipe
     else
       render json: { errors: recipe.errors.full_messages }, status: :unprocessable_content
@@ -189,7 +189,7 @@ class Api::V1::RecipesController < ApplicationController
       ingredients: recipe_data.fetch("ingredients", []),
       steps: recipe_data.fetch("steps", []),
       hashtags: recipe_data.fetch("hashtags", []),
-      is_published: params[:is_published] == true,
+      is_published: ActiveModel::Type::Boolean.new.cast(params[:is_published]),
     )
 
     if recipe.save

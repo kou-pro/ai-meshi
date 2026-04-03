@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "users/me", to: "users#me"
       get "health_check", to: "health_check#index"
+      post "guest_sessions", to: "guest_sessions#create"
       resources :users, only: [] do
         member do
           get :recipes

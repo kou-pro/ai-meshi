@@ -8,6 +8,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [guestLoading, setGuestLoading] = useState(false)
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -26,6 +27,25 @@ export default function LoginPage() {
 
     router.refresh()
     router.push('/home')
+  }
+
+  // ゲストログイン処理
+  const handleGuestLogin = async () => {
+    setGuestLoading(true)
+
+    const response = await fetch('/api/guest-login', {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      alert('ゲストログインに失敗しました')
+      setGuestLoading(false)
+      return
+    }
+
+    router.refresh()
+    router.push('/home')
+    setGuestLoading(false)
   }
 
   return (
@@ -52,6 +72,10 @@ export default function LoginPage() {
       </form>
       <hr />
       <GoogleLoginButton />
+      {/* ゲストログインボタン ← 追加 */}
+      <button onClick={handleGuestLogin} disabled={guestLoading}>
+        {guestLoading ? 'ログイン中...' : 'ゲストとしてログイン'}
+      </button>
     </div>
   )
 }

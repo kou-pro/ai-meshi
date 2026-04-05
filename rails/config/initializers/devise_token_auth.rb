@@ -72,6 +72,8 @@ DeviseTokenAuth.setup do |config|
   config.send_confirmation_email = true
 
   config.default_confirm_success_url = "http://localhost:8000/login"
+  config.default_password_reset_url = "http://localhost:8000/password-reset/edit"
+  config.require_client_password_reset_token = true
 end
 
 # ▼ CSRF検証を無効化（APIモードでセッションが使えないため）

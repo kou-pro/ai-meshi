@@ -69,10 +69,20 @@ export default function LoginPage() {
           />
         </div>
         <button type="submit">Login</button>
+
+        {/* パスワードリセット導線 */}
+        <div style={{ marginTop: '8px', textAlign: 'right' }}>
+          <a
+            href="/password-reset"
+            style={{ fontSize: '13px', color: '#6b7280' }}
+          >
+            パスワードをお忘れですか？
+          </a>
+        </div>
       </form>
       <hr />
       <GoogleLoginButton />
-      {/* ゲストログインボタン ← 追加 */}
+      {/* ゲストログインボタン */}
       <button onClick={handleGuestLogin} disabled={guestLoading}>
         {guestLoading ? 'ログイン中...' : 'ゲストとしてログイン'}
       </button>

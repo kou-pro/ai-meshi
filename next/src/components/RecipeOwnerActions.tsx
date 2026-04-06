@@ -50,38 +50,15 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
   }
 
   return (
-    <div
-      style={{
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '16px',
-        marginBottom: '24px',
-        backgroundColor: '#f9fafb',
-      }}
-    >
-      <p
-        style={{
-          fontSize: '12px',
-          color: '#6b7280',
-          marginBottom: '12px',
-          fontWeight: '600',
-        }}
-      >
+    <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
+      <p className="text-xs text-gray-500 mb-3 font-semibold">
         管理メニュー
       </p>
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div className="flex gap-2 flex-wrap">
         {/* 編集リンク */}
         <Link
           href={`/recipes/${recipeId}/edit`}
-          style={{
-            padding: '6px 16px',
-            borderRadius: '6px',
-            fontSize: '13px',
-            border: '1px solid #d1d5db',
-            backgroundColor: '#ffffff',
-            color: '#374151',
-            textDecoration: 'none',
-          }}
+          className="px-4 py-1.5 rounded text-[13px] border border-gray-300 bg-white text-gray-700 no-underline"
         >
           編集
         </Link>
@@ -90,16 +67,7 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
         <button
           onClick={handleTogglePublish}
           disabled={loading}
-          style={{
-            padding: '6px 16px',
-            borderRadius: '6px',
-            fontSize: '13px',
-            border: '1px solid',
-            borderColor: published ? '#d1d5db' : '#16a34a',
-            backgroundColor: published ? '#ffffff' : '#dcfce7',
-            color: published ? '#6b7280' : '#16a34a',
-            cursor: 'pointer',
-          }}
+          className={`px-4 py-1.5 rounded text-[13px] border ${published ? 'border-gray-300 bg-white text-gray-500' : 'border-green-600 bg-green-50 text-green-600'}`}
         >
           {published ? '非公開にする' : '公開する'}
         </button>
@@ -108,15 +76,7 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
         <button
           onClick={handleDelete}
           disabled={loading}
-          style={{
-            padding: '6px 16px',
-            borderRadius: '6px',
-            fontSize: '13px',
-            border: '1px solid #fca5a5',
-            backgroundColor: '#fff1f2',
-            color: '#ef4444',
-            cursor: 'pointer',
-          }}
+          className="px-4 py-1.5 rounded text-[13px] border border-red-300 bg-red-50 text-red-500"
         >
           削除
         </button>

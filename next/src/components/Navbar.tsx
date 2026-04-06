@@ -12,7 +12,7 @@ export default async function Navbar() {
 
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-3">
-      <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* ロゴ */}
         <Link href="/home" className="text-xl font-bold text-green-600">
           Ai-meshi
@@ -26,9 +26,14 @@ export default async function Navbar() {
           >
             ホーム
           </Link>
-
           {isLoggedIn ? (
             <>
+              <Link
+                href="/shopping-list"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                買い物リスト
+              </Link>
               <Link
                 href="/recipes/new"
                 className="text-sm text-gray-600 hover:text-green-600"

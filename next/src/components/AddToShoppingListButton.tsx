@@ -80,17 +80,13 @@ export default function AddToShoppingListButton({
     <button
       onClick={() => handleAdd(false)}
       disabled={status === 'loading'}
-      style={{
-        width: '100%',
-        padding: '12px',
-        borderRadius: '8px',
-        border: `1px solid ${buttonConfig.border}`,
-        backgroundColor: buttonConfig.bg,
-        color: buttonConfig.color,
-        fontSize: '14px',
-        fontWeight: '600',
-        cursor: status === 'loading' ? 'default' : 'pointer',
-      }}
+      className={`w-full px-3 py-3 rounded-lg border text-sm font-semibold ${
+        status === 'added'
+          ? 'bg-green-50 text-green-600 border-green-600'
+          : status === 'loading'
+            ? 'bg-gray-50 text-gray-400 border-gray-300 cursor-default'
+            : 'bg-white text-gray-700 border-gray-300'
+      }`}
     >
       {buttonConfig.label}
     </button>

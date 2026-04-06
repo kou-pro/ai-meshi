@@ -130,40 +130,17 @@ export default function HomeFeed({
     <div>
       {/* タグバッジ */}
       {activeTag && (
-        <div
-          className="mb-4"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <span
-            style={{
-              backgroundColor: '#f0fdf4',
-              color: '#16a34a',
-              padding: '4px 12px',
-              borderRadius: '9999px',
-              fontSize: '13px',
-              border: '1px solid #bbf7d0',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
+        <div className="mb-4 flex items-center gap-2">
+          <span className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[13px] border border-green-200 flex items-center gap-1.5">
             🏷️ #{activeTag}
             <button
               onClick={handleTagClear}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#16a34a',
-                fontSize: '14px',
-                padding: '0',
-                lineHeight: 1,
-              }}
+              className="bg-transparent border-none cursor-pointer text-green-600 text-sm p-0 leading-none"
             >
               ✕
             </button>
           </span>
-          <span style={{ fontSize: '13px', color: '#6b7280' }}>
+          <span className="text-[13px] text-gray-500">
             で絞り込み中
           </span>
         </div>
@@ -183,7 +160,7 @@ export default function HomeFeed({
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 text-sm"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
           >
             検索
           </button>
@@ -260,7 +237,7 @@ export default function HomeFeed({
           <button
             onClick={handleLoadMore}
             disabled={loading}
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50"
+            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
             {loading ? '読み込み中...' : 'もっと見る'}
           </button>

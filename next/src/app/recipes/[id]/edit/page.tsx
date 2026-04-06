@@ -103,7 +103,7 @@ export default function EditRecipePage() {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
 
@@ -115,29 +115,11 @@ export default function EditRecipePage() {
         {steps.map((step, index) => (
           <div
             key={index}
-            style={{
-              display: 'flex',
-              gap: '8px',
-              marginBottom: '8px',
-              alignItems: 'flex-start',
-            }}
+            className="flex gap-2 mb-2 items-start"
           >
             {/* 手順番号 */}
             <span
-              style={{
-                flexShrink: 0,
-                width: '24px',
-                height: '24px',
-                backgroundColor: '#22c55e',
-                color: 'white',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                marginTop: '8px',
-              }}
+              className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-2"
             >
               {index + 1}
             </span>
@@ -147,7 +129,7 @@ export default function EditRecipePage() {
               value={step}
               onChange={(e) => handleStepChange(index, e.target.value)}
               rows={2}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder={`手順${index + 1}を入力`}
             />
 
@@ -155,17 +137,7 @@ export default function EditRecipePage() {
             <button
               onClick={() => handleRemoveStep(index)}
               disabled={steps.length === 1}
-              style={{
-                flexShrink: 0,
-                padding: '4px 8px',
-                borderRadius: '4px',
-                border: '1px solid #fca5a5',
-                backgroundColor: '#fff1f2',
-                color: '#ef4444',
-                cursor: steps.length === 1 ? 'not-allowed' : 'pointer',
-                marginTop: '8px',
-                fontSize: '12px',
-              }}
+              className="shrink-0 px-2 py-1 rounded border border-red-300 bg-red-50 text-red-500 mt-2 text-xs disabled:opacity-50"
             >
               削除
             </button>
@@ -175,16 +147,7 @@ export default function EditRecipePage() {
         {/* 手順追加ボタン */}
         <button
           onClick={handleAddStep}
-          style={{
-            marginTop: '8px',
-            padding: '6px 16px',
-            borderRadius: '6px',
-            border: '1px solid #16a34a',
-            backgroundColor: '#f0fdf4',
-            color: '#16a34a',
-            cursor: 'pointer',
-            fontSize: '13px',
-          }}
+          className="mt-2 px-4 py-1.5 rounded border border-green-600 bg-green-50 text-green-600 text-[13px]"
         >
           ＋ 手順を追加
         </button>
@@ -198,14 +161,8 @@ export default function EditRecipePage() {
 
         {/* 現在の画像を表示 */}
         {currentImageUrl && (
-          <div style={{ marginBottom: '12px' }}>
-            <p
-              style={{
-                fontSize: '12px',
-                color: '#6b7280',
-                marginBottom: '6px',
-              }}
-            >
+          <div className="mb-3">
+            <p className="text-xs text-gray-500 mb-1.5">
               現在の画像
             </p>
             <img
@@ -214,17 +171,12 @@ export default function EditRecipePage() {
                 'http://localhost:3000',
               )}
               alt="現在の画像"
-              style={{
-                width: '100%',
-                height: '200px',
-                objectFit: 'cover',
-                borderRadius: '8px',
-              }}
+              className="w-full h-[200px] object-cover rounded-lg"
             />
           </div>
         )}
 
-        <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+        <p className="text-xs text-gray-500 mb-1.5">
           新しい画像を選択すると差し替えられます
         </p>
         <input
@@ -239,7 +191,7 @@ export default function EditRecipePage() {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+        className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
       >
         {loading ? '保存中...' : '保存する'}
       </button>

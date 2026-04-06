@@ -131,7 +131,7 @@ export default async function RecipeDetailPage({
         投稿者:
         <Link
           href={`/users/${recipe.user.id}`}
-          className="hover:text-blue-600 ml-1"
+          className="hover:text-green-600 ml-1"
         >
           {recipe.user.name}
         </Link>
@@ -153,8 +153,7 @@ export default async function RecipeDetailPage({
             'http://localhost:3000',
           )}
           alt={recipe.title}
-          className="w-full rounded-lg mb-6"
-          style={{ objectFit: 'cover', height: '300px', width: '100%' }}
+          className="w-full rounded-lg mb-6 object-cover h-[300px]"
         />
       )}
 
@@ -165,8 +164,7 @@ export default async function RecipeDetailPage({
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">材料</h2>
             <ul
-              className="border border-gray-200 rounded-lg divide-y divide-gray-200"
-              style={{ listStyle: 'none', padding: 0 }}
+              className="border border-gray-200 rounded-lg divide-y divide-gray-200 list-none p-0"
             >
               {recipe.ingredients.map((ingredient, index) => {
                 const isUnitFirst = ['大さじ', '小さじ', 'カップ'].includes(
@@ -202,23 +200,11 @@ export default async function RecipeDetailPage({
           {/* 手順 */}
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">作り方</h2>
-            <ol className="space-y-3" style={{ listStyle: 'none', padding: 0 }}>
+            <ol className="space-y-3 list-none p-0">
               {recipe.steps.map((step, index) => (
                 <li key={index} className="flex gap-3 text-sm text-gray-700">
                   <span
-                    style={{
-                      flexShrink: 0,
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#22c55e',
-                      color: 'white',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                    }}
+                    className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
                   >
                     {index + 1}
                   </span>
@@ -234,15 +220,7 @@ export default async function RecipeDetailPage({
               <Link
                 key={tag}
                 href={`/home?tag=${encodeURIComponent(tagWithoutHash)}`}
-                style={{
-                  backgroundColor: '#f0fdf4',
-                  color: '#16a34a',
-                  padding: '4px 12px',
-                  borderRadius: '9999px',
-                  fontSize: '13px',
-                  border: '1px solid #bbf7d0',
-                  textDecoration: 'none',
-                }}
+                className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[13px] border border-green-200 no-underline"
               >
                 {tag}
               </Link>

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   // ▼ Next.jsのURL（localhost:8000）を明示的に指定
   const response = NextResponse.redirect(
-    new URL('/protected', 'http://localhost:8000'),
+    new URL('/home', 'http://localhost:8000'),
   )
 
   const cookieOptions = {

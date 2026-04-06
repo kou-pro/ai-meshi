@@ -51,22 +51,13 @@ export default async function SavedRecipesPage() {
           <p className="mb-4">保存したレシピはありません</p>
           <Link
             href="/home"
-            style={{
-              color: '#16a34a',
-              textDecoration: 'underline',
-            }}
+            className="text-green-600 underline"
           >
             レシピを探す
           </Link>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '24px',
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
           {recipes.map((recipe) => (
             <RecipeCard
               key={recipe.id}

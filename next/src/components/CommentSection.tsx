@@ -89,7 +89,7 @@ export default function CommentSection({
           <button
             onClick={handleSubmit}
             disabled={loading || !body.trim()}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+            className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
           >
             {loading ? '投稿中...' : 'コメントする'}
           </button>
@@ -97,7 +97,7 @@ export default function CommentSection({
       ) : (
         <p className="text-gray-500 mb-6">
           コメントするには
-          <a href="/login" className="text-blue-500 hover:underline mx-1">
+          <a href="/login" className="text-green-600 hover:underline mx-1">
             ログイン
           </a>
           してください

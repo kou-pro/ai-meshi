@@ -15,13 +15,7 @@ export default function RecipeList({ recipes }: Props) {
       )}
 
       {/* カードグリッド表示 */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '24px',
-        }}
-      >
+      <div className="grid grid-cols-3 gap-6">
         {recipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}

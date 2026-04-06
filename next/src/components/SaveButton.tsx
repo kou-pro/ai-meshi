@@ -58,17 +58,7 @@ export default function SaveButton({ recipeId, initialBookmarked }: Props) {
     <button
       onClick={handleClick}
       disabled={isLoading}
-      style={{
-        padding: '8px 16px',
-        backgroundColor: bookmarked ? '#f59e0b' : '#e5e7eb',
-        color: bookmarked ? '#ffffff' : '#374151',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: isLoading ? 'not-allowed' : 'pointer',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        opacity: isLoading ? 0.7 : 1,
-      }}
+      className={`px-4 py-2 rounded-lg font-bold text-sm disabled:opacity-70 ${bookmarked ? 'bg-amber-400 text-white' : 'bg-gray-200 text-gray-700'}`}
     >
       {bookmarked ? '★ 保存済み' : '☆ 保存する'}
     </button>

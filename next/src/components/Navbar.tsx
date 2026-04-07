@@ -11,7 +11,7 @@ export default async function Navbar() {
   const isLoggedIn = !!(accessToken && client && uid)
 
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3">
+    <nav className="hidden md:block bg-white border-b border-gray-200 px-6 py-3">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* ロゴ */}
         <Link href="/home" className="text-xl font-bold text-green-600">

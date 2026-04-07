@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Providers from './providers'
 import Navbar from '@/components/Navbar'
+import MobileNav from '@/components/MobileNav'
 
 export const metadata: Metadata = {
   title: 'Ai-meshi',
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body>
         <Navbar />
         <Providers>{children}</Providers>
+        <MobileNav />
       </body>
     </html>
   )

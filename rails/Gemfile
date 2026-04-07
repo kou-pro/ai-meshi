@@ -31,6 +31,9 @@ gem "aws-sdk-s3", require: false
 # pageネーションに利用
 gem "kaminari"
 
+# 日本語化
+gem "rails-i18n"
+
 group :test do
   gem "factory_bot_rails"
   # テストフレームワーク rspec を導入する

@@ -9,11 +9,11 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError(null)
+    setError('')
 
     const res = await fetch('/api/signup', {
       method: 'POST',
@@ -101,7 +101,10 @@ export default function SignupPage() {
         </form>
 
         <div className="mt-4 text-center">
-          <a href="/login" className="text-xs text-gray-500 hover:text-green-600">
+          <a
+            href="/login"
+            className="text-xs text-gray-500 hover:text-green-600"
+          >
             すでにアカウントをお持ちですか？ ログイン
           </a>
         </div>

@@ -9,9 +9,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [guestLoading, setGuestLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setError('')
     const response = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -19,7 +21,7 @@ export default function LoginPage() {
       credentials: 'include',
     })
     if (!response.ok) {
-      console.error('login failed')
+      setError('メールアドレスまたはパスワードが正しくありません')
       return
     }
     router.refresh()
@@ -32,7 +34,7 @@ export default function LoginPage() {
       method: 'POST',
     })
     if (!response.ok) {
-      alert('ゲストログインに失敗しました')
+      setError('ゲストログインに失敗しました')
       setGuestLoading(false)
       return
     }
@@ -48,6 +50,7 @@ export default function LoginPage() {
           ログイン
         </h1>
 
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

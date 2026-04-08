@@ -31,4 +31,9 @@ class User < ApplicationRecord
   has_many :shopping_list_items, dependent: :destroy
   has_many :bookmarks,          dependent: :destroy
   has_many :bookmarked_recipes, through: :bookmarks, source: :recipe
+
+  # has_one_attached :image による無限ループを防ぐため
+  def as_json(options = {})
+    super(options.merge(except: [:image]))
+  end
 end

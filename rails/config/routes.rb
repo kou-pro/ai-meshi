@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "users/me", to: "users#me"
+      patch "users/me", to: "users#update_me"
       get "health_check", to: "health_check#index"
       post "guest_sessions", to: "guest_sessions#create"
       resources :users, only: [] do

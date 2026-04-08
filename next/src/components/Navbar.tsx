@@ -52,6 +52,12 @@ export default async function Navbar() {
               >
                 保存済み
               </Link>
+              <Link
+                href="/settings"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                設定
+              </Link>
               <LogoutButton />
             </>
           ) : (

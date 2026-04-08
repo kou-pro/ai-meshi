@@ -23,6 +23,7 @@ class User < ApplicationRecord
     end
   end
 
+  has_one_attached :image
   has_many :recipes, dependent: :destroy
   has_many :likes, dependent: :destroy
   has_many :liked_recipes, through: :likes, source: :recipe

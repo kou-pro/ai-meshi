@@ -8,7 +8,12 @@ export default function proxy(request: NextRequest) {
 
   const isLoggedIn = !!(accessToken && client && uid)
   const { pathname } = request.nextUrl
-  const protectedRoutes = ['/saved-recipes', '/recipes/new', '/shopping-list']
+  const protectedRoutes = [
+    '/saved-recipes',
+    '/recipes/new',
+    '/shopping-list',
+    '/settings',
+  ]
 
   // ログイン済みユーザーが /login や /signup にアクセスしたら /home へ
   if (isLoggedIn && (pathname === '/login' || pathname === '/signup')) {
@@ -32,6 +37,8 @@ export const config = {
     '/recipes/new',
     '/saved-recipes',
     '/shopping-list',
+    '/settings/:path*',
+    '/settings',
     '/login',
     '/signup',
   ],

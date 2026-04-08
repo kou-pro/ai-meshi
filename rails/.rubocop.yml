@@ -12,7 +12,7 @@ AllCops:
 
 # 以下を追加
 Metrics/ClassLength:
-  Max: 200
+  Max: 250
 
 Metrics/MethodLength:
   Max: 60

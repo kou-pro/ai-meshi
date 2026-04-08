@@ -242,7 +242,7 @@ export default function HomeFeed({
       )}
 
       {/* Load Moreボタン */}
-      {hasNextPage && (
+      {hasNextPage && recipes.length > 0 && (
         <div className="mt-8 text-center">
           <button
             onClick={handleLoadMore}

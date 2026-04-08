@@ -26,7 +26,6 @@ export default function CommentSection({
   isLoggedIn,
   currentUserId,
 }: Props) {
-  const router = useRouter()
   const [comments, setComments] = useState<Comment[]>(initialComments)
   const [body, setBody] = useState('')
   const [loading, setLoading] = useState(false)

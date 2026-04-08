@@ -46,7 +46,8 @@ services:
       - "8000:3000"
     depends_on:
       - rails
-
+    environment:
+      RAILS_API_URL: http://rails:3000
 volumes:
   mysql_data:
   next_node_modules:

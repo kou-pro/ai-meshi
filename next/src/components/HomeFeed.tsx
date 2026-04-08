@@ -140,9 +140,7 @@ export default function HomeFeed({
               ✕
             </button>
           </span>
-          <span className="text-[13px] text-gray-500">
-            で絞り込み中
-          </span>
+          <span className="text-[13px] text-gray-500">で絞り込み中</span>
         </div>
       )}
 
@@ -209,11 +207,23 @@ export default function HomeFeed({
 
       {/* レシピ一覧 */}
       {recipes.length === 0 ? (
-        <p className="text-gray-500">
-          {activeTag || query
-            ? '該当するレシピが見つかりませんでした'
-            : 'まだ投稿がありません'}
-        </p>
+        <div className="text-center py-12">
+          {activeTag || query ? (
+            <>
+              <p className="text-gray-500 mb-4">
+                該当するレシピが見つかりませんでした
+              </p>
+              <button
+                onClick={handleReset}
+                className="text-green-600 underline text-sm"
+              >
+                検索をリセットする
+              </button>
+            </>
+          ) : (
+            <p className="text-gray-500">まだ投稿がありません</p>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recipes.map((recipe) => (

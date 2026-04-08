@@ -1,5 +1,6 @@
 import { Recipe } from '@/lib/fetchRecipes'
 import RecipeCard from '@/components/RecipeCard'
+import Link from 'next/link'
 
 type Props = {
   recipes: Recipe[]
@@ -11,7 +12,15 @@ export default function RecipeList({ recipes }: Props) {
       <h1 className="text-2xl font-bold mb-6">マイレシピ</h1>
 
       {recipes.length === 0 && (
-        <p className="text-gray-500">まだレシピがありません</p>
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-4">まだレシピがありません</p>
+          <Link
+            href="/recipes/new"
+            className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+          >
+            レシピを作る
+          </Link>
+        </div>
       )}
 
       {/* カードグリッド表示 */}

@@ -187,12 +187,16 @@ export default function ShoppingListClient({ initialItems }: Props) {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-2">
-          買い物リスト
-        </h1>
-        <p className="text-gray-500">
+        <h1 className="text-2xl font-bold mb-2">買い物リスト</h1>
+        <p className="text-gray-500 mb-4">
           買い物リストに何も追加されていません。
         </p>
+        <Link
+          href="/home"
+          className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
+        >
+          レシピを探して追加する
+        </Link>
       </div>
     )
   }
@@ -200,9 +204,7 @@ export default function ShoppingListClient({ initialItems }: Props) {
   return (
     <div className="max-w-4xl mx-auto p-6">
       {/* ヘッダー */}
-      <h1 className="text-2xl font-bold mb-1">
-        買い物リスト
-      </h1>
+      <h1 className="text-2xl font-bold mb-1">買い物リスト</h1>
       <p className="text-gray-500 mb-6 text-sm">
         レシピ {recipeCount}件 / 買うもの {itemCount}件
       </p>

@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Providers from './providers'
-import Navbar from '@/components/Navbar'
-import MobileNav from '@/components/MobileNav'
 
 export const metadata: Metadata = {
-  title: 'Ai-meshi',
+  title: 'AI飯',
   description: 'AI Recipe Platform',
 }
 
@@ -17,9 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        <Navbar />
         <Providers>{children}</Providers>
-        <MobileNav />
       </body>
     </html>
   )

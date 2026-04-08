@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { LogoutButton } from './LogoutButton'
+import Image from 'next/image'
 
 export default async function Navbar() {
   const cookieStore = await cookies()
@@ -14,10 +15,15 @@ export default async function Navbar() {
     <nav className="hidden md:block bg-white border-b border-gray-200 px-6 py-3">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         {/* ロゴ */}
-        <Link href="/home" className="text-xl font-bold text-green-600">
-          Ai-meshi
+        <Link href="/home" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="AI飯"
+            width={300}
+            height={100}
+            className="w-auto h-32"
+          />
         </Link>
-
         {/* ナビリンク */}
         <div className="flex items-center gap-6">
           <Link

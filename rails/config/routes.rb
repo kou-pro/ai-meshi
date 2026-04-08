@@ -26,6 +26,8 @@ Rails.application.routes.draw do
         collection do
           post :generate
           get :published
+          get :popular
+          get :popular_tags
         end
         member do
           patch :publish

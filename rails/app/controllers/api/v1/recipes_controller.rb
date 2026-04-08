@@ -1,5 +1,5 @@
 class Api::V1::RecipesController < ApplicationController
-  before_action :authenticate_user!, except: [:published, :show]
+  before_action :authenticate_user!, except: [:published, :show, :popular, :popular_tags]
 
   def index
     recipes = current_user.recipes.
@@ -137,6 +137,41 @@ class Api::V1::RecipesController < ApplicationController
       has_next_page: !recipes.last_page?,
       total_count: recipes.total_count,
     }
+  end
+
+  def popular
+    recipes = Recipe.where(is_published: true).
+                includes(:user, image_attachment: :blob).
+                order(likes_count: :desc, created_at: :desc).
+                limit(6)
+
+    render json: recipes.map {|recipe|
+      {
+        id: recipe.id,
+        title: recipe.title,
+        created_at: recipe.created_at,
+        likes_count: recipe.likes_count,
+        image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+        user: {
+          id: recipe.user.id,
+          name: recipe.user.name,
+        },
+      }
+    }
+  end
+
+  def popular_tags
+    # 公開済みレシピのhashtagsを全て展開して集計
+    tags = Recipe.where(is_published: true).
+             pluck(:hashtags).
+             flatten.
+             compact.
+             tally.
+             sort_by {|_, count| -count }.
+             first(10).
+             map {|tag, count| { tag: tag, count: count } }
+
+    render json: { tags: tags }
   end
 
   def generate

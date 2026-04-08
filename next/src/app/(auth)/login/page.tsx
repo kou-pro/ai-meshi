@@ -3,13 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { GoogleLoginButton } from '@/components/GoogleLoginButton'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [guestLoading, setGuestLoading] = useState(false)
   const [error, setError] = useState('')
+  const [guestLoading, setGuestLoading] = useState(false)
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,9 +31,7 @@ export default function LoginPage() {
 
   const handleGuestLogin = async () => {
     setGuestLoading(true)
-    const response = await fetch('/api/guest-login', {
-      method: 'POST',
-    })
+    const response = await fetch('/api/guest-login', { method: 'POST' })
     if (!response.ok) {
       setError('ゲストログインに失敗しました')
       setGuestLoading(false)
@@ -45,12 +44,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md relative">
+        {/* ×ボタン */}
+        <button
+          onClick={() => router.push('/')}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"
+        >
+          ✕
+        </button>
+
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           ログイン
         </h1>
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -64,7 +72,6 @@ export default function LoginPage() {
               placeholder="example@email.com"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               パスワード
@@ -77,14 +84,12 @@ export default function LoginPage() {
               placeholder="パスワードを入力"
             />
           </div>
-
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium"
           >
             ログイン
           </button>
-
           <div className="text-right">
             <a
               href="/password-reset"
@@ -106,11 +111,18 @@ export default function LoginPage() {
           <button
             onClick={handleGuestLogin}
             disabled={guestLoading}
-            className="w-full border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50 text-sm font-medium disabled:opacity-50"
+            className="w-full border-2 border-gray-300 text-gray-600 py-3 rounded-full font-medium hover:bg-gray-50 text-sm disabled:opacity-50"
           >
             {guestLoading ? 'ログイン中...' : 'ゲストとしてログイン'}
           </button>
         </div>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          アカウントをお持ちでない方は
+          <Link href="/signup" className="text-green-600 hover:underline ml-1">
+            新規登録
+          </Link>
+        </p>
       </div>
     </div>
   )

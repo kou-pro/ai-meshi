@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -32,13 +33,18 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow p-8 w-full max-w-md">
+      <div className="bg-white rounded-lg shadow p-8 w-full max-w-md relative">
+        {/* ×ボタン */}
+        <button
+          onClick={() => router.push('/')}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"
+        >
+          ✕
+        </button>
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           新規登録
         </h1>
-
         {error && <p className="text-red-500 mb-4 text-sm">{error}</p>}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -99,14 +105,13 @@ export default function SignupPage() {
             登録する
           </button>
         </form>
-
         <div className="mt-4 text-center">
-          <a
-            href="/login"
-            className="text-xs text-gray-500 hover:text-green-600"
-          >
-            すでにアカウントをお持ちですか？ ログイン
-          </a>
+          <p className="text-sm text-gray-500">
+            すでにアカウントをお持ちですか？
+            <Link href="/login" className="text-green-600 hover:underline ml-1">
+              ログイン
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -16,7 +16,10 @@ export default function proxy(request: NextRequest) {
   ]
 
   // ログイン済みユーザーが /login や /signup にアクセスしたら /home へ
-  if (isLoggedIn && (pathname === '/login' || pathname === '/signup')) {
+  if (
+    isLoggedIn &&
+    (pathname === '/' || pathname === '/login' || pathname === '/signup')
+  ) {
     return NextResponse.redirect(new URL('/home', request.url))
   }
 
@@ -33,13 +36,13 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/protected/:path*',
+    '/',
+    '/login',
+    '/signup',
     '/recipes/new',
     '/saved-recipes',
     '/shopping-list',
     '/settings/:path*',
     '/settings',
-    '/login',
-    '/signup',
   ],
 }

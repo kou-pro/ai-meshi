@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import StarInput from '@/components/StarInput'
 
 export default function EditRecipePage() {
   const router = useRouter()
@@ -13,6 +14,9 @@ export default function EditRecipePage() {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [tasteScore, setTasteScore] = useState(0)
+  const [easeScore, setEaseScore] = useState(0)
+  const [costScore, setCostScore] = useState(0)
 
   // 既存のレシピデータを取得
   useEffect(() => {
@@ -31,6 +35,9 @@ export default function EditRecipePage() {
         )
         // 現在画像URLを保存
         setCurrentImageUrl(data.image_url ?? null)
+        setTasteScore(data.taste_score ?? 0)
+        setEaseScore(data.ease_score ?? 0)
+        setCostScore(data.cost_score ?? 0)
       }
       setFetching(false)
     }
@@ -74,9 +81,22 @@ export default function EditRecipePage() {
       formData.append('recipe[image]', image)
     }
 
+    // formDataとスコアを別々に送る
+    // まずタイトル・手順・画像をformDataで送る
     const res = await fetch(`/api/recipes/${id}`, {
       method: 'PATCH',
       body: formData,
+    })
+
+    // スコアは別途JSONで送る
+    await fetch(`/api/recipes/${id}/score`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taste_score: tasteScore,
+        ease_score: easeScore,
+        cost_score: costScore,
+      }),
     })
 
     if (res.ok) {
@@ -113,14 +133,9 @@ export default function EditRecipePage() {
           作り方
         </label>
         {steps.map((step, index) => (
-          <div
-            key={index}
-            className="flex gap-2 mb-2 items-start"
-          >
+          <div key={index} className="flex gap-2 mb-2 items-start">
             {/* 手順番号 */}
-            <span
-              className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-2"
-            >
+            <span className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-2">
               {index + 1}
             </span>
 
@@ -162,9 +177,7 @@ export default function EditRecipePage() {
         {/* 現在の画像を表示 */}
         {currentImageUrl && (
           <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1.5">
-              現在の画像
-            </p>
+            <p className="text-xs text-gray-500 mb-1.5">現在の画像</p>
             <img
               src={currentImageUrl.replace(
                 'http://rails:3000',
@@ -185,6 +198,20 @@ export default function EditRecipePage() {
           onChange={(e) => setImage(e.target.files?.[0] ?? null)}
           className="w-full border border-gray-300 rounded px-3 py-2"
         />
+      </div>
+
+      {/* 投稿者評価 */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <h2 className="text-sm font-bold text-gray-700 mb-3">投稿者評価</h2>
+        <div className="space-y-2">
+          <StarInput
+            label="美味しさ"
+            value={tasteScore}
+            onChange={setTasteScore}
+          />
+          <StarInput label="手軽さ" value={easeScore} onChange={setEaseScore} />
+          <StarInput label="コスパ" value={costScore} onChange={setCostScore} />
+        </div>
       </div>
 
       {/* 保存ボタン */}

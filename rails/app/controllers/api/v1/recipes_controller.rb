@@ -47,6 +47,9 @@ class Api::V1::RecipesController < ApplicationController
       liked_by_current_user: liked_by_current_user,
       bookmarked_by_current_user: bookmarked_by_current_user,
       image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+      taste_score: recipe.taste_score,
+      ease_score: recipe.ease_score,
+      cost_score: recipe.cost_score,
     }
   end
 
@@ -60,7 +63,6 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def update
-    # 自分のレシピだけ編集できる
     recipe = current_user.recipes.find(params[:id])
     if recipe.update(recipe_params)
       render json: recipe
@@ -241,6 +243,6 @@ class Api::V1::RecipesController < ApplicationController
   private
 
     def recipe_params
-      params.require(:recipe).permit(:title, :content, :image, steps: [])
+      params.require(:recipe).permit(:title, :content, :image, :taste_score, :ease_score, :cost_score, steps: [])
     end
 end

@@ -51,9 +51,7 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
 
   return (
     <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
-      <p className="text-xs text-gray-500 mb-3 font-semibold">
-        管理メニュー
-      </p>
+      <p className="text-xs text-gray-500 mb-3 font-semibold">管理メニュー</p>
       <div className="flex gap-2 flex-wrap">
         {/* 編集リンク */}
         <Link

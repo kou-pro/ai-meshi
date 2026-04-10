@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_25_215718) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_08_123522) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -82,6 +82,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_25_215718) do
     t.json "steps"
     t.json "hashtags"
     t.integer "servings"
+    t.integer "taste_score"
+    t.integer "ease_score"
+    t.integer "cost_score"
     t.index ["user_id"], name: "index_recipes_on_user_id"
   end
 

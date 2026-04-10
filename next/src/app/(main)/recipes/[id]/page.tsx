@@ -6,6 +6,7 @@ import CommentSection from '@/components/CommentSection'
 import AddToShoppingListButton from '@/components/AddToShoppingListButton'
 import SaveButton from '@/components/SaveButton'
 import RecipeOwnerActions from '@/components/RecipeOwnerActions'
+import ScoreSection from '@/components/ScoreSection'
 
 type Ingredient = {
   name: string
@@ -27,6 +28,9 @@ type RecipeDetail = {
   bookmarked_by_current_user: boolean
   is_published: boolean
   image_url: string | null
+  taste_score: number | null
+  ease_score: number | null
+  cost_score: number | null
   user: {
     id: number
     name: string
@@ -146,6 +150,15 @@ export default async function RecipeDetailPage({
         />
       )}
 
+      {/* スコアセクション */}
+      <ScoreSection
+        recipeId={recipe.id}
+        isOwner={isOwner}
+        initialTasteScore={recipe.taste_score}
+        initialEaseScore={recipe.ease_score}
+        initialCostScore={recipe.cost_score}
+      />
+
       {recipe.image_url && (
         <img
           src={recipe.image_url.replace(
@@ -163,9 +176,7 @@ export default async function RecipeDetailPage({
           {/* 食材一覧 */}
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">材料</h2>
-            <ul
-              className="border border-gray-200 rounded-lg divide-y divide-gray-200 list-none p-0"
-            >
+            <ul className="border border-gray-200 rounded-lg divide-y divide-gray-200 list-none p-0">
               {recipe.ingredients.map((ingredient, index) => {
                 const isUnitFirst = ['大さじ', '小さじ', 'カップ'].includes(
                   ingredient.unit,
@@ -203,9 +214,7 @@ export default async function RecipeDetailPage({
             <ol className="space-y-3 list-none p-0">
               {recipe.steps.map((step, index) => (
                 <li key={index} className="flex gap-3 text-sm text-gray-700">
-                  <span
-                    className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold"
-                  >
+                  <span className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
                     {index + 1}
                   </span>
                   <span>{step}</span>

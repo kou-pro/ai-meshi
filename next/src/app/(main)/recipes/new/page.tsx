@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 const SERVINGS_OPTIONS = [1, 2, 3, 4, 5]
 const GENRE_OPTIONS = ['和食', '洋食', '中華', '韓国風']
@@ -49,7 +50,7 @@ export default function NewRecipePage() {
     setLoading(true)
     setError('')
 
-    const res = await fetch('/api/recipes/generate', {
+    const res = await fetchWithAuthClient('/api/recipes/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -61,6 +62,11 @@ export default function NewRecipePage() {
         is_published: isPublished,
       }),
     })
+
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
 
     const data = await res.json()
 

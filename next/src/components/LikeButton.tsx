@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
   recipeId: number
@@ -27,10 +28,13 @@ export default function LikeButton({
 
     const method = liked ? 'DELETE' : 'POST'
 
-    const res = await fetch(`/api/likes/${recipeId}`, {
+    const res = await fetchWithAuthClient(`/api/likes/${recipeId}`, {
       method,
     })
 
+    if (res.status === 401) {
+      return
+    }
     if (!res.ok) return
 
     const data = await res.json()

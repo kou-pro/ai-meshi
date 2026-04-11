@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import RecipeCard from '@/components/RecipeCard'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Recipe = {
   id: number
@@ -42,7 +43,11 @@ export default function HomeFeed({
     const queryParam = inputValue
       ? `&query=${encodeURIComponent(inputValue)}`
       : ''
-    const res = await fetch(`/api/home-feed?sort=${sort}&page=1${queryParam}`)
+    const res = await fetchWithAuthClient(`/api/home-feed?sort=${sort}&page=1${queryParam}`)
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     const data = await res.json()
 
     setRecipes(data.items)
@@ -64,7 +69,11 @@ export default function HomeFeed({
     setLoading(true)
     setActiveTag('')
 
-    const res = await fetch(`/api/home-feed?sort=${sort}&page=1`)
+    const res = await fetchWithAuthClient(`/api/home-feed?sort=${sort}&page=1`)
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     const data = await res.json()
 
     setRecipes(data.items)
@@ -80,7 +89,11 @@ export default function HomeFeed({
     setInputValue('')
     setActiveTag('')
 
-    const res = await fetch(`/api/home-feed?sort=${sort}&page=1`)
+    const res = await fetchWithAuthClient(`/api/home-feed?sort=${sort}&page=1`)
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     const data = await res.json()
 
     setRecipes(data.items)
@@ -97,9 +110,13 @@ export default function HomeFeed({
 
     const tagParam = activeTag ? `&tag=${encodeURIComponent(activeTag)}` : ''
     const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
-    const res = await fetch(
+    const res = await fetchWithAuthClient(
       `/api/home-feed?sort=${newSort}&page=1${tagParam}${queryParam}`,
     )
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     const data = await res.json()
 
     setRecipes(data.items)
@@ -115,9 +132,13 @@ export default function HomeFeed({
 
     const tagParam = activeTag ? `&tag=${encodeURIComponent(activeTag)}` : ''
     const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
-    const res = await fetch(
+    const res = await fetchWithAuthClient(
       `/api/home-feed?sort=${sort}&page=${nextPage}${tagParam}${queryParam}`,
     )
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     const data = await res.json()
 
     setRecipes([...recipes, ...data.items])

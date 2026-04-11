@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Comment = {
   id: number
@@ -37,12 +38,16 @@ export default function CommentSection({
     setLoading(true)
     setError('')
 
-    const res = await fetch(`/api/comments/${recipeId}`, {
+    const res = await fetchWithAuthClient(`/api/comments/${recipeId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ comment: { body } }),
     })
 
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     if (res.ok) {
       const newComment = await res.json()
       setComments([newComment, ...comments])
@@ -58,10 +63,13 @@ export default function CommentSection({
   const handleDelete = async (commentId: number) => {
     if (!confirm('削除しますか？')) return
 
-    const res = await fetch(`/api/comments/${recipeId}/${commentId}`, {
+    const res = await fetchWithAuthClient(`/api/comments/${recipeId}/${commentId}`, {
       method: 'DELETE',
     })
 
+    if (res.status === 401) {
+      return
+    }
     if (res.ok) {
       setComments(comments.filter((c) => c.id !== commentId))
     } else {

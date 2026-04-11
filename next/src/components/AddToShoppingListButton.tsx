@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
   recipeId: number
@@ -21,7 +22,7 @@ export default function AddToShoppingListButton({
   const handleAdd = async (force = false) => {
     setStatus('loading')
 
-    const res = await fetch('/api/shopping-list', {
+    const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -31,6 +32,10 @@ export default function AddToShoppingListButton({
       }),
     })
 
+    if (res.status === 401) {
+      setStatus('idle')
+      return
+    }
     if (res.status === 409) {
       // すでに追加済み → 確認ダイアログを出す
       const confirmed = window.confirm(

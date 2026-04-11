@@ -6,6 +6,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 export function LogoutButton() {
   const router = useRouter()
@@ -18,7 +19,7 @@ export function LogoutButton() {
       // ▼ Next.jsのRoute Handler（/api/logout）を経由してログアウト処理を行う
       // 直接Railsを叩かない理由：HTTPOnly CookieはブラウザのJSから読めないため、
       // サーバーサイドのRoute Handlerに中継させる必要がある
-      const response = await fetch('/api/logout', {
+      const response = await fetchWithAuthClient('/api/logout', {
         method: 'POST',
       })
 

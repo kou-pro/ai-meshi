@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
   recipeId: number
@@ -19,10 +20,14 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
     if (!confirm('削除しますか？')) return
     setLoading(true)
 
-    const res = await fetch(`/api/recipes/${recipeId}`, {
+    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}`, {
       method: 'DELETE',
     })
 
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     if (res.ok) {
       router.push('/recipes')
     } else {
@@ -35,12 +40,16 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
   const handleTogglePublish = async () => {
     setLoading(true)
 
-    const res = await fetch(`/api/recipes/${recipeId}/publish`, {
+    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/publish`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_published: !published }),
     })
 
+    if (res.status === 401) {
+      setLoading(false)
+      return
+    }
     if (res.ok) {
       setPublished(!published)
     } else {

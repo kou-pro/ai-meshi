@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // カテゴリの表示順を定義（スーパーの売り場順）
 const CATEGORY_ORDER = [
@@ -134,11 +135,14 @@ export default function ShoppingListClient({ initialItems }: Props) {
     )
 
     // APIを叩く（最初のIDだけ更新）
-    await fetch('/api/shopping-list', {
+    const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: ids[0], is_checked: checked }),
     })
+    if (res.status === 401) {
+      return
+    }
   }
 
   // レシピごと削除
@@ -147,11 +151,14 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
     setItems((prev) => prev.filter((item) => item.recipe_id !== recipeId))
 
-    await fetch('/api/shopping-list', {
+    const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'recipe', recipe_id: recipeId }),
     })
+    if (res.status === 401) {
+      return
+    }
   }
 
   // 全レシピ削除
@@ -160,11 +167,14 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
     setItems([])
 
-    await fetch('/api/shopping-list', {
+    const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'checked' }),
     })
+    if (res.status === 401) {
+      return
+    }
   }
 
   // チェック済み削除
@@ -173,11 +183,14 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
     setItems((prev) => prev.filter((item) => !item.is_checked))
 
-    await fetch('/api/shopping-list', {
+    const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ type: 'checked' }),
     })
+    if (res.status === 401) {
+      return
+    }
   }
 
   // 統計

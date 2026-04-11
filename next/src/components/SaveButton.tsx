@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // コンポーネントが受け取るpropsの型定義
 type Props = {
@@ -26,20 +27,28 @@ export default function SaveButton({ recipeId, initialBookmarked }: Props) {
     try {
       if (bookmarked) {
         // 保存済み → 解除する
-        const res = await fetch(`/api/bookmarks/${recipeId}`, {
+        const res = await fetchWithAuthClient(`/api/bookmarks/${recipeId}`, {
           method: 'DELETE',
         })
+        if (res.status === 401) {
+          setIsLoading(false)
+          return
+        }
         if (!res.ok) {
           // 失敗したら元に戻す
           setBookmarked(true)
         }
       } else {
         // 未保存 → 保存する
-        const res = await fetch('/api/bookmarks', {
+        const res = await fetchWithAuthClient('/api/bookmarks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ recipe_id: recipeId }),
         })
+        if (res.status === 401) {
+          setIsLoading(false)
+          return
+        }
         if (!res.ok) {
           // 失敗したら元に戻す
           setBookmarked(false)

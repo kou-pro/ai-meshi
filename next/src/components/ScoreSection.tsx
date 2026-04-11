@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import StarInput from '@/components/StarInput'
 import StarDisplay from '@/components/StarDisplay'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
   recipeId: number
@@ -27,7 +28,7 @@ export default function ScoreSection({
 
   const handleSave = async () => {
     setSaving(true)
-    await fetch(`/api/recipes/${recipeId}/score`, {
+    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/score`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -36,6 +37,10 @@ export default function ScoreSection({
         cost_score: costScore,
       }),
     })
+    if (res.status === 401) {
+      setSaving(false)
+      return
+    }
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)

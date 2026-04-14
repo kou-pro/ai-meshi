@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 const RAILS_URL = process.env.RAILS_API_URL
 
@@ -7,21 +8,33 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') ?? 'newest'
   const page = searchParams.get('page') ?? '1'
   const query = searchParams.get('query') ?? ''
-  const tag = searchParams.get('tag') ?? '' // 追加
+  const tag = searchParams.get('tag') ?? ''
 
-  // queryがある場合だけURLに追加する
   const queryParam = query ? `&query=${encodeURIComponent(query)}` : ''
-
-  // tagがある場合だけURLに追加する
   const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : ''
+
+  // Cookieからトークンを取得
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const client = cookieStore.get('client')?.value
+  const uid = cookieStore.get('uid')?.value
+
+  // トークンがある場合のみヘッダーに追加
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  if (accessToken && client && uid) {
+    headers['access-token'] = accessToken
+    headers['client'] = client
+    headers['uid'] = uid
+  }
 
   const res = await fetch(
     `${RAILS_URL}/api/v1/recipes/published?sort=${sort}&page=${page}${queryParam}${tagParam}`,
     {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       cache: 'no-store',
     },
   )

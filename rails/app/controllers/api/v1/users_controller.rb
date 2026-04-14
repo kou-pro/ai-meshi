@@ -37,23 +37,58 @@ module Api
         }
       end
 
+      # フォロー中一覧
+      def following
+        user = User.find(params[:id])
+        render json: user.following.map { |u|
+          {
+            id: u.id,
+            name: u.name,
+            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch('RAILS_PUBLIC_URL', 'http://localhost:3000')) : nil,
+          }
+        }
+      end
+
+      # フォロワー一覧
+      def followers
+        user = User.find(params[:id])
+        render json: user.followers.map { |u|
+          {
+            id: u.id,
+            name: u.name,
+            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch('RAILS_PUBLIC_URL', 'http://localhost:3000')) : nil,
+          }
+        }
+      end
+
       def recipes
         user = User.find(params[:id])
         recipes = user.recipes.where(is_published: true).order(created_at: :desc)
+
+        # ログインしているユーザーがこのユーザーをフォローしているか
+        is_following = if current_user
+                        current_user.following.exists?(id: user.id)
+                      else
+                        false
+                      end
+
         render json: {
           user: {
             id: user.id,
             name: user.name,
+            following_count: user.following.count,
+            followers_count: user.followers.count,
           },
-          recipes: recipes.map {|r|
-            {
-              id: r.id,
-              title: r.title,
-              content: r.content,
-              created_at: r.created_at,
-              likes_count: r.likes.count,
-            }
-          },
+          is_following: is_following,
+          recipes: recipes.map { |r|
+  {
+    id: r.id,
+    title: r.title,
+    image_url: r.image.attached? ? rails_blob_url(r.image, host: ENV.fetch('RAILS_PUBLIC_URL', 'http://localhost:3000')) : nil,
+    created_at: r.created_at,
+    likes_count: r.likes.count,
+  }
+},
         }
       end
     end

@@ -20,6 +20,8 @@ Rails.application.routes.draw do
       resources :users, only: [] do
         member do
           get :recipes
+          get :following
+          get :followers
         end
       end
       resources :recipes, only: [:index, :create, :update, :destroy, :show] do
@@ -36,6 +38,8 @@ Rails.application.routes.draw do
         resources :comments, only: [:index, :create, :destroy]
       end
       resources :bookmarks, only: [:index, :create, :destroy]
+      # フォロー機能
+      resources :follows, only: [:create, :destroy]
       # 買い物リスト
       resources :shopping_list_items, only: [:index, :create, :destroy, :update] do
         collection do

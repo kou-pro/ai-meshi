@@ -20,17 +20,19 @@ type Props = {
   initialRecipes: Recipe[]
   initialHasNextPage: boolean
   initialTag?: string
+  isLoggedIn: boolean
 }
 
 export default function HomeFeed({
   initialRecipes,
   initialHasNextPage,
   initialTag = '',
+  isLoggedIn,
 }: Props) {
   const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes)
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage)
   const [page, setPage] = useState(1)
-  const [sort, setSort] = useState<'newest' | 'popular'>('newest')
+  const [sort, setSort] = useState<'newest' | 'popular' | 'following'>('newest')
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
   const [inputValue, setInputValue] = useState('')
@@ -43,7 +45,9 @@ export default function HomeFeed({
     const queryParam = inputValue
       ? `&query=${encodeURIComponent(inputValue)}`
       : ''
-    const res = await fetchWithAuthClient(`/api/home-feed?sort=${sort}&page=1${queryParam}`)
+    const res = await fetchWithAuthClient(
+      `/api/home-feed?sort=${sort}&page=1${queryParam}`,
+    )
     if (res.status === 401) {
       setLoading(false)
       return
@@ -103,7 +107,9 @@ export default function HomeFeed({
   }
 
   // ソート切り替え
-  const handleSortChange = async (newSort: 'newest' | 'popular') => {
+  const handleSortChange = async (
+    newSort: 'newest' | 'popular' | 'following',
+  ) => {
     if (newSort === sort) return
     setSort(newSort)
     setLoading(true)
@@ -219,6 +225,19 @@ export default function HomeFeed({
         >
           人気順
         </button>
+        {/* ログイン済みの場合のみフォロー中タブを表示 */}
+        {isLoggedIn && (
+          <button
+            onClick={() => handleSortChange('following')}
+            className={`px-4 py-2 rounded-full text-sm font-medium ${
+              sort === 'following'
+                ? 'bg-green-500 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            フォロー中
+          </button>
+        )}
       </div>
 
       {/* 検索結果表示 */}

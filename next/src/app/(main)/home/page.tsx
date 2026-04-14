@@ -1,4 +1,7 @@
 import HomeFeed from '@/components/HomeFeed'
+import { cookies } from 'next/headers'
+
+const RAILS_URL = process.env.RAILS_API_URL
 
 type SearchParams = {
   tag?: string
@@ -7,7 +10,7 @@ type SearchParams = {
 async function fetchInitialRecipes(tag?: string) {
   const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : ''
   const res = await fetch(
-    `http://rails:3000/api/v1/recipes/published?sort=newest&page=1${tagParam}`,
+    `${RAILS_URL}/api/v1/recipes/published?sort=newest&page=1${tagParam}`,
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -24,6 +27,12 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>
 }) {
   const { tag } = await searchParams
+
+  // ログイン状態を確認
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const isLoggedIn = !!accessToken
+
   const data = await fetchInitialRecipes(tag)
 
   return (
@@ -33,6 +42,7 @@ export default async function HomePage({
         initialRecipes={data.items}
         initialHasNextPage={data.has_next_page}
         initialTag={tag ?? ''}
+        isLoggedIn={isLoggedIn}
       />
     </div>
   )

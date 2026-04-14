@@ -1,11 +1,13 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import RecipeCard from '@/components/RecipeCard'
+import FollowButton from '@/components/FollowButton'
 
 type Recipe = {
   id: number
   title: string
-  content: string | null
+  image_url: string | null
   created_at: string
   likes_count: number
 }
@@ -14,9 +16,14 @@ type UserRecipesResponse = {
   user: {
     id: number
     name: string
+    following_count: number
+    followers_count: number
   }
+  is_following: boolean
   recipes: Recipe[]
 }
+
+const RAILS_URL = process.env.RAILS_API_URL
 
 async function fetchUserRecipes(
   id: string,
@@ -36,7 +43,7 @@ async function fetchUserRecipes(
     headers['uid'] = uid
   }
 
-  const res = await fetch(`http://rails:3000/api/v1/users/${id}/recipes`, {
+  const res = await fetch(`${RAILS_URL}/api/v1/users/${id}/recipes`, {
     method: 'GET',
     headers,
     cache: 'no-store',
@@ -47,19 +54,71 @@ async function fetchUserRecipes(
   return res.json()
 }
 
+async function fetchCurrentUserId(): Promise<number | null> {
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const client = cookieStore.get('client')?.value
+  const uid = cookieStore.get('uid')?.value
+
+  if (!accessToken || !client || !uid) return null
+
+  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
+    headers: {
+      'access-token': accessToken,
+      client: client,
+      uid: uid,
+    },
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  const data = await res.json()
+  return data.id
+}
+
 export default async function UserRecipesPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await fetchUserRecipes(id)
+  const [data, currentUserId] = await Promise.all([
+    fetchUserRecipes(id),
+    fetchCurrentUserId(),
+  ])
 
   if (!data) return notFound()
 
+  // 自分自身のページではフォローボタンを表示しない
+  const isOwnPage = currentUserId === data.user.id
+
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">{data.user.name} さんのレシピ</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">{data.user.name} さんのレシピ</h1>
+        {/* 未ログインまたは自分のページはフォローボタンを表示しない */}
+        {currentUserId && !isOwnPage && (
+          <FollowButton
+            targetUserId={data.user.id}
+            initialIsFollowing={data.is_following}
+          />
+        )}
+      </div>
+
+      <div className="flex gap-4 mb-6 text-sm">
+        <Link
+          href={`/users/${id}/follows?tab=following`}
+          className="text-gray-600 hover:text-green-600"
+        >
+          <span className="font-bold">{data.user.following_count}</span> フォロー中
+        </Link>
+        <Link
+          href={`/users/${id}/follows?tab=followers`}
+          className="text-gray-600 hover:text-green-600"
+        >
+          <span className="font-bold">{data.user.followers_count}</span> フォロワー
+        </Link>
+      </div>
 
       {data.recipes.length === 0 && (
         <p className="text-gray-500">まだ公開レシピがありません</p>
@@ -71,7 +130,7 @@ export default async function UserRecipesPage({
             key={recipe.id}
             id={recipe.id}
             title={recipe.title}
-            content={recipe.content}
+            imageUrl={recipe.image_url ?? null}
             userName={data.user.name}
             userId={data.user.id}
             createdAt={recipe.created_at}

@@ -163,7 +163,7 @@ export default async function RecipeDetailPage({
         <img
           src={recipe.image_url.replace(
             'http://rails:3000',
-            'http://localhost:3000',
+            process.env.NEXT_PUBLIC_RAILS_URL || 'http://localhost:3000',
           )}
           alt={recipe.title}
           className="w-full rounded-lg mb-6 object-cover h-[300px]"

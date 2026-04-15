@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Comment = {
@@ -73,7 +74,7 @@ export default function CommentSection({
     if (res.ok) {
       setComments(comments.filter((c) => c.id !== commentId))
     } else {
-      alert('削除に失敗しました')
+      toast.error('削除に失敗しました')
     }
   }
 

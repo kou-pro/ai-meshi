@@ -57,6 +57,5 @@ export async function PATCH(request: NextRequest) {
   }
 
   const data = await res.json()
-  console.log('PATCH response data:', data) // ← PATCHの方に移動
   return NextResponse.json(data)
 }

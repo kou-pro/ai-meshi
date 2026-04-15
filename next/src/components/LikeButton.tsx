@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
@@ -22,7 +23,7 @@ export default function LikeButton({
   const handleClick = async () => {
     // 未ログインの場合はログインページへ誘導
     if (!isLoggedIn) {
-      alert('いいねするにはログインが必要です')
+      toast.error('いいねするにはログインが必要です')
       return
     }
 

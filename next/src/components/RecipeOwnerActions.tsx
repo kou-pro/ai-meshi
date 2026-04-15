@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
@@ -31,7 +32,7 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
     if (res.ok) {
       router.push('/recipes')
     } else {
-      alert('削除に失敗しました')
+      toast.error('削除に失敗しました')
     }
     setLoading(false)
   }
@@ -53,7 +54,7 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
     if (res.ok) {
       setPublished(!published)
     } else {
-      alert('切り替えに失敗しました')
+      toast.error('切り替えに失敗しました')
     }
     setLoading(false)
   }

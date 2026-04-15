@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { toast } from 'sonner'
 import StarInput from '@/components/StarInput'
 
 export default function EditRecipePage() {
@@ -103,7 +104,7 @@ export default function EditRecipePage() {
       router.refresh()
       router.push(`/recipes/${id}`)
     } else {
-      alert('更新に失敗しました')
+      toast.error('更新に失敗しました')
     }
     setLoading(false)
   }
@@ -181,7 +182,7 @@ export default function EditRecipePage() {
             <img
               src={currentImageUrl.replace(
                 'http://rails:3000',
-                'http://localhost:3000',
+                process.env.NEXT_PUBLIC_RAILS_URL || 'http://localhost:3000',
               )}
               alt="現在の画像"
               className="w-full h-[200px] object-cover rounded-lg"

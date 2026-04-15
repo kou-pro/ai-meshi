@@ -30,7 +30,7 @@ export default function RecipeCard({
         <img
           src={
             imageUrl
-              ? imageUrl.replace('http://rails:3000', 'http://localhost:3000')
+              ? imageUrl.replace('http://rails:3000', process.env.NEXT_PUBLIC_RAILS_URL || 'http://localhost:3000')
               : '/default-recipe.jpg'
           }
           alt={title}

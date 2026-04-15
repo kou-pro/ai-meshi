@@ -19,8 +19,6 @@ export async function PATCH(request: NextRequest) {
   })
 
   if (!res.ok) {
-    const data = await res.json()
-    console.log('Rails error:', data)
     return NextResponse.json(
       { error: 'パスワードの再設定に失敗しました' },
       { status: res.status },

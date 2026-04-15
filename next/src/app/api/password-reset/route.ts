@@ -16,8 +16,6 @@ export async function POST(request: NextRequest) {
     }),
   })
 
-  console.log('Rails response status:', res.status) // ← 追加
-
   // メールアドレスの存在有無を露出しないため常に200を返す
   return NextResponse.json({ success: true }, { status: 200 })
 }

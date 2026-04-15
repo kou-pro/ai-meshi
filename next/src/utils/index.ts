@@ -5,6 +5,5 @@ export const fetcher = (url: string) =>
     .get(url)
     .then((res: AxiosResponse) => res.data)
     .catch((err: AxiosError) => {
-      console.log(err.message)
       throw err
     })

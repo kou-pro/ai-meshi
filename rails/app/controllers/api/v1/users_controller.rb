@@ -63,7 +63,14 @@ module Api
 
       def recipes
         user = User.find(params[:id])
-        recipes = user.recipes.where(is_published: true).includes(:likes, image_attachment: :blob).order(created_at: :desc)
+
+        # 自分のページなら全レシピ、他人のページなら公開レシピのみ
+        is_own_page = current_user&.id == user.id
+        recipes = if is_own_page
+                    user.recipes.includes(:likes, image_attachment: :blob).order(created_at: :desc)
+                  else
+                    user.recipes.where(is_published: true).includes(:likes, image_attachment: :blob).order(created_at: :desc)
+                  end
 
         # ログインしているユーザーがこのユーザーをフォローしているか
         is_following = if current_user
@@ -84,6 +91,7 @@ module Api
   {
     id: r.id,
     title: r.title,
+    is_published: r.is_published,
     image_url: r.image.attached? ? rails_blob_url(r.image, host: ENV.fetch('RAILS_PUBLIC_URL', 'http://localhost:3000')) : nil,
     created_at: r.created_at,
     likes_count: r.likes.count,

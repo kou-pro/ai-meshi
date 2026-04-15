@@ -50,13 +50,6 @@ export default function UserMenu() {
               マイレシピ
             </Link>
           )}
-          <Link
-            href="/recipes"
-            onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-green-600"
-          >
-            レシピ管理
-          </Link>
           {userId && (
             <Link
               href={`/users/${userId}/follows`}

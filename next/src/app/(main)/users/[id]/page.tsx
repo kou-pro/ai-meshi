@@ -8,6 +8,7 @@ type Recipe = {
   id: number
   title: string
   image_url: string | null
+  is_published: boolean
   created_at: string
   likes_count: number
 }
@@ -120,24 +121,25 @@ export default async function UserRecipesPage({
         </Link>
       </div>
 
-      {data.recipes.length === 0 && (
-        <p className="text-gray-500">まだ公開レシピがありません</p>
+      {data.recipes.length === 0 ? (
+        <p className="text-gray-500">まだレシピがありません</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {data.recipes.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              id={recipe.id}
+              title={recipe.title}
+              imageUrl={recipe.image_url ?? null}
+              userName={data.user.name}
+              userId={data.user.id}
+              createdAt={recipe.created_at}
+              likesCount={recipe.likes_count}
+              isPublished={isOwnPage ? recipe.is_published : undefined}
+            />
+          ))}
+        </div>
       )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {data.recipes.map((recipe) => (
-          <RecipeCard
-            key={recipe.id}
-            id={recipe.id}
-            title={recipe.title}
-            imageUrl={recipe.image_url ?? null}
-            userName={data.user.name}
-            userId={data.user.id}
-            createdAt={recipe.created_at}
-            likesCount={recipe.likes_count}
-          />
-        ))}
-      </div>
     </div>
   )
 }

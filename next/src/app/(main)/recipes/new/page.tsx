@@ -86,7 +86,7 @@ export default function NewRecipePage() {
       {/* 食材入力 */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          食材を入力してください
+          作りたい料理や食材を入力してください
         </label>
         <textarea
           value={ingredients}
@@ -196,7 +196,7 @@ export default function NewRecipePage() {
             onChange={(e) => setIsPublished(e.target.checked)}
             className="w-4 h-4 cursor-pointer"
           />
-          生成後に公開する
+          生成後に投稿する
         </label>
       </div>
 

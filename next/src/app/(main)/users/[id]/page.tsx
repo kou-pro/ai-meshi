@@ -93,7 +93,7 @@ export default async function UserRecipesPage({
   const isOwnPage = currentUserId === data.user.id
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{data.user.name} さんのレシピ</h1>
         {/* 未ログインまたは自分のページはフォローボタンを表示しない */}
@@ -124,7 +124,7 @@ export default async function UserRecipesPage({
         <p className="text-gray-500">まだ公開レシピがありません</p>
       )}
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {data.recipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}

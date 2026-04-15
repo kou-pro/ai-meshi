@@ -45,6 +45,7 @@ Rails.application.routes.draw do
         collection do
           delete :destroy_by_recipe
           delete :destroy_checked
+          delete :destroy_all_items
         end
       end
     end

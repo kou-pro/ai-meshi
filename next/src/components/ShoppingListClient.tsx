@@ -134,14 +134,16 @@ export default function ShoppingListClient({ initialItems }: Props) {
       ),
     )
 
-    // APIを叩く（最初のIDだけ更新）
-    const res = await fetchWithAuthClient('/api/shopping-list', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: ids[0], is_checked: checked }),
-    })
-    if (res.status === 401) {
-      return
+    // APIを叩く（全IDを更新）
+    for (const id of ids) {
+      const res = await fetchWithAuthClient('/api/shopping-list', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_checked: checked }),
+      })
+      if (res.status === 401) {
+        return
+      }
     }
   }
 
@@ -170,7 +172,7 @@ export default function ShoppingListClient({ initialItems }: Props) {
     const res = await fetchWithAuthClient('/api/shopping-list', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'checked' }),
+      body: JSON.stringify({ type: 'all' }),
     })
     if (res.status === 401) {
       return

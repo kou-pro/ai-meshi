@@ -108,6 +108,9 @@ export async function DELETE(request: NextRequest) {
   } else if (type === 'checked') {
     // チェック済み削除
     url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_checked`
+  } else if (type === 'all') {
+    // 全削除
+    url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_all_items`
   }
 
   const res = await fetch(url, {

@@ -75,6 +75,11 @@ class Api::V1::ShoppingListItemsController < ApplicationController
     render json: { message: "削除しました" }
   end
 
+  def destroy_all_items
+    current_user.shopping_list_items.destroy_all
+    render json: { message: "すべて削除しました" }
+  end
+
   private
 
     def shopping_list_item_params

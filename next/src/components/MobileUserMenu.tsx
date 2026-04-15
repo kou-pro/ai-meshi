@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { UserIcon } from '@heroicons/react/24/outline'
 
 export default function MobileUserMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -36,7 +37,7 @@ export default function MobileUserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
       >
-        <span className="text-xl">👤</span>
+        <UserIcon className="w-6 h-6" />
         <span className="text-xs">マイページ</span>
       </button>
 

@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import { HomeIcon, SparklesIcon, ShoppingCartIcon, BookmarkIcon } from '@heroicons/react/24/outline'
 import MobileUserMenu from './MobileUserMenu'
 
 export default async function MobileNav() {
@@ -19,7 +20,7 @@ export default async function MobileNav() {
           href="/home"
           className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
         >
-          <span className="text-xl">🏠</span>
+          <HomeIcon className="w-6 h-6" />
           <span className="text-xs">ホーム</span>
         </Link>
 
@@ -27,7 +28,7 @@ export default async function MobileNav() {
           href="/recipes/new"
           className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
         >
-          <span className="text-xl">✨</span>
+          <SparklesIcon className="w-6 h-6" />
           <span className="text-xs">作る</span>
         </Link>
 
@@ -35,7 +36,7 @@ export default async function MobileNav() {
           href="/shopping-list"
           className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
         >
-          <span className="text-xl">🛒</span>
+          <ShoppingCartIcon className="w-6 h-6" />
           <span className="text-xs">買い物</span>
         </Link>
 
@@ -43,7 +44,7 @@ export default async function MobileNav() {
           href="/saved-recipes"
           className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
         >
-          <span className="text-xl">🔖</span>
+          <BookmarkIcon className="w-6 h-6" />
           <span className="text-xs">保存</span>
         </Link>
 

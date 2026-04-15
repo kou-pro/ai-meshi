@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { SparklesIcon, ClockIcon, CurrencyYenIcon } from '@heroicons/react/24/outline'
 import StarInput from '@/components/StarInput'
 import StarDisplay from '@/components/StarDisplay'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
@@ -54,24 +55,21 @@ export default function ScoreSection({
   return (
     <div className="my-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
       <h2 className="text-sm font-bold text-gray-700 mb-3">投稿者評価</h2>
-      <div className="space-y-2">
+      <div className="space-y-3">
         {isOwner ? (
           <>
-            <StarInput
-              label="美味しさ"
-              value={tasteScore}
-              onChange={setTasteScore}
-            />
-            <StarInput
-              label="手軽さ"
-              value={easeScore}
-              onChange={setEaseScore}
-            />
-            <StarInput
-              label="コスパ"
-              value={costScore}
-              onChange={setCostScore}
-            />
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-4 h-4 text-orange-500" />
+              <StarInput label="美味しさ" value={tasteScore} onChange={setTasteScore} />
+            </div>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-4 h-4 text-blue-500" />
+              <StarInput label="手軽さ" value={easeScore} onChange={setEaseScore} />
+            </div>
+            <div className="flex items-center gap-2">
+              <CurrencyYenIcon className="w-4 h-4 text-green-600" />
+              <StarInput label="コスパ" value={costScore} onChange={setCostScore} />
+            </div>
             <button
               onClick={handleSave}
               disabled={saving}
@@ -82,9 +80,18 @@ export default function ScoreSection({
           </>
         ) : (
           <>
-            <StarDisplay label="美味しさ" value={tasteScore} />
-            <StarDisplay label="手軽さ" value={easeScore} />
-            <StarDisplay label="コスパ" value={costScore} />
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-4 h-4 text-orange-500" />
+              <StarDisplay label="美味しさ" value={tasteScore} />
+            </div>
+            <div className="flex items-center gap-2">
+              <ClockIcon className="w-4 h-4 text-blue-500" />
+              <StarDisplay label="手軽さ" value={easeScore} />
+            </div>
+            <div className="flex items-center gap-2">
+              <CurrencyYenIcon className="w-4 h-4 text-green-600" />
+              <StarDisplay label="コスパ" value={costScore} />
+            </div>
           </>
         )}
       </div>

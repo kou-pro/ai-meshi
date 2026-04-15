@@ -6,7 +6,7 @@ type Props = {
 export default function StarDisplay({ value, label }: Props) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600 w-16">{label}</span>
+      <span className="text-sm text-gray-600 w-20">{label}</span>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <span

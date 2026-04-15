@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { HeartIcon as HeartOutline } from '@heroicons/react/24/outline'
+import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
@@ -48,7 +50,11 @@ export default function LikeButton({
       onClick={handleClick}
       className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500"
     >
-      <span>{liked ? '❤️' : '🤍'}</span>
+      {liked ? (
+        <HeartSolid className="w-5 h-5 text-red-500" />
+      ) : (
+        <HeartOutline className="w-5 h-5" />
+      )}
       <span>{likesCount}</span>
     </button>
   )

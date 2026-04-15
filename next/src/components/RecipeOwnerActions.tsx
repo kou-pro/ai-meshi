@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useState } from 'react'
+import { PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
@@ -66,8 +67,9 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
         {/* 編集リンク */}
         <Link
           href={`/recipes/${recipeId}/edit`}
-          className="px-4 py-1.5 rounded text-[13px] border border-gray-300 bg-white text-gray-700 no-underline"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border border-gray-300 bg-white text-gray-700 no-underline"
         >
+          <PencilIcon className="w-3.5 h-3.5" />
           編集
         </Link>
 
@@ -75,8 +77,9 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
         <button
           onClick={handleTogglePublish}
           disabled={loading}
-          className={`px-4 py-1.5 rounded text-[13px] border ${published ? 'border-gray-300 bg-white text-gray-500' : 'border-green-600 bg-green-50 text-green-600'}`}
+          className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border ${published ? 'border-gray-300 bg-white text-gray-500' : 'border-green-600 bg-green-50 text-green-600'}`}
         >
+          {published ? <EyeSlashIcon className="w-3.5 h-3.5" /> : <EyeIcon className="w-3.5 h-3.5" />}
           {published ? '非公開にする' : '公開する'}
         </button>
 
@@ -84,8 +87,9 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="px-4 py-1.5 rounded text-[13px] border border-red-300 bg-red-50 text-red-500"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border border-red-300 bg-red-50 text-red-500"
         >
+          <TrashIcon className="w-3.5 h-3.5" />
           削除
         </button>
       </div>

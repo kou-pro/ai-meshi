@@ -13,7 +13,7 @@ export default function StarInput({ value, onChange, label }: Props) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600 w-16">{label}</span>
+      <span className="text-sm text-gray-600 w-20">{label}</span>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
@@ -22,9 +22,9 @@ export default function StarInput({ value, onChange, label }: Props) {
             onClick={() => onChange(star)}
             onMouseEnter={() => setHovered(star)}
             onMouseLeave={() => setHovered(0)}
-            className="text-2xl focus:outline-none transition-colors"
+            className={`text-2xl focus:outline-none transition-colors ${star <= (hovered || value) ? 'text-yellow-400' : 'text-gray-300'}`}
           >
-            {star <= (hovered || value) ? '★' : '☆'}
+            ★
           </button>
         ))}
       </div>

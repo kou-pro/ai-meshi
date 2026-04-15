@@ -130,35 +130,7 @@ export default async function RecipeDetailPage({
   const isOwner = currentUserId === recipe.user.id
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        投稿者:
-        <Link
-          href={`/users/${recipe.user.id}`}
-          className="hover:text-green-600 ml-1"
-        >
-          {recipe.user.name}
-        </Link>
-        ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
-      </p>
-
-      {/* 管理メニュー（自分のレシピのときだけ表示） ← 追加 */}
-      {isOwner && (
-        <RecipeOwnerActions
-          recipeId={recipe.id}
-          isPublished={recipe.is_published}
-        />
-      )}
-
-      {/* スコアセクション */}
-      <ScoreSection
-        recipeId={recipe.id}
-        isOwner={isOwner}
-        initialTasteScore={recipe.taste_score}
-        initialEaseScore={recipe.ease_score}
-        initialCostScore={recipe.cost_score}
-      />
-
+      {/* 1. 画像（視覚的インパクト） */}
       {recipe.image_url && (
         <img
           src={recipe.image_url.replace(
@@ -170,10 +142,50 @@ export default async function RecipeDetailPage({
         />
       )}
 
-      {/* 構造化データがある場合 → 食材一覧・手順を表示 */}
+      {/* 2. タイトル */}
+      <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>
+
+      {/* 3. 投稿者情報 */}
+      <p className="text-sm text-gray-500 mb-4">
+        投稿者:
+        <Link
+          href={`/users/${recipe.user.id}`}
+          className="hover:text-green-600 ml-1"
+        >
+          {recipe.user.name}
+        </Link>
+        ／ {new Date(recipe.created_at).toLocaleDateString('ja-JP')}
+      </p>
+
+      {/* 4. アクションボタン（いいね・保存） */}
+      <div className="flex items-center gap-4 mb-6">
+        <LikeButton
+          recipeId={recipe.id}
+          initialLikesCount={recipe.likes_count}
+          initialLiked={recipe.liked_by_current_user}
+          isLoggedIn={isLoggedIn}
+        />
+        {isLoggedIn && (
+          <SaveButton
+            recipeId={recipe.id}
+            initialBookmarked={recipe.bookmarked_by_current_user}
+          />
+        )}
+      </div>
+
+      {/* 5. 投稿者評価（スコア） */}
+      <ScoreSection
+        recipeId={recipe.id}
+        isOwner={isOwner}
+        initialTasteScore={recipe.taste_score}
+        initialEaseScore={recipe.ease_score}
+        initialCostScore={recipe.cost_score}
+      />
+
+      {/* 6〜8. 材料・手順・タグ */}
       {recipe.ingredients && recipe.steps ? (
         <>
-          {/* 食材一覧 */}
+          {/* 6. 材料 */}
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">材料</h2>
             <ul className="border border-gray-200 rounded-lg divide-y divide-gray-200 list-none p-0">
@@ -198,7 +210,6 @@ export default async function RecipeDetailPage({
                 )
               })}
             </ul>
-            {/* ← ここに追加 */}
             {isLoggedIn && (
               <div className="mt-4">
                 <AddToShoppingListButton
@@ -208,7 +219,8 @@ export default async function RecipeDetailPage({
               </div>
             )}
           </div>
-          {/* 手順 */}
+
+          {/* 7. 手順 */}
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">作り方</h2>
             <ol className="space-y-3 list-none p-0">
@@ -222,43 +234,38 @@ export default async function RecipeDetailPage({
               ))}
             </ol>
           </div>
-          {/* タグ */}
-          {(recipe.hashtags ?? []).map((tag) => {
-            const tagWithoutHash = tag.replace(/^#/, '')
-            return (
-              <Link
-                key={tag}
-                href={`/home?tag=${encodeURIComponent(tagWithoutHash)}`}
-                className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[13px] border border-green-200 no-underline"
-              >
-                {tag}
-              </Link>
-            )
-          })}
+
+          {/* 8. タグ */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(recipe.hashtags ?? []).map((tag) => {
+              const tagWithoutHash = tag.replace(/^#/, '')
+              return (
+                <Link
+                  key={tag}
+                  href={`/home?tag=${encodeURIComponent(tagWithoutHash)}`}
+                  className="bg-green-50 text-green-600 px-3 py-1 rounded-full text-[13px] border border-green-200 no-underline"
+                >
+                  {tag}
+                </Link>
+              )
+            })}
+          </div>
         </>
       ) : (
-        /* 構造化データがない場合 → 従来のcontentを表示 */
         <div className="whitespace-pre-wrap text-gray-700 mb-6">
           {recipe.content}
         </div>
       )}
 
-      <LikeButton
-        recipeId={recipe.id}
-        initialLikesCount={recipe.likes_count}
-        initialLiked={recipe.liked_by_current_user}
-        isLoggedIn={isLoggedIn}
-      />
-
-      {isLoggedIn && (
-        <div className="mt-3">
-          <SaveButton
-            recipeId={recipe.id}
-            initialBookmarked={recipe.bookmarked_by_current_user}
-          />
-        </div>
+      {/* 9. 管理者メニュー（オーナーのみ、控えめに下部） */}
+      {isOwner && (
+        <RecipeOwnerActions
+          recipeId={recipe.id}
+          isPublished={recipe.is_published}
+        />
       )}
 
+      {/* 10. コメント */}
       <CommentSection
         recipeId={recipe.id}
         initialComments={comments}

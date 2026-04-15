@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
+import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // コンポーネントが受け取るpropsの型定義
@@ -67,9 +69,14 @@ export default function SaveButton({ recipeId, initialBookmarked }: Props) {
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className={`px-4 py-2 rounded-lg font-bold text-sm disabled:opacity-70 ${bookmarked ? 'bg-amber-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+      className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-sm disabled:opacity-70 ${bookmarked ? 'bg-amber-400 text-white' : 'bg-gray-200 text-gray-700'}`}
     >
-      {bookmarked ? '★ 保存済み' : '☆ 保存する'}
+      {bookmarked ? (
+        <BookmarkSolid className="w-4 h-4" />
+      ) : (
+        <BookmarkOutline className="w-4 h-4" />
+      )}
+      {bookmarked ? '保存済み' : '保存する'}
     </button>
   )
 }

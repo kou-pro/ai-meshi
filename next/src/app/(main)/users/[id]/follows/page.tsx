@@ -49,14 +49,6 @@ export default function FollowsPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      {/* 戻るリンク */}
-      <Link
-        href={`/users/${userId}`}
-        className="text-sm text-gray-500 hover:text-green-600 mb-4 inline-block"
-      >
-        ← 戻る
-      </Link>
-
       {/* タブ切り替え */}
       <div className="flex border-b border-gray-200 mb-6">
         <button

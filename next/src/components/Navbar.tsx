@@ -2,6 +2,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { LogoutButton } from './LogoutButton'
 import Image from 'next/image'
+import UserMenu from './UserMenu'
 
 export default async function Navbar() {
   const cookieStore = await cookies()
@@ -35,22 +36,10 @@ export default async function Navbar() {
           {isLoggedIn ? (
             <>
               <Link
-                href="/shopping-list"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
-                買い物リスト
-              </Link>
-              <Link
                 href="/recipes/new"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
                 作る
-              </Link>
-              <Link
-                href="/recipes"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
-                マイレシピ
               </Link>
               <Link
                 href="/saved-recipes"
@@ -59,11 +48,12 @@ export default async function Navbar() {
                 保存済み
               </Link>
               <Link
-                href="/settings"
+                href="/shopping-list"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                設定
+                買い物リスト
               </Link>
+              <UserMenu />
               <LogoutButton />
             </>
           ) : (

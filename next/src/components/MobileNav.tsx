@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import MobileUserMenu from './MobileUserMenu'
 
 export default async function MobileNav() {
   const cookieStore = await cookies()
@@ -46,13 +47,7 @@ export default async function MobileNav() {
           <span className="text-xs">保存</span>
         </Link>
 
-        <Link
-          href="/settings"
-          className="flex flex-col items-center gap-1 text-gray-600 hover:text-green-600 px-3 py-1"
-        >
-          <span className="text-xl">👤</span>
-          <span className="text-xs">マイページ</span>
-        </Link>
+        <MobileUserMenu />
       </div>
     </nav>
   )

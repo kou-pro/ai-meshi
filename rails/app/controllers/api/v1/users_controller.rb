@@ -63,7 +63,7 @@ module Api
 
       def recipes
         user = User.find(params[:id])
-        recipes = user.recipes.where(is_published: true).order(created_at: :desc)
+        recipes = user.recipes.where(is_published: true).includes(:likes, image_attachment: :blob).order(created_at: :desc)
 
         # ログインしているユーザーがこのユーザーをフォローしているか
         is_following = if current_user

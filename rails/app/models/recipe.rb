@@ -5,6 +5,8 @@ class Recipe < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :bookmarks, dependent: :destroy
 
+  validates :title, presence: true
+
   validate :acceptable_image, if: :image_attached?
 
   private

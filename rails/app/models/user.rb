@@ -31,17 +31,18 @@ class User < ApplicationRecord
   has_many :shopping_list_items, dependent: :destroy
   has_many :bookmarks,          dependent: :destroy
   has_many :bookmarked_recipes, through: :bookmarks, source: :recipe
-    # フォロー機能
-  has_many :following_relationships, class_name: 'Follow',
-                                     foreign_key: 'follower_id',
+  # フォロー機能
+  has_many :following_relationships, class_name: "Follow",
+                                     foreign_key: "follower_id",
+                                     inverse_of: :follower,
                                      dependent: :destroy
   has_many :following, through: :following_relationships, source: :following
 
-  has_many :follower_relationships, class_name: 'Follow',
-                                    foreign_key: 'following_id',
+  has_many :follower_relationships, class_name: "Follow",
+                                    foreign_key: "following_id",
+                                    inverse_of: :following,
                                     dependent: :destroy
   has_many :followers, through: :follower_relationships, source: :follower
-
 
   # has_one_attached :image による無限ループを防ぐため
   def as_json(options = {})

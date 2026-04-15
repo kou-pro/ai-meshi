@@ -93,13 +93,13 @@ class Api::V1::RecipesController < ApplicationController
     tag = params[:tag].presence
 
     # フォロー中タブの場合
-    if sort_order == 'following' && current_user
+    if sort_order == "following" && current_user
       following_ids = current_user.following.pluck(:id)
-      recipes = Recipe.where(is_published: true, user_id: following_ids)
-                      .includes(:user, image_attachment: :blob)
+      recipes = Recipe.where(is_published: true, user_id: following_ids).
+                  includes(:user, image_attachment: :blob)
     else
-      recipes = Recipe.where(is_published: true)
-                      .includes(:user, image_attachment: :blob)
+      recipes = Recipe.where(is_published: true).
+                  includes(:user, image_attachment: :blob)
     end
 
     if tag
@@ -117,7 +117,7 @@ class Api::V1::RecipesController < ApplicationController
       end
     end
 
-    recipes = if sort_order == 'popular'
+    recipes = if sort_order == "popular"
                 recipes.order(likes_count: :desc, created_at: :desc)
               else
                 recipes.order(created_at: :desc)
@@ -126,7 +126,7 @@ class Api::V1::RecipesController < ApplicationController
     recipes = recipes.page(params[:page]).per(12)
 
     render json: {
-      items: recipes.map { |recipe|
+      items: recipes.map {|recipe|
         {
           id: recipe.id,
           title: recipe.title,

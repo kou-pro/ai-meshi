@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // カテゴリの表示順を定義（スーパーの売り場順）
@@ -224,8 +225,8 @@ export default function ShoppingListClient({ initialItems }: Props) {
         レシピ {recipeCount}件 / 買うもの {itemCount}件
       </p>
 
-      {/* 2カラムレイアウト */}
-      <div className="grid grid-cols-[1fr_2fr] gap-6">
+      {/* レスポンシブレイアウト: モバイル縦並び / PC横並び */}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
         {/* 左カラム: 追加したレシピ一覧 */}
         <div>
           <h2 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide">
@@ -249,8 +250,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
                 </p>
                 <button
                   onClick={() => handleDeleteByRecipe(Number(recipeId))}
-                  className="mt-2 text-xs text-red-500 bg-transparent border-none cursor-pointer p-0"
+                  className="mt-2 flex items-center gap-1 text-xs text-red-500 bg-transparent border-none cursor-pointer p-0"
                 >
+                  <TrashIcon className="w-3.5 h-3.5" />
                   削除
                 </button>
               </div>
@@ -260,8 +262,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
           {/* 全削除ボタン */}
           <button
             onClick={handleDeleteAll}
-            className="mt-4 w-full py-2 text-[13px] text-gray-500 bg-transparent border border-gray-200 rounded cursor-pointer"
+            className="mt-4 w-full py-2 text-[13px] text-red-500 bg-red-50 border border-red-200 rounded cursor-pointer flex items-center justify-center gap-1.5 hover:bg-red-100"
           >
+            <TrashIcon className="w-4 h-4" />
             レシピをすべて削除
           </button>
         </div>
@@ -315,8 +318,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
           {/* チェック済み削除ボタン */}
           <button
             onClick={handleDeleteChecked}
-            className="mt-2 px-4 py-2 text-[13px] text-gray-500 bg-transparent border border-gray-200 rounded cursor-pointer"
+            className="mt-4 w-full py-2 text-[13px] text-green-600 bg-green-50 border border-green-200 rounded cursor-pointer flex items-center justify-center gap-1.5 hover:bg-green-100"
           >
+            <CheckCircleIcon className="w-4 h-4" />
             チェック済み項目を削除
           </button>
         </div>

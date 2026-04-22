@@ -1,0 +1,122 @@
+# syntax=docker/dockerfile:1
+
+# ==================================================================
+# 【Stage 1: base】共通の土台
+# 目的: 開発ツールを含まない、軽量な Ruby 実行環境を用意する
+# ==================================================================
+ARG RUBY_VERSION=3.2.10
+# --platform=linux/amd64 で ECS Fargate 対応のアーキテクチャを明示
+# （amd64 は x86_64 と同じ。Docker 公式の正式表記が amd64）
+FROM --platform=linux/amd64 ruby:${RUBY_VERSION}-slim AS base
+
+# 【作業ディレクトリ】コンテナ内でアプリを置く場所
+# /myapp ではなく /rails にする理由: Rails 7.2 公式テンプレートの慣例
+WORKDIR /rails
+
+# 【本番ランタイムに必要なパッケージのみインストール】
+#  - curl: ヘルスチェック用（ALBからの/upエンドポイント確認等）
+#  - libjemalloc2: Rubyのメモリ効率改善（標準mallocより5〜10%削減）
+#  - default-mysql-client: mysqlコマンド（トラブル時の手動接続用、サイズ小）
+# ※ libmysqlclient-dev は Stage 2 の build 側だけに入れる（実行時は不要）
+# --no-install-recommends: おまけパッケージを省く（軽量化）
+# rm -rf で apt キャッシュを消してイメージサイズ削減
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      curl \
+      libjemalloc2 \
+      default-mysql-client && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# 【本番用の環境変数】
+#  - RAILS_ENV=production: Railsを本番モードで起動
+#  - BUNDLE_DEPLOYMENT=1: Gemfile.lockと厳密一致を強制（安全）
+#  - BUNDLE_PATH: gemのインストール先を固定
+#  - BUNDLE_WITHOUT="development:test": 本番で不要なgemグループを除外
+ENV RAILS_ENV="production" \
+    BUNDLE_DEPLOYMENT="1" \
+    BUNDLE_PATH="/usr/local/bundle" \
+    BUNDLE_WITHOUT="development:test"
+
+
+# ==================================================================
+# 【Stage 2: build】ビルド専用ステージ
+# 目的: gem のコンパイル・bootsnap プリコンパイルを行う
+# ここで入れた重いパッケージは最終イメージに持ち込まない
+# ==================================================================
+FROM base AS build
+
+# 【ビルド用パッケージ】
+#  - build-essential: gcc/make 等（nokogiri等のC拡張gemビルドに必要）
+#  - default-libmysqlclient-dev: mysql2 gem のビルドに必要なヘッダー
+#  - git: GitHubから直接取得するgemがある場合に必要
+#  - pkg-config: ライブラリ検出ツール（nokogiri等で使用）
+#  - libyaml-dev: psych gem（YAML解析）のビルドに必要（slim版には含まれない）
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      default-libmysqlclient-dev \
+      git \
+      pkg-config \
+      libyaml-dev && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# 【gem のインストール】
+# Gemfileだけを先にコピーしてbundle installする理由:
+#   ソースコードが変わってもGemfile不変ならDockerキャッシュが効く
+#   → 2回目以降のビルドが劇的に高速化
+# bundle install後に不要ファイル削除でサイズ削減:
+#   - ~/.bundle/ : bundler内部キャッシュ
+#   - cache/ : ダウンロードしたgemの.gz（展開済みなので不要）
+#   - bundler/gems/*/.git : githubからのgemの.gitディレクトリ
+# bootsnap precompile --gemfile: gem読み込みの事前キャッシュ化（起動時間短縮）
+COPY Gemfile Gemfile.lock ./
+RUN bundle install && \
+    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
+    bundle exec bootsnap precompile --gemfile
+
+# 【アプリコード全体をコピー】
+# .dockerignoreで除外したもの以外を全部コピー
+COPY . .
+
+# 【bootsnapでアプリコードも事前コンパイル】
+# 初回リクエスト時の require を高速化
+RUN bundle exec bootsnap precompile app/ lib/
+
+
+# ==================================================================
+# 【Stage 3: final】最終イメージ（本番に乗る）
+# 目的: base（軽量）にbuildの成果物だけコピーした最小イメージを作る
+# ==================================================================
+FROM base
+
+# 【buildステージから成果物だけコピー】
+# gem本体（/usr/local/bundle）と、プリコンパイル済みアプリコード（/rails）
+# build-essential等の重いパッケージは持ち込まれない
+COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
+COPY --from=build /rails /rails
+
+# 【非rootユーザーの作成と権限設定】
+# セキュリティ上の理由:
+#   rootで動くコンテナに侵入されるとホストへの被害が大きい
+#   非rootなら権限が限定され、被害を最小化できる
+# UID/GID 1000 は Linuxで一般ユーザー用の慣例的な番号
+# chown対象: Railsが書き込みする必要があるディレクトリ
+RUN groupadd --system --gid 1000 rails && \
+    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+    chown -R rails:rails db log storage tmp
+USER 1000:1000
+
+# 【ENTRYPOINT】コンテナ起動時に必ず最初に実行されるコマンド
+# 既存の bin/docker-entrypoint を活用:
+#   - jemalloc を有効化
+#   - サーバー起動時は db:prepare を実行（migration自動適用）
+ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+
+# 【EXPOSE】コンテナが3000番ポートでリッスンすることを宣言
+# ※ これはドキュメント用途（実際のポートマッピングはECS Task Definitionで定義）
+EXPOSE 3000
+
+# 【CMD】ENTRYPOINTに渡される引数（= デフォルトで起動するコマンド）
+# -b 0.0.0.0: 全ネットワークインターフェースで受け付ける
+#   （コンテナ外部からアクセス可能にするために必須）
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]

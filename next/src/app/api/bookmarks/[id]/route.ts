@@ -5,7 +5,7 @@ const RAILS_URL = process.env.RAILS_API_URL
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
   const cookieStore = await cookies()

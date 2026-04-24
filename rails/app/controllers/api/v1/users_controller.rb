@@ -9,7 +9,7 @@ module Api
           name: current_user.name,
           email: current_user.email,
           image_url: if current_user.image.attached?
-                       rails_blob_url(current_user.image, host: ENV.fetch("RAILS_PUBLIC_URL", "http://localhost:3000"))
+                       rails_blob_url(current_user.image, host: ENV.fetch("RAILS_PUBLIC_URL"))
                      else
                        nil
                      end,
@@ -30,7 +30,7 @@ module Api
           name: current_user.name,
           email: current_user.email,
           image_url: if current_user.image.attached?
-                       rails_blob_url(current_user.image, host: ENV.fetch("RAILS_PUBLIC_URL", "http://localhost:3000"))
+                       rails_blob_url(current_user.image, host: ENV.fetch("RAILS_PUBLIC_URL"))
                      else
                        nil
                      end,
@@ -44,7 +44,7 @@ module Api
           {
             id: u.id,
             name: u.name,
-            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL", "http://localhost:3000")) : nil,
+            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL")) : nil,
           }
         }
       end
@@ -56,7 +56,7 @@ module Api
           {
             id: u.id,
             name: u.name,
-            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL", "http://localhost:3000")) : nil,
+            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL")) : nil,
           }
         }
       end
@@ -92,7 +92,7 @@ module Api
               id: r.id,
               title: r.title,
               is_published: r.is_published,
-              image_url: r.image.attached? ? rails_blob_url(r.image, host: ENV.fetch("RAILS_PUBLIC_URL", "http://localhost:3000")) : nil,
+              image_url: r.image.attached? ? rails_blob_url(r.image, host: ENV.fetch("RAILS_PUBLIC_URL")) : nil,
               created_at: r.created_at,
               likes_count: r.likes.count,
             }

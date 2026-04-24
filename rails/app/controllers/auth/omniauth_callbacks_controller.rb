@@ -2,7 +2,7 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
   def passthru
     # ▼ Googleの認証URLを直接生成してリダイレクト
     client_id = ENV.fetch("GOOGLE_CLIENT_ID", nil)
-    redirect_uri = "http://localhost:3000/omniauth/google_oauth2/callback"
+    redirect_uri = "#{ENV.fetch('RAILS_PUBLIC_URL')}/omniauth/google_oauth2/callback"
     scope = "email profile"
 
     google_auth_url = "https://accounts.google.com/o/oauth2/auth?" \
@@ -26,7 +26,7 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       uid          = URI.encode_www_form_component(@resource.uid)
 
       redirect_to(
-        "http://localhost:8000/api/auth/google/callback?" \
+        "#{ENV.fetch('FRONT_DOMAIN')}/api/auth/google/callback?" \
         "access-token=#{access_token}" \
         "&client=#{client}" \
         "&uid=#{uid}",
@@ -34,7 +34,7 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       )
     else
       redirect_to(
-        "http://localhost:8000/login?error=auth_failed",
+        "#{ENV.fetch('FRONT_DOMAIN')}/login?error=auth_failed",
         allow_other_host: true,
       )
     end

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
@@ -12,7 +12,7 @@ type UserItem = {
   image_url: string | null
 }
 
-export default function FollowsPage() {
+function FollowsPageContent() {
   const params = useParams()
   const searchParams = useSearchParams()
   const userId = params.id as string
@@ -112,5 +112,13 @@ export default function FollowsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function FollowsPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-6" />}>
+      <FollowsPageContent />
+    </Suspense>
   )
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function PasswordResetEditPage() {
+function PasswordResetEditPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -94,5 +94,13 @@ export default function PasswordResetEditPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function PasswordResetEditPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <PasswordResetEditPageContent />
+    </Suspense>
   )
 }

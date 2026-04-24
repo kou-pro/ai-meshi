@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { GoogleLoginButton } from '@/components/GoogleLoginButton'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -24,7 +24,7 @@ type Tag = {
 
 type ModalType = 'login' | null
 
-export default function TopPage() {
+function TopPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -341,5 +341,13 @@ export default function TopPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function TopPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <TopPageContent />
+    </Suspense>
   )
 }

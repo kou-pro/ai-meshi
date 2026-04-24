@@ -1,33 +1,31 @@
-# ============================================
-# Next.js 公式 with-docker example ベース
-# ============================================
-
-# dependencies（ビルド時に npm ci で再インストールされる）
-node_modules
-.pnp
+# Dependencies (installed inside the image, never copy from host)
+node_modules/
+.pnp/
 .pnp.js
+.pnpm-store/
 
-# testing
-coverage
+# Next.js build output (generated during the image build)
+.next/
+out/
+dist/
+build/
+.vercel/
 
-# next.js（ビルド時に再生成される）
-.next
-out
+# Testing (not needed in the production image)
+coverage/
+.nyc_output/
+__tests__/
+__mocks__/
+jest/
+cypress/
+playwright-report/
+test-results/
+.vitest/
 
-# production
-build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# local env files（機密情報漏洩防止）
-# ⚠️ .env.production は Docker ビルド時に必要なため除外しない
+# Environment files (avoid leaking secrets into the build context)
+# ⚠️ .env.production is NOT excluded because NEXT_PUBLIC_*
+#    variables must be baked into the build
+.env
 .env.local
 .env.development
 .env.development.local
@@ -35,33 +33,42 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# vercel
-.vercel
+# Debug and log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# IDE and editor files
+.vscode/
+.idea/
+.cursor/
+.cursorrules
+.copilot/
+*.swp
+*.swo
+*~
 
-# git
-.git
+# Git
+.git/
 .gitignore
 .gitattributes
 
-# docker（Dockerfile 自体はコンテキストから除外）
-Dockerfile
-Dockerfile.prod
+# Docker files (reduce build context; not needed inside the image)
+Dockerfile*
 .dockerignore
+docker-compose*.yml
+compose*.yaml
 
-# editor / IDE
-.vscode
-.idea
-*.swp
-*.swo
-.cursor
+# Documentation (not needed in the image)
+*.md
+docs/
 
-# documentation
-README.md
-CHANGELOG.md
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts
 
 # GitHub / CI
-.github
+.github/

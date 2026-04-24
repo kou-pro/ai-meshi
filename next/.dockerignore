@@ -1,0 +1,67 @@
+# ============================================
+# Next.js 公式 with-docker example ベース
+# ============================================
+
+# dependencies（ビルド時に npm ci で再インストールされる）
+node_modules
+.pnp
+.pnp.js
+
+# testing
+coverage
+
+# next.js（ビルド時に再生成される）
+.next
+out
+
+# production
+build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files（機密情報漏洩防止）
+# ⚠️ .env.production は Docker ビルド時に必要なため除外しない
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# git
+.git
+.gitignore
+.gitattributes
+
+# docker（Dockerfile 自体はコンテキストから除外）
+Dockerfile
+Dockerfile.prod
+.dockerignore
+
+# editor / IDE
+.vscode
+.idea
+*.swp
+*.swo
+.cursor
+
+# documentation
+README.md
+CHANGELOG.md
+
+# GitHub / CI
+.github

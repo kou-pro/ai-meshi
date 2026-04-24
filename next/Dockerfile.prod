@@ -1,33 +1,43 @@
 # ============================================
 # Stage 1: Dependencies Installation
 # ============================================
-FROM --platform=linux/amd64 node:20-alpine AS deps
+# Node.js 24 slim (latest LTS at time of writing)
+# Check latest LTS at https://nodejs.org/ and update NODE_VERSION
+ARG NODE_VERSION=24.13.0-slim
+FROM node:${NODE_VERSION} AS dependencies
 
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Copy package files to leverage Docker cache
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+
+# Install dependencies with BuildKit cache mount for speed
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
 
 # ============================================
 # Stage 2: Build Next.js application
 # ============================================
-FROM --platform=linux/amd64 node:20-alpine AS builder
+FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /app
 
-COPY --from=deps /app/node_modules ./node_modules
+# Copy installed dependencies
+COPY --from=dependencies /app/node_modules ./node_modules
+
+# Copy source code
 COPY . .
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Build the Next.js app in standalone mode
 RUN npm run build
 
 # ============================================
-# Stage 3: Production Runner
+# Stage 3: Run Next.js application
 # ============================================
-FROM --platform=linux/amd64 node:20-alpine AS runner
+FROM node:${NODE_VERSION} AS runner
 
 WORKDIR /app
 
@@ -36,17 +46,23 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# 非rootユーザー作成（セキュリティ）
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Copy production assets
+COPY --from=builder --chown=node:node /app/public ./public
 
-# standalone モードの成果物をコピー
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Create .next directory with correct permissions
+# Required for Next.js runtime to write prerender cache and optimized images
+RUN mkdir .next
+RUN chown node:node .next
 
-USER nextjs
+# Automatically leverage output traces to reduce image size
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
+# Switch to non-root user for security best practices
+USER node
+
+# Expose port 3000
 EXPOSE 3000
 
+# Start Next.js standalone server
 CMD ["node", "server.js"]

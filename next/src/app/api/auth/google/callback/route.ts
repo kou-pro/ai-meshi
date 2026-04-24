@@ -8,13 +8,12 @@ export async function GET(request: NextRequest) {
 
   if (!accessToken || !client || !uid) {
     return NextResponse.redirect(
-      new URL('/login?error=auth_failed', 'http://localhost:8000'),
+      new URL('/login?error=auth_failed', process.env.NEXT_PUBLIC_APP_URL),
     )
   }
 
-  // ▼ Next.jsのURL（localhost:8000）を明示的に指定
   const response = NextResponse.redirect(
-    new URL('/home', 'http://localhost:8000'),
+    new URL('/home', process.env.NEXT_PUBLIC_APP_URL),
   )
 
   const cookieOptions = {

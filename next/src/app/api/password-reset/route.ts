@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({
       email: body.email,
-      redirect_url: 'http://localhost:8000/password-reset/edit',
+      redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/password-reset/edit`,
     }),
   })
 

@@ -182,7 +182,7 @@ export default function EditRecipePage() {
             <img
               src={currentImageUrl.replace(
                 'http://rails:3000',
-                process.env.NEXT_PUBLIC_RAILS_URL || 'http://localhost:3000',
+                process.env.NEXT_PUBLIC_RAILS_URL,
               )}
               alt="現在の画像"
               className="w-full h-[200px] object-cover rounded-lg"

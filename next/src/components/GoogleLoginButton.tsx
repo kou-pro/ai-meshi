@@ -5,7 +5,7 @@ export function GoogleLoginButton() {
     // ▼ RailsのOmniAuth認証エンドポイントへ直接リダイレクト
     // Next.jsを経由せずブラウザがRailsへ直接アクセスする
     // これによりRailsがGoogleの認証画面へリダイレクトしてくれる
-    window.location.href = 'http://localhost:3000/omniauth/google_oauth2'
+    window.location.href = `${process.env.NEXT_PUBLIC_RAILS_URL}/omniauth/google_oauth2`
   }
   return (
     <button

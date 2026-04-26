@@ -76,10 +76,5 @@ DeviseTokenAuth.setup do |config|
   config.require_client_password_reset_token = true
 end
 
-# ▼ CSRF検証を無効化（APIモードでセッションが使えないため）
-OmniAuth.config.before_callback_phase do |env|
-  env["omniauth.state"] = env.dig("rack.request.query_hash", "state")
-end
-
 OmniAuth.config.allowed_request_methods = [:get, :post]
 OmniAuth.config.silence_get_warning = true

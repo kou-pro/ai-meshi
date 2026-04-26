@@ -1,17 +1,9 @@
 class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksController
+  # OmniAuth 標準パスへ転送し、state 生成・session 保存・Google リダイレクトを
+  # OmniAuth middleware に委譲する。
+  # 参考: https://github.com/lynndylanhurley/devise_token_auth/issues/1020
   def passthru
-    # ▼ Googleの認証URLを直接生成してリダイレクト
-    client_id = ENV.fetch("GOOGLE_CLIENT_ID", nil)
-    redirect_uri = "#{ENV.fetch('RAILS_PUBLIC_URL')}/omniauth/google_oauth2/callback"
-    scope = "email profile"
-
-    google_auth_url = "https://accounts.google.com/o/oauth2/auth?" \
-                      "client_id=#{client_id}" \
-                      "&redirect_uri=#{CGI.escape(redirect_uri)}" \
-                      "&response_type=code" \
-                      "&scope=#{CGI.escape(scope)}"
-
-    redirect_to google_auth_url, allow_other_host: true
+    redirect_to "/auth/google_oauth2"
   end
 
   def omniauth_success

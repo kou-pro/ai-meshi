@@ -10,17 +10,34 @@ class User < ApplicationRecord
 
   include DeviseTokenAuth::Concerns::User
 
-  # ▼ Googleから返ってきた情報でユーザーを作成 or 取得するメソッド
+  # OmniAuth コールバックから User を取得 or 作成する。
+  #
+  # 1. provider + uid で既存連携済みユーザーを検索（最優先）
+  # 2. email_verified=true のときに限り、同じ email の既存ユーザーと自動連携
+  #    （メール+パスワード登録 → Google ログインへの統合シナリオ）
+  # 3. それ以外は新規作成
+  #
+  # email_verified=false の場合に自動連携しないのは、未確認 email を使った
+  # アカウント乗っ取りリスクを排除するため。Google 個人アカウントは通常 true。
   def self.from_omniauth(auth)
-    # ▼ Google の uid + provider の組み合わせでユーザーを検索
-    # 存在しなければ新規作成する
-    find_or_create_by!(provider: auth.provider, uid: auth.uid) do |user|
-      user.email = auth.info.email
-      user.name = auth.info.name if user.respond_to?(:name)
-      # ▼ OmniAuthログインではパスワード不要なのでランダム生成
-      user.password = Devise.friendly_token[0, 20]
-      user.skip_confirmation!
+    user = find_by(provider: auth.provider, uid: auth.uid)
+    return user if user
+
+    if auth.dig("extra", "raw_info", "email_verified") && auth.info.email.present?
+      user = find_by(email: auth.info.email)
+      if user
+        user.update!(provider: auth.provider, uid: auth.uid)
+        return user
+      end
     end
+
+    create!(
+      provider: auth.provider,
+      uid: auth.uid,
+      email: auth.info.email,
+      name: auth.info.name,
+      password: Devise.friendly_token[0, 20],
+    ).tap(&:skip_confirmation!)
   end
 
   has_one_attached :image

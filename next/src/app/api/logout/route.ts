@@ -1,9 +1,16 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 export async function POST() {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    // ▼ env 未設定時は Rails 通知をスキップするだけで、Cookie 削除は続行する
+    // ログアウト処理はユーザー保護のため必ず完了させる
+    console.error('RAILS_API_URL is not set, skipping Rails sign_out')
+  }
+
   // ▼ サーバーサイドでCookieを読み取る
   // Route HandlerはサーバーサイドなのでHTTPOnly Cookieにアクセスできる
   const cookieStore = await cookies()
@@ -14,7 +21,7 @@ export async function POST() {
   // ▼ トークンが存在する場合のみRailsにサインアウトを通知する
   // これをしないとRails側でトークンが有効なまま残り、
   // 古いトークンで不正アクセスされるリスクが残る
-  if (accessToken && client && uid) {
+  if (RAILS_URL && accessToken && client && uid) {
     try {
       await fetch(`${RAILS_URL}/auth/sign_out`, {
         method: 'DELETE',

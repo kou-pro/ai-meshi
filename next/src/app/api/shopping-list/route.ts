@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 // 共通: Cookieからトークンを取得する
 async function getAuthHeaders() {
@@ -14,6 +14,15 @@ async function getAuthHeaders() {
 
 // 買い物リスト追加
 export async function POST(request: NextRequest) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const body = await request.json()
   const { recipe_id, ingredients, force } = body
   const { accessToken, client, uid } = await getAuthHeaders()
@@ -39,6 +48,15 @@ export async function POST(request: NextRequest) {
 
 // 買い物リスト取得
 export async function GET() {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const { accessToken, client, uid } = await getAuthHeaders()
 
   if (!accessToken || !client || !uid) {
@@ -61,6 +79,15 @@ export async function GET() {
 
 // チェック状態の更新
 export async function PATCH(request: NextRequest) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const body = await request.json()
   const { id, is_checked } = body
   const { accessToken, client, uid } = await getAuthHeaders()
@@ -89,6 +116,15 @@ export async function PATCH(request: NextRequest) {
 
 // 削除（1件・レシピごと・チェック済み）
 export async function DELETE(request: NextRequest) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const body = await request.json()
   const { type, id, recipe_id } = body
   const { accessToken, client, uid } = await getAuthHeaders()

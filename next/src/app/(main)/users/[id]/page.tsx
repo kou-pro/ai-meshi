@@ -24,11 +24,17 @@ type UserRecipesResponse = {
   recipes: Recipe[]
 }
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 async function fetchUserRecipes(
   id: string,
 ): Promise<UserRecipesResponse | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return null
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value
@@ -56,6 +62,12 @@ async function fetchUserRecipes(
 }
 
 async function fetchCurrentUserId(): Promise<number | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return null
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value

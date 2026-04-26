@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import RecipeCard from '@/components/RecipeCard'
 
+export const dynamic = 'force-dynamic'
+
 type Recipe = {
   id: number
   title: string
@@ -16,6 +18,12 @@ type Recipe = {
 }
 
 async function fetchSavedRecipes(): Promise<Recipe[]> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return []
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value
@@ -26,7 +34,7 @@ async function fetchSavedRecipes(): Promise<Recipe[]> {
     redirect('/login')
   }
 
-  const res = await fetch('http://rails:3000/api/v1/bookmarks', {
+  const res = await fetch(`${RAILS_URL}/api/v1/bookmarks`, {
     headers: {
       'access-token': accessToken,
       client: client,

@@ -47,9 +47,15 @@ type Comment = {
   }
 }
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return null
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value
@@ -76,6 +82,12 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
 }
 
 async function fetchComments(id: string): Promise<Comment[]> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return []
+  }
+
   const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}/comments`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
@@ -90,6 +102,12 @@ async function fetchCurrentUserId(
   client: string,
   uid: string,
 ): Promise<number | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return null
+  }
+
   const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
     method: 'GET',
     headers: {

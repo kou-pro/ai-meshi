@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const body = await request.json()
 
   const res = await fetch(`${RAILS_URL}/auth/password`, {

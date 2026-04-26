@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 // コメント一覧取得
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ recipeId: string }> },
 ) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const { recipeId } = await params
 
   const res = await fetch(
@@ -30,6 +39,15 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ recipeId: string }> },
 ) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   const { recipeId } = await params
 
   const cookieStore = await cookies()

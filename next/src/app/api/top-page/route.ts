@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   // 人気レシピと人気タグを並行取得
   const [popularRes, tagsRes] = await Promise.all([
     fetch(`${RAILS_URL}/api/v1/recipes/popular`, { cache: 'no-store' }),

@@ -4,7 +4,15 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { LogoutButton } from '@/components/LogoutButton'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProtectedPage() {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    throw new Error('Server configuration error')
+  }
+
   const cookieStore = await cookies()
 
   const accessToken = cookieStore.get('access-token')?.value
@@ -18,7 +26,7 @@ export default async function ProtectedPage() {
     redirect('/login')
   }
 
-  const res = await fetch('http://rails:3000/api/v1/users/me', {
+  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
     cache: 'no-store',
     headers: {
       'access-token': accessToken,

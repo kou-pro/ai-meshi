@@ -2,6 +2,8 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import ShoppingListClient from '@/components/ShoppingListClient'
 
+export const dynamic = 'force-dynamic'
+
 type ShoppingListItem = {
   id: number
   ingredient_name: string
@@ -13,6 +15,12 @@ type ShoppingListItem = {
 }
 
 async function fetchShoppingList(): Promise<ShoppingListItem[]> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return []
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value
@@ -20,7 +28,7 @@ async function fetchShoppingList(): Promise<ShoppingListItem[]> {
 
   if (!accessToken || !client || !uid) return []
 
-  const res = await fetch('http://rails:3000/api/v1/shopping_list_items', {
+  const res = await fetch(`${RAILS_URL}/api/v1/shopping_list_items`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

@@ -1,13 +1,19 @@
 import HomeFeed from '@/components/HomeFeed'
 import { cookies } from 'next/headers'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 type SearchParams = {
   tag?: string
 }
 
 async function fetchInitialRecipes(tag?: string) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return { items: [], has_next_page: false }
+  }
+
   const tagParam = tag ? `&tag=${encodeURIComponent(tag)}` : ''
   const res = await fetch(
     `${RAILS_URL}/api/v1/recipes/published?sort=newest&page=1${tagParam}`,

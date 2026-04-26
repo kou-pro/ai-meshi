@@ -1,9 +1,18 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-const RAILS_URL = process.env.RAILS_API_URL
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return NextResponse.json(
+      { error: 'Server configuration error' },
+      { status: 500 },
+    )
+  }
+
   // ① リクエストボディから食材・選択条件を取り出す
   const body = await request.json()
   const { ingredients, servings, genre, scene, conditions, is_published } = body // ← is_published を追加

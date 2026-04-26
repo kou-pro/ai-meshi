@@ -2,9 +2,13 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { HomeIcon, SparklesIcon, ShoppingCartIcon, BookmarkIcon, UserIcon } from '@heroicons/react/24/outline'
 
-const RAILS_URL = process.env.RAILS_API_URL
-
 async function fetchCurrentUserId(): Promise<number | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) {
+    console.error('RAILS_API_URL is not set in environment variables')
+    return null
+  }
+
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
   const client = cookieStore.get('client')?.value

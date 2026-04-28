@@ -23,6 +23,34 @@ Rails.application.configure do
   config.log_tags = [:request_id]
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.action_mailer.perform_caching = false
+
+  # === Gmail SMTP メール配信設定 ===
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+
+  # 送信元アドレス（credentials の Gmail を使用）
+  config.action_mailer.default_options = {
+    from: Rails.application.credentials.gmail.user_name
+  }
+
+  # メール内のURL生成に使われるホスト名（devise_token_auth の確認URL等）
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch("RAILS_PUBLIC_URL").sub(%r{\Ahttps?://}, ""),
+    protocol: "https"
+  }
+
+  # Gmail SMTP 接続設定
+  config.action_mailer.smtp_settings = {
+    address:              "smtp.gmail.com",
+    port:                 587,
+    domain:               "gmail.com",
+    user_name:            Rails.application.credentials.gmail.user_name,
+    password:             Rails.application.credentials.gmail.password,
+    authentication:       :plain,
+    enable_starttls_auto: true,
+  }
+
   config.i18n.fallbacks = true
   config.active_support.report_deprecations = false
   config.active_record.dump_schema_after_migration = false

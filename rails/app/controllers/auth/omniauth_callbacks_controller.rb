@@ -18,7 +18,7 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       uid          = URI.encode_www_form_component(@resource.uid)
 
       redirect_to(
-        "#{ENV.fetch('FRONT_DOMAIN')}/api/auth/google/callback?" \
+        "#{ENV.fetch("FRONT_DOMAIN")}/api/auth/google/callback?" \
         "access-token=#{access_token}" \
         "&client=#{client}" \
         "&uid=#{uid}",
@@ -26,7 +26,7 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       )
     else
       redirect_to(
-        "#{ENV.fetch('FRONT_DOMAIN')}/login?error=auth_failed",
+        "#{ENV.fetch("FRONT_DOMAIN")}/login?error=auth_failed",
         allow_other_host: true,
       )
     end

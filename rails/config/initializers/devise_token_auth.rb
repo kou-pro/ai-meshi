@@ -71,7 +71,7 @@ DeviseTokenAuth.setup do |config|
   # send email, set it to true. (This is a setting for compatibility)
   config.send_confirmation_email = true
 
-  config.default_confirm_success_url = "#{ENV.fetch('FRONT_DOMAIN')}/login"
+  config.default_confirm_success_url = "#{ENV.fetch('FRONT_DOMAIN')}/api/auth/confirmation/callback"
   config.default_password_reset_url = "#{ENV.fetch('FRONT_DOMAIN')}/password-reset/edit"
   config.require_client_password_reset_token = true
 end

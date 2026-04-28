@@ -1,7 +1,12 @@
 name: Continuous Integration
 on:
+  # main ブランチへの push 時は cd.yml が CI を呼び出すので二重実行を防止
   push:
+    branches-ignore:
+      - "main"
   pull_request:
+  # cd.yml の jobs.ci.uses から呼び出されるための定義
+  workflow_call:
 jobs:
   rspec:
     runs-on: ubuntu-latest

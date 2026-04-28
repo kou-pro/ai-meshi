@@ -30,4 +30,4 @@ User.find_or_create_by!(email: guest_email) do |user|
   user.skip_confirmation!
 end
 
-puts "✓ Guest user ready: #{guest_email}"
+Rails.logger.debug { "✓ Guest user ready: #{guest_email}" }

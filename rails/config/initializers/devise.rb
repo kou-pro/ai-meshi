@@ -151,7 +151,9 @@ Devise.setup do |config|
   # their account can't be confirmed with the token any more.
   # Default is nil, meaning there is no restriction on how long a user can take
   # before confirming their account.
-  # config.confirm_within = 3.days
+  # OWASP 推奨に従い、確認リンクの寿命を 24 時間に制限。
+  # トークン盗難・メール転送等のリスクを軽減する。
+  config.confirm_within = 24.hours
 
   # If true, requires any email changes to be confirmed (exactly the same way as
   # initial account confirmation) to be applied. Requires additional unconfirmed_email

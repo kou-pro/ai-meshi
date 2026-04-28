@@ -1,12 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { GoogleLoginButton } from '@/components/GoogleLoginButton'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const confirmationError = searchParams.get('confirmation_error') === 'true'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -56,6 +58,18 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           ログイン
         </h1>
+
+        {confirmationError && (
+          <div className="bg-red-50 border border-red-200 rounded p-3 mb-4">
+            <p className="text-sm text-red-700 leading-relaxed">
+              メールアドレスの認証に失敗しました。
+              <br />
+              リンクの有効期限が切れているか、すでに使用済みの可能性があります。
+              <br />
+              改めて新規登録 or 確認メールの再送をお試しください。
+            </p>
+          </div>
+        )}
 
         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
@@ -125,5 +139,19 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-gray-500">読み込み中...</div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   )
 }

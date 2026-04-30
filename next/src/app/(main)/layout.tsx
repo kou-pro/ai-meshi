@@ -26,7 +26,7 @@ export default function MainLayout({
           <Cog6ToothIcon className="w-6 h-6" />
         </Link>
       </header>
-      {children}
+      <main className="pb-20 md:pb-0">{children}</main>
       <MobileNav />
     </>
   )

@@ -1,10 +1,9 @@
-'use client'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { getCurrentUserId } from '@/lib/getCurrentUser'
+import FollowsClient from './FollowsClient'
 
-import { Suspense, useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
-import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
-import FollowButton from '@/components/FollowButton'
+export const dynamic = 'force-dynamic'
 
 type UserItem = {
   id: number
@@ -12,113 +11,75 @@ type UserItem = {
   image_url: string | null
 }
 
-function FollowsPageContent() {
-  const params = useParams()
-  const searchParams = useSearchParams()
-  const userId = params.id as string
+/** Rails API から指定タブのユーザーリストを取得（Server-side） */
+async function fetchUsersByTab(
+  userId: string,
+  tab: 'following' | 'followers',
+): Promise<UserItem[]> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) return []
 
-  const initialTab = searchParams.get('tab') === 'followers' ? 'followers' : 'following'
-  const [activeTab, setActiveTab] = useState<'following' | 'followers'>(initialTab)
-  const [users, setUsers] = useState<UserItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const client = cookieStore.get('client')?.value
+  const uid = cookieStore.get('uid')?.value
+  if (!accessToken || !client || !uid) return []
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const res = await fetchWithAuthClient('/api/auth/me')
-      if (res.ok) {
-        const data = await res.json()
-        setCurrentUserId(data.id)
-      }
-    }
-    fetchCurrentUser()
-  }, [])
+  const res = await fetch(`${RAILS_URL}/api/v1/users/${userId}/${tab}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'access-token': accessToken,
+      client: client,
+      uid: uid,
+    },
+    cache: 'no-store',
+  })
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoading(true)
-      const res = await fetchWithAuthClient(`/api/users/${userId}/${activeTab}`)
-      if (res.ok) {
-        const data = await res.json()
-        setUsers(data)
-      }
-      setIsLoading(false)
-    }
-    fetchUsers()
-  }, [userId, activeTab])
-
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      {/* タブ切り替え */}
-      <div className="flex border-b border-gray-200 mb-6">
-        <button
-          onClick={() => setActiveTab('following')}
-          className={`flex-1 py-3 text-center text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'following'
-              ? 'border-green-600 text-green-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          フォロー中
-        </button>
-        <button
-          onClick={() => setActiveTab('followers')}
-          className={`flex-1 py-3 text-center text-sm font-medium border-b-2 transition-colors ${
-            activeTab === 'followers'
-              ? 'border-green-600 text-green-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          フォロワー
-        </button>
-      </div>
-
-      {/* ユーザー一覧 */}
-      {isLoading ? (
-        <p className="text-center text-gray-500">読み込み中...</p>
-      ) : users.length === 0 ? (
-        <p className="text-center text-gray-500">
-          {activeTab === 'following' ? 'フォロー中のユーザーはいません' : 'フォロワーはいません'}
-        </p>
-      ) : (
-        <div className="space-y-4">
-          {users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between">
-              <Link
-                href={`/users/${user.id}`}
-                className="flex items-center gap-3 hover:opacity-80"
-              >
-                {user.image_url ? (
-                  <img
-                    src={user.image_url}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-                    👤
-                  </div>
-                )}
-                <span className="text-sm font-medium">{user.name}</span>
-              </Link>
-              {currentUserId !== user.id && (
-                <FollowButton
-                  targetUserId={user.id}
-                  initialIsFollowing={activeTab === 'following'}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
+  if (!res.ok) return []
+  return res.json()
 }
 
-export default function FollowsPage() {
+/**
+ * フォロー/フォロワー一覧ページ（Server Component）。
+ *
+ * # 設計
+ * - 現在ログイン中のユーザー ID と初期タブのユーザーリストを Server で取得。
+ * - クライアント (FollowsClient) には props として渡す。
+ *
+ * # 旧版の問題
+ * `'use client'` の本ページが `useEffect` 内で `/api/auth/me` を fetch して
+ * `currentUserId` を取得していた。新規登録直後の Cookie 伝搬タイミングで
+ * 401 になり「自分自身に対するフォローボタン非表示」のロジックが崩れる
+ * 不具合があった。
+ */
+export default async function FollowsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const { id: userId } = await params
+  const { tab } = await searchParams
+
+  const initialTab: 'following' | 'followers' =
+    tab === 'followers' ? 'followers' : 'following'
+
+  // ログイン必須ページ
+  const currentUserId = await getCurrentUserId()
+  if (currentUserId === null) {
+    redirect('/login')
+  }
+
+  // 初期表示分のユーザーリストを Server で取得（チラつき防止）
+  const initialUsers = await fetchUsersByTab(userId, initialTab)
+
   return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto p-6" />}>
-      <FollowsPageContent />
-    </Suspense>
+    <FollowsClient
+      profileUserId={userId}
+      currentUserId={currentUserId}
+      initialTab={initialTab}
+      initialUsers={initialUsers}
+    />
   )
 }

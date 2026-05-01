@@ -3,21 +3,27 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
-export default function UserMenu() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [userId, setUserId] = useState<number | null>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+type Props = {
+  /** 現在ログイン中のユーザー ID。null = 未ログイン */
+  userId: number | null
+}
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch('/api/auth/me')
-      if (res.ok) {
-        const data = await res.json()
-        setUserId(data.id)
-      }
-    }
-    fetchUser()
-  }, [])
+/**
+ * 「マイページ ▼」ドロップダウン。
+ *
+ * # 設計
+ * - 認証情報の取得は Server Component (Navbar) 側で実行し、props で受け取る。
+ * - 本コンポーネントは UI 状態（開閉）と外クリック検知だけを担う。
+ *
+ * # 旧バージョンの問題
+ * 以前は `useEffect` 内で `/api/auth/me` を fetch していたため、
+ * 新規登録直後の Cookie 伝搬タイミングによっては 401 となり、
+ * userId が null のまま「マイレシピ / フォロー/フォロワー」が消えるバグがあった。
+ * Server-side 取得 + props 受け渡しに変更したことでこの問題は解消。
+ */
+export default function UserMenu({ userId }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // メニュー外クリックで閉じる
   useEffect(() => {
@@ -41,7 +47,7 @@ export default function UserMenu() {
 
       {isOpen && (
         <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50">
-          {userId && (
+          {userId !== null && (
             <Link
               href={`/users/${userId}`}
               onClick={() => setIsOpen(false)}
@@ -50,7 +56,7 @@ export default function UserMenu() {
               マイレシピ
             </Link>
           )}
-          {userId && (
+          {userId !== null && (
             <Link
               href={`/users/${userId}/follows`}
               onClick={() => setIsOpen(false)}

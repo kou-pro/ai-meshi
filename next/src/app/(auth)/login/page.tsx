@@ -3,12 +3,14 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { GoogleLoginButton } from '@/components/GoogleLoginButton'
+import { getSafeNextPath } from '@/lib/redirect'
 import Link from 'next/link'
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const confirmationError = searchParams.get('confirmation_error') === 'true'
+  const nextPath = getSafeNextPath(searchParams.get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -47,9 +49,9 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md relative">
-        {/* ×ボタン */}
+        {/* ×ボタン: ?next= が指定されていれば元のページに戻る */}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push(nextPath)}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"
         >
           ✕
@@ -133,7 +135,10 @@ function LoginContent() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           アカウントをお持ちでない方は
-          <Link href="/signup" className="text-green-600 hover:underline ml-1">
+          <Link
+            href={`/signup?next=${encodeURIComponent(nextPath)}`}
+            className="text-green-600 hover:underline ml-1"
+          >
             新規登録
           </Link>
         </p>

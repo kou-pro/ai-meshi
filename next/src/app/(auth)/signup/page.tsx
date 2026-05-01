@@ -1,11 +1,14 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { getSafeNextPath } from '@/lib/redirect'
 import Link from 'next/link'
 
-export default function SignupPage() {
+function SignupContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath = getSafeNextPath(searchParams.get('next'))
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,9 +37,9 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow p-8 w-full max-w-md relative">
-        {/* ×ボタン */}
+        {/* ×ボタン: ?next= が指定されていれば元のページに戻る */}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push(nextPath)}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"
         >
           ✕
@@ -108,12 +111,29 @@ export default function SignupPage() {
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-500">
             すでにアカウントをお持ちですか？
-            <Link href="/login" className="text-green-600 hover:underline ml-1">
+            <Link
+              href={`/login?next=${encodeURIComponent(nextPath)}`}
+              className="text-green-600 hover:underline ml-1"
+            >
               ログイン
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-gray-500">読み込み中...</div>
+        </div>
+      }
+    >
+      <SignupContent />
+    </Suspense>
   )
 }

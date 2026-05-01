@@ -25,8 +25,8 @@ export default async function MainLayout({
           <Image
             src="/logo.png"
             alt="AI飯"
-            width={120}
-            height={40}
+            width={800}
+            height={436}
             className="w-auto h-14"
           />
         </Link>

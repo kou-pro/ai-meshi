@@ -20,8 +20,8 @@ export default async function Navbar() {
           <Image
             src="/logo.png"
             alt="AI飯"
-            width={300}
-            height={100}
+            width={800}
+            height={436}
             className="w-auto h-32"
           />
         </Link>

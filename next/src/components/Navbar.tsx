@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { LogoutButton } from './LogoutButton'
 import Image from 'next/image'
 import UserMenu from './UserMenu'
+import { getCurrentUserId } from '@/lib/getCurrentUser'
 
 export default async function Navbar() {
   const cookieStore = await cookies()
@@ -11,6 +12,10 @@ export default async function Navbar() {
   const uid = cookieStore.get('uid')?.value
 
   const isLoggedIn = !!(accessToken && client && uid)
+  // ログイン済みなら server-side でユーザー ID を取得し、UserMenu に props で渡す。
+  // これにより Client Component 内で /api/auth/me を fetch する必要がなくなり、
+  // 401 によるドロップダウンの欠落バグを根絶できる。
+  const userId = isLoggedIn ? await getCurrentUserId() : null
 
   return (
     <nav className="hidden md:block bg-white border-b border-gray-200 px-6 py-3">
@@ -53,7 +58,7 @@ export default async function Navbar() {
               >
                 買い物リスト
               </Link>
-              <UserMenu />
+              <UserMenu userId={userId} />
               <LogoutButton />
             </>
           ) : (

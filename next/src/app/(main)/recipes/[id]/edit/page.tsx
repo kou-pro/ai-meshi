@@ -1,228 +1,87 @@
-'use client'
-import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import { toast } from 'sonner'
-import StarInput from '@/components/StarInput'
+import { cookies } from 'next/headers'
+import { notFound, redirect } from 'next/navigation'
+import EditRecipeForm from './EditRecipeForm'
 
-export default function EditRecipePage() {
-  const router = useRouter()
-  const params = useParams()
-  const id = params.id
+export const dynamic = 'force-dynamic'
 
-  const [title, setTitle] = useState('')
-  const [steps, setSteps] = useState<string[]>([''])
-  const [image, setImage] = useState<File | null>(null)
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [fetching, setFetching] = useState(true)
-  const [tasteScore, setTasteScore] = useState(0)
-  const [easeScore, setEaseScore] = useState(0)
-  const [costScore, setCostScore] = useState(0)
+type Recipe = {
+  id: number
+  title: string
+  steps: string[]
+  image_url: string | null
+  taste_score: number
+  ease_score: number
+  cost_score: number
+}
 
-  // 既存のレシピデータを取得
-  useEffect(() => {
-    const fetchRecipe = async () => {
-      const res = await fetch(`/api/recipes/${id}`, {
-        method: 'GET',
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setTitle(data.title)
-        // stepsが配列で来た場合はそのまま・空なら1つ空欄を用意
-        setSteps(
-          Array.isArray(data.steps) && data.steps.length > 0
-            ? data.steps
-            : [''],
-        )
-        // 現在画像URLを保存
-        setCurrentImageUrl(data.image_url ?? null)
-        setTasteScore(data.taste_score ?? 0)
-        setEaseScore(data.ease_score ?? 0)
-        setCostScore(data.cost_score ?? 0)
-      }
-      setFetching(false)
-    }
-    fetchRecipe()
-  }, [id])
+/** Rails API から特定レシピを取得（Server-side） */
+async function fetchRecipe(id: string): Promise<Recipe | null> {
+  const RAILS_URL = process.env.RAILS_API_URL
+  if (!RAILS_URL) return null
 
-  // 手順の変更
-  const handleStepChange = (index: number, value: string) => {
-    const newSteps = [...steps]
-    newSteps[index] = value
-    setSteps(newSteps)
+  const cookieStore = await cookies()
+  const accessToken = cookieStore.get('access-token')?.value
+  const client = cookieStore.get('client')?.value
+  const uid = cookieStore.get('uid')?.value
+  if (!accessToken || !client || !uid) return null
+
+  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'access-token': accessToken,
+      client: client,
+      uid: uid,
+    },
+    cache: 'no-store',
+  })
+
+  if (!res.ok) return null
+  return res.json()
+}
+
+/**
+ * レシピ編集ページ（Server Component）。
+ *
+ * # 設計
+ * - 編集対象のレシピを Server で取得し、Client Form に props で渡す。
+ * - クライアントは初期値をすぐに表示できる（チラつきなし）。
+ *
+ * # 旧版の問題
+ * `'use client'` の本ページが `useEffect` 内で `/api/recipes/[id]` を fetch していた。
+ * 初期表示時に `fetching` ステートで「読み込み中...」が一瞬表示されるチラつきがあった。
+ * Server-side 取得 + props 渡しに変更したことで初回 HTML から完全な状態で表示される。
+ */
+export default async function EditRecipePage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+
+  // 認証必須
+  const cookieStore = await cookies()
+  if (!cookieStore.get('access-token')?.value) {
+    redirect('/login')
   }
 
-  // 手順を追加
-  const handleAddStep = () => {
-    setSteps([...steps, ''])
+  const recipe = await fetchRecipe(id)
+  if (!recipe) {
+    notFound()
   }
-
-  // 手順を削除
-  const handleRemoveStep = (index: number) => {
-    if (steps.length === 1) return
-    const newSteps = steps.filter((_, i) => i !== index)
-    setSteps(newSteps)
-  }
-
-  // 編集を保存
-  const handleSubmit = async () => {
-    if (!title.trim()) return
-    setLoading(true)
-
-    const formData = new FormData()
-    formData.append('recipe[title]', title)
-
-    // 空の手順を除外してから送る
-    const filteredSteps = steps.map((s) => s.trim()).filter((s) => s !== '')
-    filteredSteps.forEach((step) => {
-      formData.append('recipe[steps][]', step)
-    })
-
-    if (image) {
-      formData.append('recipe[image]', image)
-    }
-
-    // formDataとスコアを別々に送る
-    // まずタイトル・手順・画像をformDataで送る
-    const res = await fetch(`/api/recipes/${id}`, {
-      method: 'PATCH',
-      body: formData,
-    })
-
-    // スコアは別途JSONで送る
-    await fetch(`/api/recipes/${id}/score`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        taste_score: tasteScore,
-        ease_score: easeScore,
-        cost_score: costScore,
-      }),
-    })
-
-    if (res.ok) {
-      router.refresh()
-      router.push(`/recipes/${id}`)
-    } else {
-      toast.error('更新に失敗しました')
-    }
-    setLoading(false)
-  }
-
-  if (fetching) return <p className="p-6">読み込み中...</p>
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">レシピを編集</h1>
-
-      {/* タイトル入力 */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          タイトル
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-      </div>
-
-      {/* 作り方（手順ごとに分割） */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          作り方
-        </label>
-        {steps.map((step, index) => (
-          <div key={index} className="flex gap-2 mb-2 items-start">
-            {/* 手順番号 */}
-            <span className="shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-2">
-              {index + 1}
-            </span>
-
-            {/* テキストエリア */}
-            <textarea
-              value={step}
-              onChange={(e) => handleStepChange(index, e.target.value)}
-              rows={2}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder={`手順${index + 1}を入力`}
-            />
-
-            {/* 削除ボタン */}
-            <button
-              onClick={() => handleRemoveStep(index)}
-              disabled={steps.length === 1}
-              className="shrink-0 px-2 py-1 rounded border border-red-300 bg-red-50 text-red-500 mt-2 text-xs disabled:opacity-50"
-            >
-              削除
-            </button>
-          </div>
-        ))}
-
-        {/* 手順追加ボタン */}
-        <button
-          onClick={handleAddStep}
-          className="mt-2 px-4 py-1.5 rounded border border-green-600 bg-green-50 text-green-600 text-[13px]"
-        >
-          ＋ 手順を追加
-        </button>
-      </div>
-
-      {/* 画像 */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          画像
-        </label>
-
-        {/* 現在の画像を表示 */}
-        {currentImageUrl && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-1.5">現在の画像</p>
-            <img
-              src={currentImageUrl.replace(
-                'http://rails:3000',
-                process.env.NEXT_PUBLIC_RAILS_URL,
-              )}
-              alt="現在の画像"
-              className="w-full h-[200px] object-cover rounded-lg"
-            />
-          </div>
-        )}
-
-        <p className="text-xs text-gray-500 mb-1.5">
-          新しい画像を選択すると差し替えられます
-        </p>
-        <input
-          type="file"
-          accept="image/png, image/jpeg"
-          onChange={(e) => setImage(e.target.files?.[0] ?? null)}
-          className="w-full border border-gray-300 rounded px-3 py-2"
-        />
-      </div>
-
-      {/* 投稿者評価 */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <h2 className="text-sm font-bold text-gray-700 mb-3">投稿者評価</h2>
-        <div className="space-y-2">
-          <StarInput
-            label="美味しさ"
-            value={tasteScore}
-            onChange={setTasteScore}
-          />
-          <StarInput label="手軽さ" value={easeScore} onChange={setEaseScore} />
-          <StarInput label="コスパ" value={costScore} onChange={setCostScore} />
-        </div>
-      </div>
-
-      {/* 保存ボタン */}
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
-      >
-        {loading ? '保存中...' : '保存する'}
-      </button>
-    </div>
+    <EditRecipeForm
+      id={id}
+      initialTitle={recipe.title}
+      initialSteps={
+        Array.isArray(recipe.steps) && recipe.steps.length > 0
+          ? recipe.steps
+          : ['']
+      }
+      initialImageUrl={recipe.image_url}
+      initialTasteScore={recipe.taste_score ?? 0}
+      initialEaseScore={recipe.ease_score ?? 0}
+      initialCostScore={recipe.cost_score ?? 0}
+    />
   )
 }

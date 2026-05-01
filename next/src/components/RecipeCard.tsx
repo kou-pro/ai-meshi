@@ -24,9 +24,10 @@ export default function RecipeCard({
   commentsCount,
 }: Props) {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       {/* 画像 */}
-      <Link href={`/recipes/${id}`}>
+      <Link href={`/recipes/${id}`} className="block shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={
             imageUrl
@@ -38,7 +39,7 @@ export default function RecipeCard({
         />
       </Link>
 
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         {/* 公開/未公開バッジ（isPublishedが渡された場合のみ表示） */}
         {isPublished !== undefined && (
           <span
@@ -48,15 +49,15 @@ export default function RecipeCard({
           </span>
         )}
 
-        {/* タイトル */}
+        {/* タイトル: 2行で固定（短い時も同じ高さ） */}
         <Link href={`/recipes/${id}`}>
-          <h2 className="text-lg font-bold text-gray-800 hover:text-green-600 mb-2">
+          <h2 className="text-lg font-bold text-gray-800 hover:text-green-600 mb-2 line-clamp-2 min-h-[3.5rem]">
             {title}
           </h2>
         </Link>
 
-        {/* フッター */}
-        <div className="flex items-center justify-between text-xs text-gray-400">
+        {/* フッター: mt-auto で下端に固定 */}
+        <div className="mt-auto flex items-center justify-between text-xs text-gray-400">
           <div>
             <Link href={`/users/${userId}`} className="hover:text-green-600">
               {userName}

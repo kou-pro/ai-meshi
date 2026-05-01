@@ -27,14 +27,14 @@ export default async function Navbar() {
         </Link>
         {/* ナビリンク */}
         <div className="flex items-center gap-6">
-          <Link
-            href="/home"
-            className="text-sm text-gray-600 hover:text-green-600"
-          >
-            ホーム
-          </Link>
           {isLoggedIn ? (
             <>
+              <Link
+                href="/home"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                ホーム
+              </Link>
               <Link
                 href="/recipes/new"
                 className="text-sm text-gray-600 hover:text-green-600"
@@ -59,16 +59,22 @@ export default async function Navbar() {
           ) : (
             <>
               <Link
+                href="/home"
+                className="text-sm text-gray-600 hover:text-green-600"
+              >
+                みんなのレシピ
+              </Link>
+              <Link
                 href="/login"
                 className="text-sm text-gray-600 hover:text-green-600"
               >
-                Login
+                ログイン
               </Link>
               <Link
                 href="/signup"
                 className="text-sm bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
               >
-                Signup
+                新規登録
               </Link>
             </>
           )}

@@ -154,12 +154,12 @@ function TopPageContent() {
 
         <div className="relative max-w-7xl mx-auto px-6 py-10 md:py-16 lg:py-20">
           <div className="max-w-[60%] md:max-w-md lg:max-w-lg">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight mb-5 [word-break:keep-all]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight mb-5 break-keep">
               <span className="text-green-600">AI</span>があなたの
               <br />
               食事をサポート
             </h1>
-            <p className="text-sm sm:text-base text-gray-900 font-medium mb-6 md:mb-8 [word-break:keep-all]">
+            <p className="text-sm sm:text-base text-gray-900 font-medium mb-6 md:mb-8 break-keep">
               食材を入力するだけで、
               <br className="md:hidden" />
               AIが最適なレシピを提案します
@@ -182,14 +182,23 @@ function TopPageContent() {
                 </button>
               </div>
 
-              {/* 区切り線 + Google ログイン */}
+              {/* 区切り線 + Google ログイン + ゲストログイン */}
               <div className="mt-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="h-px bg-gray-300 flex-1" />
                   <span className="text-xs text-gray-400">または</span>
                   <div className="h-px bg-gray-300 flex-1" />
                 </div>
-                <GoogleLoginButton />
+                <div className="space-y-3">
+                  <GoogleLoginButton />
+                  <button
+                    onClick={handleGuestLogin}
+                    disabled={guestLoading}
+                    className="w-full flex items-center justify-center px-4 py-3 bg-white border-2 border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 font-medium text-sm disabled:opacity-50"
+                  >
+                    {guestLoading ? 'ログイン中...' : 'ゲストとしてログイン'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

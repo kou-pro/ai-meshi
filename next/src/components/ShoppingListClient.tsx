@@ -3,6 +3,22 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import {
+  Carrot,
+  Apple,
+  Beef,
+  Fish,
+  Milk,
+  Egg,
+  Bean,
+  Wheat,
+  Sandwich,
+  CookingPot,
+  Leaf,
+  Package,
+  ShoppingBasket,
+  type LucideIcon,
+} from 'lucide-react'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // カテゴリの表示順を定義（スーパーの売り場順）
@@ -18,8 +34,29 @@ const CATEGORY_ORDER = [
   '主食',
   '調味料',
   '薬味',
+  'たんぱく質',
   'その他',
 ]
+
+// カテゴリ別アイコン（Lucide React）+ 緑系のテーマ色
+const CATEGORY_ICONS: Record<
+  string,
+  { Icon: LucideIcon; colorClass: string }
+> = {
+  野菜: { Icon: Carrot, colorClass: 'text-green-600' },
+  果物: { Icon: Apple, colorClass: 'text-red-500' },
+  肉類: { Icon: Beef, colorClass: 'text-rose-500' },
+  魚介: { Icon: Fish, colorClass: 'text-blue-500' },
+  乳製品: { Icon: Milk, colorClass: 'text-sky-500' },
+  卵: { Icon: Egg, colorClass: 'text-amber-500' },
+  '豆腐・大豆': { Icon: Bean, colorClass: 'text-amber-700' },
+  穀物: { Icon: Wheat, colorClass: 'text-yellow-600' },
+  主食: { Icon: Sandwich, colorClass: 'text-orange-500' },
+  調味料: { Icon: CookingPot, colorClass: 'text-amber-600' },
+  薬味: { Icon: Leaf, colorClass: 'text-emerald-600' },
+  たんぱく質: { Icon: Egg, colorClass: 'text-amber-500' },
+  その他: { Icon: Package, colorClass: 'text-gray-500' },
+}
 
 type ShoppingListItem = {
   id: number
@@ -29,6 +66,7 @@ type ShoppingListItem = {
   is_checked: boolean
   recipe_id: number
   recipe_title: string
+  recipe_image_url: string | null
 }
 
 // 同じ食材をまとめる（名前一致ベース）
@@ -79,6 +117,7 @@ export default function ShoppingListClient({ initialItems }: Props) {
       if (!acc[item.recipe_id]) {
         acc[item.recipe_id] = {
           recipe_title: item.recipe_title,
+          recipe_image_url: item.recipe_image_url,
           items: [],
         }
       }
@@ -89,6 +128,7 @@ export default function ShoppingListClient({ initialItems }: Props) {
       number,
       {
         recipe_title: string
+        recipe_image_url: string | null
         items: ShoppingListItem[]
       }
     >,
@@ -128,14 +168,12 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
   // チェック状態を更新する
   const handleCheck = async (ids: number[], checked: boolean) => {
-    // 楽観的UI: 先に画面を更新する
     setItems((prev) =>
       prev.map((item) =>
         ids.includes(item.id) ? { ...item, is_checked: checked } : item,
       ),
     )
 
-    // APIを叩く（全IDを更新）
     for (const id of ids) {
       const res = await fetchWithAuthClient('/api/shopping-list', {
         method: 'PATCH',
@@ -202,59 +240,100 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto p-6">
-        <h1 className="text-2xl font-bold mb-2">買い物リスト</h1>
-        <p className="text-gray-500 mb-4">
-          買い物リストに何も追加されていません。
-        </p>
-        <Link
-          href="/home"
-          className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
-        >
-          レシピを探して追加する
-        </Link>
+      <div className="max-w-3xl mx-auto px-6 min-h-[calc(100vh-160px)] flex flex-col justify-center md:min-h-0 md:py-8 md:block">
+        {/* タイトル: 中央寄せ */}
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-12">
+          買い物リスト
+        </h1>
+
+        {/* バスケットアイコン + メッセージ + ボタン: 縦中央 */}
+        <div className="flex flex-col items-center text-center pb-8 md:pb-0">
+          <ShoppingBasket
+            className="w-32 h-32 text-green-200"
+            strokeWidth={1.5}
+          />
+          <p className="mt-6 text-gray-500 text-sm leading-relaxed">
+            買い物リストに
+            <br className="sm:hidden" />
+            何も追加されていません
+          </p>
+          <Link
+            href="/home"
+            className="mt-8 inline-block bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-sm"
+          >
+            レシピを探して追加する
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* ヘッダー */}
-      <h1 className="text-2xl font-bold mb-1">買い物リスト</h1>
-      <p className="text-gray-500 mb-6 text-sm">
-        レシピ {recipeCount}件 / 買うもの {itemCount}件
-      </p>
-
-      {/* レスポンシブレイアウト: モバイル縦並び / PC横並び */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
-        {/* 左カラム: 追加したレシピ一覧 */}
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+      {/* ヘッダー: バスケットアイコン + タイトル + サブテキスト */}
+      <div className="flex items-center gap-3 mb-6">
+        <ShoppingBasket className="w-9 h-9 text-green-600" strokeWidth={1.75} />
         <div>
-          <h2 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide">
+          <h1 className="text-2xl font-bold text-gray-800">買い物リスト</h1>
+          <p className="text-gray-500 text-sm mt-0.5">
+            レシピ {recipeCount}件 / 買うもの {itemCount}件
+          </p>
+        </div>
+      </div>
+
+      {/* レスポンシブレイアウト: モバイル縦並び / PC横並び（左1/3 右2/3） */}
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(280px,1fr)_2fr] gap-4 md:gap-6">
+        {/* 左カラム: 追加したレシピ一覧（カード化） */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <h2 className="text-base font-bold text-gray-800 mb-4">
             追加したレシピ
           </h2>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {Object.entries(groupedByRecipe).map(([recipeId, group]) => (
               <div
                 key={recipeId}
-                className="border border-gray-200 rounded-lg p-3"
+                className="border border-gray-200 rounded-xl p-3 flex gap-3"
               >
+                {/* レシピ画像 */}
                 <Link
                   href={`/recipes/${recipeId}`}
-                  className="font-bold text-sm text-gray-900 no-underline"
+                  className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
                 >
-                  {group.recipe_title}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      group.recipe_image_url
+                        ? group.recipe_image_url.replace(
+                            'http://rails:3000',
+                            process.env.NEXT_PUBLIC_RAILS_URL ?? '',
+                          )
+                        : '/default-recipe.jpg'
+                    }
+                    alt={group.recipe_title}
+                    className="w-full h-full object-cover"
+                  />
                 </Link>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  食材 {group.items.length}件
-                </p>
-                <button
-                  onClick={() => handleDeleteByRecipe(Number(recipeId))}
-                  className="mt-2 flex items-center gap-1 text-xs text-red-500 bg-transparent border-none cursor-pointer p-0"
-                >
-                  <TrashIcon className="w-3.5 h-3.5" />
-                  削除
-                </button>
+
+                {/* レシピ情報 */}
+                <div className="flex-1 min-w-0 flex flex-col">
+                  <Link
+                    href={`/recipes/${recipeId}`}
+                    className="font-bold text-sm text-gray-900 line-clamp-2 hover:text-green-600"
+                  >
+                    {group.recipe_title}
+                  </Link>
+                  <p className="text-xs text-gray-400 mt-1">
+                    食材 {group.items.length}件
+                  </p>
+                  <button
+                    onClick={() => handleDeleteByRecipe(Number(recipeId))}
+                    className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
+                  >
+                    <TrashIcon className="w-3.5 h-3.5" />
+                    削除
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -262,63 +341,84 @@ export default function ShoppingListClient({ initialItems }: Props) {
           {/* 全削除ボタン */}
           <button
             onClick={handleDeleteAll}
-            className="mt-4 w-full py-2 text-[13px] text-red-500 bg-red-50 border border-red-200 rounded cursor-pointer flex items-center justify-center gap-1.5 hover:bg-red-100"
+            className="mt-4 w-full py-2.5 text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg flex items-center justify-center gap-2 hover:bg-red-100 transition-colors"
           >
             <TrashIcon className="w-4 h-4" />
             レシピをすべて削除
           </button>
         </div>
 
-        {/* 右カラム: 買うもの一覧（カテゴリ別） */}
-        <div>
-          <h2 className="text-sm font-bold text-gray-500 mb-3 uppercase tracking-wide">
+        {/* 右カラム: 買うもの一覧（カード化） */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-5">
+          <h2 className="text-base font-bold text-gray-800 mb-4">
             買うもの一覧
           </h2>
 
-          {sortedCategories.map((category) => (
-            <div key={category} className="mb-5">
-              {/* カテゴリ名 */}
-              <h3 className="text-[13px] font-bold text-gray-700 mb-2 pb-1 border-b border-gray-100">
-                {category}
-              </h3>
+          <div className="space-y-5">
+            {sortedCategories.map((category, index) => {
+              const { Icon, colorClass } =
+                CATEGORY_ICONS[category] || CATEGORY_ICONS['その他']
+              return (
+                <div key={category}>
+                  {/* カテゴリ間の区切り線（最初以外） */}
+                  {index > 0 && <hr className="border-gray-100 mb-5" />}
 
-              {/* 食材リスト */}
-              <ul className="list-none p-0 m-0">
-                {groupedByCategory[category].map((item) => (
-                  <li
-                    key={item.name}
-                    className="flex items-center gap-2 py-1.5"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={item.is_checked}
-                      onChange={(e) => handleCheck(item.ids, e.target.checked)}
-                      className="cursor-pointer"
-                    />
-                    <span
-                      className={`flex-1 text-sm ${item.is_checked ? 'text-gray-400 line-through' : 'text-gray-900'}`}
-                    >
-                      {item.name}
-                      {item.count > 1 && (
-                        <span className="text-gray-400 text-xs">
-                          {' '}
-                          ×{item.count}
+                  {/* カテゴリ名（Lucide アイコン + カラー） */}
+                  <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                    <Icon className={`w-5 h-5 ${colorClass}`} />
+                    <span>{category}</span>
+                  </h3>
+
+                  {/* 食材リスト */}
+                  <ul className="space-y-1.5">
+                    {groupedByCategory[category].map((item) => (
+                      <li
+                        key={item.name}
+                        className="flex items-center gap-3 py-1"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.is_checked}
+                          onChange={(e) =>
+                            handleCheck(item.ids, e.target.checked)
+                          }
+                          className="w-4 h-4 cursor-pointer accent-green-600"
+                        />
+                        <span
+                          className={`flex-1 text-sm ${
+                            item.is_checked
+                              ? 'text-gray-400 line-through'
+                              : 'text-gray-800'
+                          }`}
+                        >
+                          {item.name}
+                          {item.count > 1 && (
+                            <span className="text-gray-400 text-xs ml-1">
+                              ×{item.count}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                    <span className="text-[13px] text-gray-500">
-                      {item.amount}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+                        <span
+                          className={`text-sm ${
+                            item.is_checked
+                              ? 'text-gray-400'
+                              : 'text-gray-500'
+                          }`}
+                        >
+                          {item.amount}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
 
           {/* チェック済み削除ボタン */}
           <button
             onClick={handleDeleteChecked}
-            className="mt-4 w-full py-2 text-[13px] text-green-600 bg-green-50 border border-green-200 rounded cursor-pointer flex items-center justify-center gap-1.5 hover:bg-green-100"
+            className="mt-6 w-full py-2.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg flex items-center justify-center gap-2 hover:bg-green-100 transition-colors"
           >
             <CheckCircleIcon className="w-4 h-4" />
             チェック済み項目を削除

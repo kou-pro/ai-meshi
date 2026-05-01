@@ -3,7 +3,7 @@ class Api::V1::ShoppingListItemsController < ApplicationController
 
   def index
     items = current_user.shopping_list_items.
-              includes(:recipe).
+              includes(recipe: { image_attachment: :blob }).
               order(created_at: :desc)
 
     render json: items.map {|item|
@@ -15,6 +15,7 @@ class Api::V1::ShoppingListItemsController < ApplicationController
         is_checked: item.is_checked,
         recipe_id: item.recipe_id,
         recipe_title: item.recipe.title,
+        recipe_image_url: item.recipe.image.attached? ? url_for(item.recipe.image) : nil,
       }
     }
   end

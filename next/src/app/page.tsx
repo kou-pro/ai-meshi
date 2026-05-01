@@ -154,13 +154,15 @@ function TopPageContent() {
 
         <div className="relative max-w-7xl mx-auto px-6 py-10 md:py-16 lg:py-20">
           <div className="max-w-[60%] md:max-w-md lg:max-w-lg">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight mb-5">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight mb-5 [word-break:keep-all]">
               <span className="text-green-600">AI</span>があなたの
               <br />
               食事をサポート
             </h1>
-            <p className="text-sm sm:text-base text-gray-900 font-medium mb-6 md:mb-8">
-              食材を入力するだけで、AIが最適なレシピを提案します
+            <p className="text-sm sm:text-base text-gray-900 font-medium mb-6 md:mb-8 [word-break:keep-all]">
+              食材を入力するだけで、
+              <br className="md:hidden" />
+              AIが最適なレシピを提案します
             </p>
             {/* CTA 群: Google ボタンと同じ最大幅 (max-w-sm) で揃える */}
             <div className="max-w-sm">

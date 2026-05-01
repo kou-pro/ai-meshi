@@ -12,6 +12,7 @@ type ShoppingListItem = {
   is_checked: boolean
   recipe_id: number
   recipe_title: string
+  recipe_image_url: string | null
 }
 
 async function fetchShoppingList(): Promise<ShoppingListItem[]> {

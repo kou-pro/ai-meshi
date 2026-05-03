@@ -13,7 +13,12 @@ DeviseTokenAuth.setup do |config|
   # determines how long tokens will remain valid after they are issued.
 
   # 発行したトークンが有効でいられる期間の設定
-  config.token_lifespan = 2.hours
+  # devise_token_auth 公式デフォルト (2.weeks) を採用。
+  # OWASP の絶対タイムアウト 4-8h は業務アプリ前提。
+  # SNS カテゴリは Instagram 60日 / Twitter 約3ヶ月 が業界実績で、
+  # その中で保守的に 2.weeks を選定。
+  # Cookie 側 (Next.js) の maxAge も同じ 14 日に揃えること。
+  config.token_lifespan = 2.weeks
 
   # confirmable有効時に確認メールを送る設定
   config.send_confirmation_email = true

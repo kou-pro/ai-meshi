@@ -3,14 +3,14 @@ import { NextResponse } from 'next/server'
 
 /**
  * Cookie の共通オプション。
- * Rails 側 token_lifespan = 2.weeks に合わせて maxAge を 14 日に設定。
+ * Rails 側 token_lifespan = 30.days に合わせて maxAge を 30 日に設定。
  */
 const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
-  maxAge: 60 * 60 * 24 * 14,
+  maxAge: 60 * 60 * 24 * 30,
 }
 
 /**
@@ -24,7 +24,7 @@ const COOKIE_OPTIONS = {
  * # 現在の運用方針 (固定トークン)
  * Rails 側 change_headers_on_each_request = false のため、Rails は新トークンを
  * 返さない。よって本ヘルパーの Cookie 上書き分岐は事実上常にスキップされる。
- * Cookie の maxAge = 14日 でトークン寿命を統一している。
+ * Cookie の maxAge = 30日 でトークン寿命を統一している。
  *
  * # スライディングセッション再挑戦時の参考
  * change_headers_on_each_request = true にすると、認証成功した全レスポンスで

@@ -6,12 +6,20 @@ DeviseTokenAuth.setup do |config|
   # this to false to prevent the Authorization header from changing after
   # each request.
 
-  # 認証成功した全レスポンスで access-token / client / uid / expiry ヘッダーを
-  # 新しい値で返す（公式デフォルト = true）。
-  # クライアント (Next.js Route Handler) はレスポンスから新トークンを取り出し
-  # Cookie を上書きすることでスライディングセッションを実現する。
-  # 並列リクエストは batch_request_buffer_throttle (5秒) で保護されている。
-  config.change_headers_on_each_request = true
+  # ローテーションを無効化して固定トークン運用にする。
+  #
+  # 設計上の制約（Next.js App Router 由来）:
+  #   - Server Component は Cookie を書き込めない（HTTP の制約上、ストリーミング開始後に Set-Cookie 不可）
+  #   - 一方で Server Component から getCurrentUser() 等で Rails を呼ぶ箇所がある
+  #   - true にすると Server Component の Rails 呼び出しでもトークンが更新されてしまうが、
+  #     Cookie に書き戻せないため Cookie 内のトークンが Rails 側で無効化されてズレる
+  #   - 結果、5秒の batch_request_buffer_throttle 経過後に必ず 401 → 強制ログアウト
+  #
+  # スライディングセッション化を再挑戦する場合の方針:
+  #   - proxy.ts で全リクエスト前に Rails を呼んで Cookie を更新する
+  #   - もしくは Server Component から Rails を呼ばないアーキテクチャに変える
+  #   - どちらも工数大、いったん諦めて Cookie maxAge = 14日 の固定運用とする
+  config.change_headers_on_each_request = false
 
   # By default, users will need to re-authenticate after 2 weeks. This setting
   # determines how long tokens will remain valid after they are issued.

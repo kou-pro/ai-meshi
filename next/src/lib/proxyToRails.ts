@@ -18,20 +18,28 @@ const COOKIE_OPTIONS = {
  *
  * # 役割
  * 1. 既存 Cookie から access-token / client / uid を取り出し Rails に転送
- * 2. Rails レスポンスから新トークンを取り出し Cookie を上書き（スライディングセッション）
- * 3. ボディ + ステータスコードを Next.js のレスポンスとして返す
+ * 2. ボディ + ステータスコードを Next.js のレスポンスとして返す
+ * 3. Rails が新トークンを返した場合に限り Cookie を上書き
  *
- * # スライディングセッションの仕組み
- * devise_token_auth (change_headers_on_each_request = true) は
- * 認証成功した全レスポンスに新しい access-token / client / uid / expiry を返す。
- * 本ヘルパーがこれを毎回 Cookie に上書きすることで、操作するたびにトークン期限が
- * 14日後にリセットされ、アクティブな間は半永久的にログイン状態が維持される。
+ * # 現在の運用方針 (固定トークン)
+ * Rails 側 change_headers_on_each_request = false のため、Rails は新トークンを
+ * 返さない。よって本ヘルパーの Cookie 上書き分岐は事実上常にスキップされる。
+ * Cookie の maxAge = 14日 でトークン寿命を統一している。
+ *
+ * # スライディングセッション再挑戦時の参考
+ * change_headers_on_each_request = true にすると、認証成功した全レスポンスで
+ * 新トークン (access-token / client / uid / expiry) が返る。本ヘルパーは
+ * Route Handler から呼ばれた場合に限り Cookie 上書き可能 (NextResponse 経由)。
+ * ただし Server Component から Rails を呼ぶ箇所 (例: getCurrentUser) では
+ * Cookie 上書きが構造的にできず、Rails 側でローテーションされたトークンと
+ * Cookie が乖離して 401 ループに陥る。proxy.ts を介した一元処理など、
+ * 別途設計が必要。
  *
  * # 並列リクエスト時の挙動 (batch_request_buffer_throttle = 5.seconds)
  * 5 秒以内の同一トークンによる並列リクエストはバッチと判定され、
  * 1 番目のリクエストにだけ新トークンが返り、2 番目以降は新トークン無し。
- * 本ヘルパーは「新トークンが返ってきた時だけ Cookie 更新」する条件分岐により、
- * バッチ後続レスポンスでは Cookie を変更しない（公式仕様に整合）。
+ * 本ヘルパーは「新トークンが返ってきた時だけ Cookie 更新」の条件分岐で
+ * バッチ後続レスポンスでは Cookie を変更しない (公式仕様に整合)。
  *
  * # 使い方
  * ```ts

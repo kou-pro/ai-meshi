@@ -47,6 +47,9 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax' as const,
       path: '/',
+      // Rails 側 token_lifespan = 2.weeks に合わせて 14 日。
+      // maxAge 未設定だとセッション Cookie となりブラウザを閉じた瞬間に消える。
+      maxAge: 60 * 60 * 24 * 14,
     }
 
     response.cookies.set('access-token', accessToken, cookieOptions)

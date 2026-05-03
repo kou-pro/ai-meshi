@@ -6,8 +6,12 @@ DeviseTokenAuth.setup do |config|
   # this to false to prevent the Authorization header from changing after
   # each request.
 
-  # マイリクエストごとにトークンを更新する挙動を実行
-  config.change_headers_on_each_request = false
+  # 認証成功した全レスポンスで access-token / client / uid / expiry ヘッダーを
+  # 新しい値で返す（公式デフォルト = true）。
+  # クライアント (Next.js Route Handler) はレスポンスから新トークンを取り出し
+  # Cookie を上書きすることでスライディングセッションを実現する。
+  # 並列リクエストは batch_request_buffer_throttle (5秒) で保護されている。
+  config.change_headers_on_each_request = true
 
   # By default, users will need to re-authenticate after 2 weeks. This setting
   # determines how long tokens will remain valid after they are issued.

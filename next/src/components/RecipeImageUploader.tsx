@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera } from 'lucide-react'
 import { toast } from 'sonner'
+import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
   recipeId: number
@@ -77,10 +78,16 @@ export default function RecipeImageUploader({ recipeId, variant = 'add' }: Props
     formData.append('recipe[image]', file)
 
     try {
-      const res = await fetch(`/api/recipes/${recipeId}`, {
+      // fetchWithAuthClient: 401 を検知すると自動でログアウト → /login へリダイレクトしてくれる。
+      // 画像アップロードだけ raw fetch を使うと、セッション切れ時に
+      // 「画像が変わらない」という silent failure になるため共通ラッパーに統一する。
+      const res = await fetchWithAuthClient(`/api/recipes/${recipeId}`, {
         method: 'PATCH',
         body: formData,
       })
+
+      // 401 はラッパー側で既に toast + redirect 処理済み。ここでは早期 return のみ。
+      if (res.status === 401) return
 
       if (res.ok) {
         toast.success(

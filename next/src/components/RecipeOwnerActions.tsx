@@ -52,25 +52,29 @@ export default function RecipeOwnerActions({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
+  // ネットワーク断時に fetch が throw すると loading=true が永続化するため、
+  // 全 handler で try/finally で setLoading(false) を保証する。
   const handleDelete = async () => {
     setOpen(false)
     if (!confirm('削除しますか？')) return
     setLoading(true)
 
-    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}`, {
-      method: 'DELETE',
-    })
+    try {
+      const res = await fetchWithAuthClient(`/api/recipes/${recipeId}`, {
+        method: 'DELETE',
+      })
 
-    if (res.status === 401) {
+      if (res.status === 401) return
+      if (res.ok) {
+        router.push('/recipes')
+      } else {
+        toast.error('削除に失敗しました')
+      }
+    } catch {
+      toast.error('通信エラーが発生しました')
+    } finally {
       setLoading(false)
-      return
     }
-    if (res.ok) {
-      router.push('/recipes')
-    } else {
-      toast.error('削除に失敗しました')
-    }
-    setLoading(false)
   }
 
   const handleTogglePublish = async () => {
@@ -78,24 +82,26 @@ export default function RecipeOwnerActions({
     setLoading(true)
 
     const next = !isPublished
-    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/publish`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_published: next }),
-    })
+    try {
+      const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/publish`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_published: next }),
+      })
 
-    if (res.status === 401) {
+      if (res.status === 401) return
+      if (res.ok) {
+        // Server Component (page.tsx) が描画する公開バッジ等を更新するため再取得
+        router.refresh()
+        toast.success(next ? '公開しました' : '非公開にしました')
+      } else {
+        toast.error('切り替えに失敗しました')
+      }
+    } catch {
+      toast.error('通信エラーが発生しました')
+    } finally {
       setLoading(false)
-      return
     }
-    if (res.ok) {
-      // Server Component (page.tsx) が描画する公開バッジ等を更新するため再取得
-      router.refresh()
-      toast.success(next ? '公開しました' : '非公開にしました')
-    } else {
-      toast.error('切り替えに失敗しました')
-    }
-    setLoading(false)
   }
 
   return (

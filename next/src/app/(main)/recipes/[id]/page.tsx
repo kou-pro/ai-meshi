@@ -57,6 +57,8 @@ type Comment = {
   }
 }
 
+// dynamic = 'force-dynamic' を宣言すると Next.js が全 fetch を自動で
+// cache: 'no-store' 相当として扱うため、各 fetch の cache 指定は不要 (重複)。
 export const dynamic = 'force-dynamic'
 
 async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
@@ -84,7 +86,6 @@ async function fetchRecipe(id: string): Promise<RecipeDetail | null> {
   const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
     method: 'GET',
     headers,
-    cache: 'no-store',
   })
 
   if (!res.ok) return null
@@ -98,7 +99,6 @@ async function fetchComments(id: string): Promise<Comment[]> {
   const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}/comments`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
-    cache: 'no-store',
   })
   if (!res.ok) return []
   return res.json()
@@ -120,7 +120,6 @@ async function fetchCurrentUserId(
       client: client,
       uid: uid,
     },
-    cache: 'no-store',
   })
   if (!res.ok) return null
   const data = await res.json()
@@ -140,14 +139,17 @@ export default async function RecipeDetailPage({
 
   const isLoggedIn = !!(accessToken && client && uid)
 
-  const recipe = await fetchRecipe(id)
+  // 3 つの fetch を並列実行: 互いに依存しないため Promise.all で
+  // 逐次 await の RTT 合算を解消 (推定 ~2 RTT 短縮)。
+  const [recipe, comments, currentUserId] = await Promise.all([
+    fetchRecipe(id),
+    fetchComments(id),
+    isLoggedIn
+      ? fetchCurrentUserId(accessToken!, client!, uid!)
+      : Promise.resolve(null),
+  ])
+
   if (!recipe) return notFound()
-
-  const comments = await fetchComments(id)
-
-  const currentUserId = isLoggedIn
-    ? await fetchCurrentUserId(accessToken!, client!, uid!)
-    : null
 
   const isOwner = currentUserId === recipe.user.id
 

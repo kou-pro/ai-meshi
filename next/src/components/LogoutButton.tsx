@@ -6,6 +6,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { User } from 'lucide-react'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 export function LogoutButton() {
@@ -47,8 +48,9 @@ export function LogoutButton() {
     <button
       onClick={handleLogout}
       disabled={isLoading}
-      className="px-4 py-2 bg-red-500 text-white rounded disabled:opacity-50"
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
     >
+      <User className="w-4 h-4" strokeWidth={2} />
       {isLoading ? 'ログアウト中...' : 'ログアウト'}
     </button>
   )

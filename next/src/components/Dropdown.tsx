@@ -64,11 +64,13 @@ export default function Dropdown({
         />
       </button>
 
-      {/* 選択肢パネル: トリガー直下にインラインで展開 */}
+      {/* 選択肢パネル: 業界標準のオーバーレイ方式 (Material Design / Apple HIG 準拠)。
+          absolute + top-full でトリガー直下にフロート表示し、下のコンテンツを
+          押し下げない。Bootstrap / MUI / Carbon Design 等と同じパターン。 */}
       {open && (
         <ul
           role="listbox"
-          className="mt-1 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm max-h-60 overflow-y-auto"
+          className="absolute left-0 right-0 top-full z-20 mt-1 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-lg max-h-60 overflow-y-auto"
         >
           {options.map((opt) => {
             const isSelected = value === opt

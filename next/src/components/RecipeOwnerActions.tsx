@@ -1,9 +1,9 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useState } from 'react'
-import { PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { MoreHorizontal, Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
@@ -12,13 +12,48 @@ type Props = {
   isPublished: boolean
 }
 
-export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
+/**
+ * レシピオーナー専用の管理メニュー (詳細ページのタイトル右上)。
+ *
+ * # デザイン
+ * Instagram / Twitter 等の「⋯」メニュー方式に準拠。
+ * - 「⋯ 管理」ボタンをトリガー
+ * - クリックで下方向にドロップダウンが展開
+ * - 編集・公開/非公開切替・削除の 3 項目を縦並びで表示
+ * - 外側クリックで閉じる
+ *
+ * # Server Component との同期
+ * 公開状態の切替成功時は router.refresh() を呼ぶ。
+ * 詳細ページ (page.tsx) は Server Component で recipe.is_published を
+ * 描画しているため、Server 側を再取得しないと公開バッジ等の表示が
+ * 古いままになる。Next.js 公式推奨の更新パターン。
+ */
+export default function RecipeOwnerActions({
+  recipeId,
+  isPublished,
+}: Props) {
   const router = useRouter()
-  const [published, setPublished] = useState(isPublished)
   const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // 削除処理
+  // 外側クリックで閉じる
+  useEffect(() => {
+    if (!open) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [open])
+
   const handleDelete = async () => {
+    setOpen(false)
     if (!confirm('削除しますか？')) return
     setLoading(true)
 
@@ -38,14 +73,15 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
     setLoading(false)
   }
 
-  // 公開/非公開切り替え処理
   const handleTogglePublish = async () => {
+    setOpen(false)
     setLoading(true)
 
+    const next = !isPublished
     const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/publish`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_published: !published }),
+      body: JSON.stringify({ is_published: next }),
     })
 
     if (res.status === 401) {
@@ -53,7 +89,9 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
       return
     }
     if (res.ok) {
-      setPublished(!published)
+      // Server Component (page.tsx) が描画する公開バッジ等を更新するため再取得
+      router.refresh()
+      toast.success(next ? '公開しました' : '非公開にしました')
     } else {
       toast.error('切り替えに失敗しました')
     }
@@ -61,38 +99,63 @@ export default function RecipeOwnerActions({ recipeId, isPublished }: Props) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 mb-6 bg-gray-50">
-      <p className="text-xs text-gray-500 mb-3 font-semibold">管理メニュー</p>
-      <div className="flex gap-2 flex-wrap">
-        {/* 編集リンク */}
-        <Link
-          href={`/recipes/${recipeId}/edit`}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border border-gray-300 bg-white text-gray-700 no-underline"
-        >
-          <PencilIcon className="w-3.5 h-3.5" />
-          編集
-        </Link>
+    <div ref={containerRef} className="relative">
+      {/* トリガー: 「⋯ 管理」 */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:opacity-60"
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <MoreHorizontal className="w-4 h-4" />
+        管理
+      </button>
 
-        {/* 公開/非公開切り替えボタン */}
-        <button
-          onClick={handleTogglePublish}
-          disabled={loading}
-          className={`flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border ${published ? 'border-gray-300 bg-white text-gray-500' : 'border-green-600 bg-green-50 text-green-600'}`}
+      {/* ドロップダウン (右上から下方向に展開) */}
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-1 z-20 w-40 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
         >
-          {published ? <EyeSlashIcon className="w-3.5 h-3.5" /> : <EyeIcon className="w-3.5 h-3.5" />}
-          {published ? '非公開にする' : '公開する'}
-        </button>
+          <Link
+            href={`/recipes/${recipeId}/edit`}
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 no-underline"
+          >
+            <Pencil className="w-4 h-4 text-gray-500" />
+            編集
+          </Link>
 
-        {/* 削除ボタン */}
-        <button
-          onClick={handleDelete}
-          disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded text-[13px] border border-red-300 bg-red-50 text-red-500"
-        >
-          <TrashIcon className="w-3.5 h-3.5" />
-          削除
-        </button>
-      </div>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={handleTogglePublish}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+          >
+            {isPublished ? (
+              <EyeOff className="w-4 h-4 text-gray-500" />
+            ) : (
+              <Eye className="w-4 h-4 text-gray-500" />
+            )}
+            {isPublished ? '非公開にする' : '公開する'}
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={handleDelete}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 disabled:opacity-60"
+          >
+            <Trash2 className="w-4 h-4" />
+            削除
+          </button>
+        </div>
+      )}
     </div>
   )
 }

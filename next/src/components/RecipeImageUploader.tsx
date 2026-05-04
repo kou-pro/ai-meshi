@@ -194,12 +194,14 @@ export default function RecipeImageUploader({ recipeId, variant = 'add' }: Props
             </div>
           </button>
         ) : (
-          // ─── 差し替え: 右上隅に小さなカメラアイコン (Twitter/Instagram 式) ───
+          // ─── 差し替え: 左上隅に小さなカメラアイコン
+          //    (詳細ページの右上はいいね/保存/買い物リストアイコンが並ぶため
+          //    カメラは左上で住み分け) ───
           <button
             type="button"
             onClick={handleClick}
             disabled={isUploading}
-            className="absolute top-3 right-3 bg-black/60 backdrop-blur-md p-2.5 rounded-full hover:bg-black/80 hover:scale-110 transition-all opacity-90 hover:opacity-100 shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute top-3 left-3 bg-black/60 backdrop-blur-md p-2.5 rounded-full hover:bg-black/80 hover:scale-110 transition-all opacity-90 hover:opacity-100 shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="画像を変更"
           >
             <Camera

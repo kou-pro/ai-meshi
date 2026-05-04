@@ -17,9 +17,11 @@ export default function StarDisplay({ value, label }: Props) {
           </span>
         ))}
       </div>
-      <span className="text-xs text-gray-400">
-        {value > 0 ? `${value}/5` : '未評価'}
-      </span>
+      {/* 評価が付いていれば "X/5" を表示。未評価時は何も表示しない
+          (「未評価」を 3 軸で並べると視覚ノイズが大きいため、空の星だけで状態を示す) */}
+      {value > 0 && (
+        <span className="text-xs text-gray-400">{value}/5</span>
+      )}
     </div>
   )
 }

@@ -1,34 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline'
-import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid'
+import { Bookmark } from 'lucide-react'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
-// コンポーネントが受け取るpropsの型定義
 type Props = {
   recipeId: number
   initialBookmarked: boolean
 }
 
+/**
+ * 「保存」アクションアイコン (詳細ページのヒーロー画像オーバーレイ用)。
+ *
+ * # デザイン
+ * ヒーロー画像の右上隅に並ぶ半透明白の円形アイコンボタン。
+ * 状態に応じてアンバー (保存済み) で塗りつぶす。
+ */
 export default function SaveButton({ recipeId, initialBookmarked }: Props) {
-  // 保存済みかどうかの状態（楽観的UIのために使う）
   const [bookmarked, setBookmarked] = useState(initialBookmarked)
-  // 通信中かどうか（連打防止のために使う）
   const [isLoading, setIsLoading] = useState(false)
 
   const handleClick = async () => {
-    // 通信中は何もしない（連打防止）
     if (isLoading) return
-
     setIsLoading(true)
 
-    // 楽観的UI：APIの結果を待たずに先にUIを更新する
     setBookmarked((prev) => !prev)
 
     try {
       if (bookmarked) {
-        // 保存済み → 解除する
         const res = await fetchWithAuthClient(`/api/bookmarks/${recipeId}`, {
           method: 'DELETE',
         })
@@ -36,12 +35,8 @@ export default function SaveButton({ recipeId, initialBookmarked }: Props) {
           setIsLoading(false)
           return
         }
-        if (!res.ok) {
-          // 失敗したら元に戻す
-          setBookmarked(true)
-        }
+        if (!res.ok) setBookmarked(true)
       } else {
-        // 未保存 → 保存する
         const res = await fetchWithAuthClient('/api/bookmarks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -51,32 +46,30 @@ export default function SaveButton({ recipeId, initialBookmarked }: Props) {
           setIsLoading(false)
           return
         }
-        if (!res.ok) {
-          // 失敗したら元に戻す
-          setBookmarked(false)
-        }
+        if (!res.ok) setBookmarked(false)
       }
     } catch {
-      // 通信エラーの場合も元に戻す
       setBookmarked((prev) => !prev)
     } finally {
-      // 成功・失敗どちらでもローディングを解除する
       setIsLoading(false)
     }
   }
 
   return (
     <button
+      type="button"
       onClick={handleClick}
       disabled={isLoading}
-      className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-sm disabled:opacity-70 ${bookmarked ? 'bg-amber-400 text-white' : 'bg-gray-200 text-gray-700'}`}
+      className={`w-11 h-11 rounded-full bg-white/90 backdrop-blur-md shadow-md hover:bg-white hover:shadow-lg transition-all flex items-center justify-center disabled:opacity-70 ${
+        bookmarked ? 'text-amber-500' : 'text-gray-600 hover:text-amber-500'
+      }`}
+      aria-label={bookmarked ? '保存を解除' : '保存する'}
+      aria-pressed={bookmarked}
     >
-      {bookmarked ? (
-        <BookmarkSolid className="w-4 h-4" />
-      ) : (
-        <BookmarkOutline className="w-4 h-4" />
-      )}
-      {bookmarked ? '保存済み' : '保存する'}
+      <Bookmark
+        className={`w-5 h-5 ${bookmarked ? 'fill-current' : ''}`}
+        strokeWidth={2}
+      />
     </button>
   )
 }

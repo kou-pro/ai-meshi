@@ -20,6 +20,7 @@ type RecipeDetail = {
   id: number
   title: string
   content: string | null
+  servings: number | null
   ingredients: Ingredient[] | null
   steps: string[] | null
   hashtags: string[]
@@ -221,9 +222,17 @@ export default async function RecipeDetailPage({
       {/* 6〜8. 材料・手順・タグ */}
       {recipe.ingredients && recipe.steps ? (
         <>
-          {/* 6. 材料 */}
+          {/* 6. 材料 (Cookpad / NYT Cooking 等の業界標準パターン:
+              「材料 (○人分)」を見出し横にメタ情報として表示) */}
           <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3">材料</h2>
+            <h2 className="text-lg font-bold mb-3">
+              材料
+              {recipe.servings && (
+                <span className="ml-2 text-sm font-normal text-gray-500">
+                  ({recipe.servings}人分)
+                </span>
+              )}
+            </h2>
             <ul className="border border-gray-200 rounded-lg divide-y divide-gray-200 list-none p-0">
               {recipe.ingredients.map((ingredient, index) => {
                 const isUnitFirst = ['大さじ', '小さじ', 'カップ'].includes(

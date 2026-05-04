@@ -55,17 +55,25 @@ export default function CommentSection({
       setLoading(false)
       return
     }
-    if (res.ok) {
-      const newComment = await res.json()
-      setComments([newComment, ...comments])
-      setBody('')
-      // page.tsx メタ行のコメント件数バッジを更新するため Server Component を再取得
-      router.refresh()
-    } else {
-      const data = await res.json()
-      setError(data.errors?.[0] || 'コメントの投稿に失敗しました')
+
+    // res.json() は応答が JSON でない場合 (500 HTML エラーページ等) に throw する。
+    // try/catch で囲んで loading 永続化を防ぐ。
+    try {
+      if (res.ok) {
+        const newComment = await res.json()
+        setComments([newComment, ...comments])
+        setBody('')
+        // page.tsx メタ行のコメント件数バッジを更新するため Server Component を再取得
+        router.refresh()
+      } else {
+        const data = await res.json().catch(() => null)
+        setError(data?.errors?.[0] || 'コメントの投稿に失敗しました')
+      }
+    } catch {
+      setError('コメントの投稿に失敗しました')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const handleDelete = async (commentId: number) => {

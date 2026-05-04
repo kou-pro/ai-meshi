@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
@@ -24,6 +24,18 @@ export default function AddToShoppingListButton({
   ingredients,
 }: Props) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'added'>('idle')
+
+  // 「追加しました」表示を 3 秒後に idle へ戻すタイマー。
+  // unmount 時に cleartTimeout してリーク警告を防ぐ。
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current)
+      }
+    }
+  }, [])
 
   const handleAdd = async (force = false) => {
     setStatus('loading')
@@ -56,7 +68,9 @@ export default function AddToShoppingListButton({
 
     if (res.ok) {
       setStatus('added')
-      setTimeout(() => setStatus('idle'), 3000)
+      // 既存タイマーがあればキャンセルしてから新規予約 (連打対策)
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = setTimeout(() => setStatus('idle'), 3000)
     } else {
       setStatus('idle')
     }

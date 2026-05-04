@@ -8,10 +8,6 @@ type Recipe = {
   id: number
   title: string
   steps: string[]
-  image_url: string | null
-  taste_score: number
-  ease_score: number
-  cost_score: number
 }
 
 /** Rails API から特定レシピを取得（Server-side） */
@@ -46,10 +42,11 @@ async function fetchRecipe(id: string): Promise<Recipe | null> {
  * - 編集対象のレシピを Server で取得し、Client Form に props で渡す。
  * - クライアントは初期値をすぐに表示できる（チラつきなし）。
  *
- * # 旧版の問題
- * `'use client'` の本ページが `useEffect` 内で `/api/recipes/[id]` を fetch していた。
- * 初期表示時に `fetching` ステートで「読み込み中...」が一瞬表示されるチラつきがあった。
- * Server-side 取得 + props 渡しに変更したことで初回 HTML から完全な状態で表示される。
+ * # スコープ
+ * 編集対象は タイトル と 手順 のみ。
+ * - 画像は詳細ページの RecipeImageUploader から追加・変更可能
+ * - 投稿者評価 (taste / ease / cost) は詳細ページの ScoreSection から保存可能
+ * 重複機能を排除して編集画面の責務を簡素化した。
  */
 export default async function EditRecipePage({
   params,
@@ -78,10 +75,6 @@ export default async function EditRecipePage({
           ? recipe.steps
           : ['']
       }
-      initialImageUrl={recipe.image_url}
-      initialTasteScore={recipe.taste_score ?? 0}
-      initialEaseScore={recipe.ease_score ?? 0}
-      initialCostScore={recipe.cost_score ?? 0}
     />
   )
 }

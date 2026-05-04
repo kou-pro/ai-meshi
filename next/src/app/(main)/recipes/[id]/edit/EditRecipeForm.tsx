@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { ArrowLeft, GripVertical, Trash2, Save, Info } from 'lucide-react'
+import TextareaAutosize from 'react-textarea-autosize'
 import {
   DndContext,
   closestCenter,
@@ -96,13 +97,18 @@ function SortableStep({
         {index + 1}
       </span>
 
-      {/* テキストエリア */}
-      <textarea
+      {/* テキストエリア (自動リサイズ)
+          react-textarea-autosize: Slack / GitHub / Notion / ChatGPT で
+          採用されている業界デファクトのライブラリ。入力に応じて高さが
+          自動で伸縮する。手動リサイズハンドルは不要なので resize-none。
+          minRows=2 で初期高さを保証、maxRows=15 で極端な長文を防ぐ。 */}
+      <TextareaAutosize
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={2}
+        minRows={2}
+        maxRows={15}
         placeholder={`手順${index + 1}を入力`}
-        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-y"
+        className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
       />
 
       {/* 削除ボタン: 手順が 1 つしかないときは disabled */}

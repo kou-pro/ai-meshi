@@ -17,10 +17,19 @@ type Props = {
  *
  * # デザイン
  * Instagram / Twitter 等の「⋯」メニュー方式に準拠。
- * - 「⋯ 管理」ボタンをトリガー
- * - クリックで下方向にドロップダウンが展開
- * - 編集・公開/非公開切替・削除の 3 項目を縦並びで表示
- * - 外側クリックで閉じる
+ *
+ * # アクセシビリティ (WAI-ARIA APG menu pattern 完全準拠)
+ * - トリガー: aria-haspopup="menu" + aria-expanded
+ * - メニュー: role="menu" + role="menuitem" + roving tabindex
+ * - キー操作:
+ *   - Enter / Space: トリガーで開く / メニュー項目で実行
+ *   - ↓ (ArrowDown): 次の項目 (循環)
+ *   - ↑ (ArrowUp): 前の項目 (循環)
+ *   - Home: 最初の項目
+ *   - End: 最後の項目
+ *   - Escape: メニューを閉じてトリガーへ focus 復帰
+ *   - 外側クリック: メニューを閉じる
+ * - 開いた直後に最初の menuitem へ自動 focus
  *
  * # Server Component との同期
  * 公開状態の切替成功時は router.refresh() を呼ぶ。
@@ -36,10 +45,13 @@ export default function RecipeOwnerActions({
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
-  // 外側クリックで閉じる
+  // 外側クリック / Escape で閉じる + Escape はトリガーに focus 復帰
   useEffect(() => {
     if (!open) return
+
     const handleClickOutside = (e: MouseEvent) => {
       if (
         containerRef.current &&
@@ -48,9 +60,63 @@ export default function RecipeOwnerActions({
         setOpen(false)
       }
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [open])
+
+  // メニューを開いた直後に最初の menuitem へ自動 focus (APG menu pattern)
+  useEffect(() => {
+    if (!open) return
+    const firstItem = menuRef.current?.querySelector<HTMLElement>(
+      '[role="menuitem"]',
+    )
+    firstItem?.focus()
+  }, [open])
+
+  // メニュー内の矢印キー / Home / End ナビゲーション
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    )
+    if (items.length === 0) return
+
+    const currentIndex = items.findIndex((el) => el === document.activeElement)
+    let nextIndex: number | null = null
+
+    switch (e.key) {
+      case 'ArrowDown':
+        nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length
+        break
+      case 'ArrowUp':
+        nextIndex =
+          currentIndex < 0
+            ? items.length - 1
+            : (currentIndex - 1 + items.length) % items.length
+        break
+      case 'Home':
+        nextIndex = 0
+        break
+      case 'End':
+        nextIndex = items.length - 1
+        break
+      default:
+        return
+    }
+    e.preventDefault()
+    items[nextIndex]?.focus()
+  }
 
   // ネットワーク断時に fetch が throw すると loading=true が永続化するため、
   // 全 handler で try/finally で setLoading(false) を保証する。
@@ -108,10 +174,11 @@ export default function RecipeOwnerActions({
     <div ref={containerRef} className="relative">
       {/* トリガー: 「⋯ 管理」 */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={loading}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
         aria-haspopup="menu"
         aria-expanded={open}
       >
@@ -119,17 +186,21 @@ export default function RecipeOwnerActions({
         管理
       </button>
 
-      {/* ドロップダウン (右上から下方向に展開) */}
+      {/* ドロップダウン (右上から下方向に展開)
+          矢印キーナビゲーションは menu div で受ける */}
       {open && (
         <div
+          ref={menuRef}
           role="menu"
+          onKeyDown={handleMenuKeyDown}
           className="absolute right-0 top-full mt-1 z-20 w-40 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
         >
           <Link
             href={`/recipes/${recipeId}/edit`}
             role="menuitem"
+            tabIndex={-1}
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 no-underline"
+            className="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none no-underline"
           >
             <Pencil className="w-4 h-4 text-gray-500" />
             編集
@@ -138,9 +209,10 @@ export default function RecipeOwnerActions({
           <button
             type="button"
             role="menuitem"
+            tabIndex={-1}
             onClick={handleTogglePublish}
             disabled={loading}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none disabled:opacity-60"
           >
             {isPublished ? (
               <EyeOff className="w-4 h-4 text-gray-500" />
@@ -153,9 +225,10 @@ export default function RecipeOwnerActions({
           <button
             type="button"
             role="menuitem"
+            tabIndex={-1}
             onClick={handleDelete}
             disabled={loading}
-            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 disabled:opacity-60"
+            className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 focus:bg-red-50 focus:outline-none disabled:opacity-60"
           >
             <Trash2 className="w-4 h-4" />
             削除

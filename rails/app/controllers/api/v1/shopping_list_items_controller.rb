@@ -34,7 +34,14 @@ class Api::V1::ShoppingListItemsController < ApplicationController
     end
 
     ingredients.each do |ingredient|
-      amount = "#{ingredient["quantity"]}#{ingredient["unit"]}"
+      # IngredientFormatter (Service Object) に整形を委譲。
+      # 旧実装の素朴な連結 ("#{quantity}#{unit}") では
+      # "適量g" や "1大さじ" のような壊れ表記が発生していたため、
+      # 業界標準 (大さじ前置 / 「適量」等の単位省略) に準拠した整形を行う。
+      amount = IngredientFormatter.call(
+        quantity: ingredient["quantity"],
+        unit: ingredient["unit"],
+      )
       current_user.shopping_list_items.create!(
         recipe_id: recipe_id,
         ingredient_name: ingredient["name"],

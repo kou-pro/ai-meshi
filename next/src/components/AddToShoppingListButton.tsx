@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ShoppingCart, Check } from 'lucide-react'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
@@ -13,6 +14,11 @@ type Props = {
   }[]
 }
 
+/**
+ * 「買い物リストに追加」ボタン。
+ * 業界標準 (Cookpad / DELISH KITCHEN / NYT Cooking 等) に倣い、
+ * 詳細ページの材料セクション下にだけ配置する。
+ */
 export default function AddToShoppingListButton({
   recipeId,
   ingredients,
@@ -37,15 +43,12 @@ export default function AddToShoppingListButton({
       return
     }
     if (res.status === 409) {
-      // すでに追加済み → 確認ダイアログを出す
       const confirmed = window.confirm(
         'このレシピはすでに買い物リストに追加されています。\nもう一度追加しますか？',
       )
       if (confirmed) {
-        // OKなら force: true で再リクエスト
         await handleAdd(true)
       } else {
-        // キャンセルなら idle に戻す
         setStatus('idle')
       }
       return
@@ -53,47 +56,36 @@ export default function AddToShoppingListButton({
 
     if (res.ok) {
       setStatus('added')
-      // 3秒後に idle に戻す（再追加できるように）
       setTimeout(() => setStatus('idle'), 3000)
     } else {
       setStatus('idle')
     }
   }
 
-  const buttonConfig = {
-    idle: {
-      label: '🛒 買い物リストに追加',
-      bg: '#ffffff',
-      color: '#374151',
-      border: '#d1d5db',
-    },
-    loading: {
-      label: '追加中...',
-      bg: '#f9fafb',
-      color: '#9ca3af',
-      border: '#d1d5db',
-    },
-    added: {
-      label: '✓ 追加しました',
-      bg: '#dcfce7',
-      color: '#16a34a',
-      border: '#16a34a',
-    },
-  }[status]
+  const isAdded = status === 'added'
+  const isLoading = status === 'loading'
 
   return (
     <button
+      type="button"
       onClick={() => handleAdd(false)}
-      disabled={status === 'loading'}
-      className={`w-full px-3 py-3 rounded-lg border text-sm font-semibold ${
-        status === 'added'
-          ? 'bg-green-50 text-green-600 border-green-600'
-          : status === 'loading'
-            ? 'bg-gray-50 text-gray-400 border-gray-300 cursor-default'
-            : 'bg-white text-gray-700 border-gray-300'
+      disabled={isLoading}
+      className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ${
+        isAdded
+          ? 'border-green-500 bg-green-50 text-green-600'
+          : 'border-green-500 bg-white text-green-600 hover:bg-green-50'
       }`}
     >
-      {buttonConfig.label}
+      {isAdded ? (
+        <Check className="w-4 h-4" />
+      ) : (
+        <ShoppingCart className="w-4 h-4" />
+      )}
+      {isLoading
+        ? '追加中...'
+        : isAdded
+          ? '追加しました'
+          : '買い物リストに追加'}
     </button>
   )
 }

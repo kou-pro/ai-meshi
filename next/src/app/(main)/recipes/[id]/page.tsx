@@ -16,6 +16,7 @@ import SaveButton from '@/components/SaveButton'
 import RecipeOwnerActions from '@/components/RecipeOwnerActions'
 import ScoreSection from '@/components/ScoreSection'
 import RecipeImageUploader from '@/components/RecipeImageUploader'
+import { formatIngredientAmount } from '@/lib/formatIngredientAmount'
 
 type Ingredient = {
   name: string
@@ -279,15 +280,13 @@ export default async function RecipeDetailPage({
                 </h2>
                 <ul className="divide-y divide-gray-100 list-none p-0 mb-4">
                   {recipe.ingredients.map((ingredient, index) => {
-                    const isUnitFirst = ['大さじ', '小さじ', 'カップ'].includes(
-                      ingredient.unit,
-                    )
-                    const amount =
-                      ingredient.quantity === '適量'
-                        ? '適量'
-                        : isUnitFirst
-                          ? `${ingredient.unit}${ingredient.quantity}`
-                          : `${ingredient.quantity}${ingredient.unit}`
+                    // formatIngredientAmount: バックエンド (Rails の
+                    // IngredientFormatter) と完全に同じロジック。
+                    // 業界標準 (大さじ前置 / 適量・少々等の単位省略) に準拠。
+                    const amount = formatIngredientAmount({
+                      quantity: ingredient.quantity,
+                      unit: ingredient.unit,
+                    })
                     return (
                       <li
                         key={index}

@@ -34,6 +34,7 @@ class Api::V1::RecipesController < ApplicationController
       id: recipe.id,
       title: recipe.title,
       content: recipe.content,
+      servings: recipe.servings,
       ingredients: recipe.ingredients,
       steps: recipe.steps,
       hashtags: recipe.hashtags,

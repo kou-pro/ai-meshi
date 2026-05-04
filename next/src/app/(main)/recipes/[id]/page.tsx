@@ -7,6 +7,7 @@ import AddToShoppingListButton from '@/components/AddToShoppingListButton'
 import SaveButton from '@/components/SaveButton'
 import RecipeOwnerActions from '@/components/RecipeOwnerActions'
 import ScoreSection from '@/components/ScoreSection'
+import RecipeImageUploader from '@/components/RecipeImageUploader'
 
 type Ingredient = {
   name: string
@@ -148,17 +149,34 @@ export default async function RecipeDetailPage({
   const isOwner = currentUserId === recipe.user.id
   return (
     <div className="max-w-2xl mx-auto p-6">
-      {/* 1. 画像（視覚的インパクト） */}
-      {recipe.image_url && (
+      {/* 1. 画像（視覚的インパクト）
+          オーナーが画像エリアに重ねるアップローダーから追加 / 変更できるよう、
+          画像あり / なしの両方で同じ relative コンテナにまとめる。
+          - 画像あり: variant='replace' で右上隅にカメラアイコン
+          - 画像なし: variant='add' で中央に大きな追加ボタン
+          画像未設定時の placeholder は、リストカードや買い物リストと同じ
+          /default-recipe.jpg を使い、サイト全体で統一感を持たせる。 */}
+      <div className="relative w-full mb-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={recipe.image_url.replace(
-            'http://rails:3000',
-            process.env.NEXT_PUBLIC_RAILS_URL,
-          )}
-          alt={recipe.title}
-          className="w-full rounded-lg mb-6 object-cover h-[300px]"
+          src={
+            recipe.image_url
+              ? recipe.image_url.replace(
+                  'http://rails:3000',
+                  process.env.NEXT_PUBLIC_RAILS_URL ?? '',
+                )
+              : '/default-recipe.jpg'
+          }
+          alt={recipe.image_url ? recipe.title : ''}
+          className="w-full rounded-lg max-h-175 object-cover"
         />
-      )}
+        {isOwner && (
+          <RecipeImageUploader
+            recipeId={recipe.id}
+            variant={recipe.image_url ? 'replace' : 'add'}
+          />
+        )}
+      </div>
 
       {/* 2. タイトル */}
       <h1 className="text-2xl font-bold mb-2">{recipe.title}</h1>

@@ -1,10 +1,23 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { LogoutButton } from './LogoutButton'
 import Image from 'next/image'
 import UserMenu from './UserMenu'
 import { getCurrentUserId } from '@/lib/getCurrentUser'
 
+/**
+ * 共通ヘッダーナビゲーション。
+ *
+ * # ログアウトボタンについて
+ * ログアウトはヘッダーには配置しない (Cookpad / DELISH KITCHEN /
+ * クラシル等の日本系レシピアプリ標準パターンに準拠)。
+ * /settings 画面の最下部に配置済みのため、そちらから操作する。
+ *
+ * # ナビリンクのデザイン
+ * GitHub / Vercel / Notion / Linear / Stripe 等の業界標準に倣い、
+ * - text-sm font-medium (14px / 500) で読みやすい中間の太さ
+ * - text-gray-700 (#374151) で視認性確保
+ * - hover:text-green-600 + transition-colors で滑らかな遷移
+ */
 export default async function Navbar() {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get('access-token')?.value
@@ -16,6 +29,10 @@ export default async function Navbar() {
   // これにより Client Component 内で /api/auth/me を fetch する必要がなくなり、
   // 401 によるドロップダウンの欠落バグを根絶できる。
   const userId = isLoggedIn ? await getCurrentUserId() : null
+
+  // ナビリンクの共通スタイル (DRY)
+  const linkClass =
+    'text-sm font-medium text-gray-700 hover:text-green-600 transition-colors'
 
   return (
     <nav className="hidden md:block bg-white border-b border-gray-200 px-6 py-3">
@@ -34,50 +51,31 @@ export default async function Navbar() {
         <div className="flex items-center gap-6">
           {isLoggedIn ? (
             <>
-              <Link
-                href="/home"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/home" className={linkClass}>
                 ホーム
               </Link>
-              <Link
-                href="/recipes/new"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/recipes/new" className={linkClass}>
                 作る
               </Link>
-              <Link
-                href="/saved-recipes"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/saved-recipes" className={linkClass}>
                 保存済み
               </Link>
-              <Link
-                href="/shopping-list"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/shopping-list" className={linkClass}>
                 買い物リスト
               </Link>
               <UserMenu userId={userId} />
-              <LogoutButton />
             </>
           ) : (
             <>
-              <Link
-                href="/home"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/home" className={linkClass}>
                 みんなのレシピ
               </Link>
-              <Link
-                href="/login"
-                className="text-sm text-gray-600 hover:text-green-600"
-              >
+              <Link href="/login" className={linkClass}>
                 ログイン
               </Link>
               <Link
                 href="/signup"
-                className="text-sm bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700"
+                className="text-sm font-medium bg-green-600 text-white px-4 py-1.5 rounded hover:bg-green-700 transition-colors"
               >
                 新規登録
               </Link>

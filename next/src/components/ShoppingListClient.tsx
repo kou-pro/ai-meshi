@@ -405,44 +405,48 @@ export default function ShoppingListClient({ initialItems }: Props) {
                     <span>{category}</span>
                   </h3>
 
-                  {/* 食材リスト */}
+                  {/* 食材リスト
+                      行全体タップでチェック切替できるよう <label> で囲む。
+                      AnyList / Todoist / Apple Reminders 等の業界標準パターン。
+                      <label> 内に <input> をラップする implicit 関連付け方式 (HTML 仕様)。
+                      タップ領域は WCAG 2.5.5 (24px 以上) を満たすため py-2 + px-2。
+                      モバイルでの誤選択を防ぐため select-none を付与。 */}
                   <ul className="space-y-1.5">
                     {groupedByCategory[category].map((item) => (
-                      <li
-                        key={item.name}
-                        className="flex items-center gap-3 py-1"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={item.is_checked}
-                          onChange={(e) =>
-                            handleCheck(item.ids, e.target.checked)
-                          }
-                          className="w-4 h-4 cursor-pointer accent-green-600"
-                        />
-                        <span
-                          className={`flex-1 text-sm ${
-                            item.is_checked
-                              ? 'text-gray-400 line-through'
-                              : 'text-gray-800'
-                          }`}
-                        >
-                          {item.name}
-                          {item.count > 1 && (
-                            <span className="text-gray-400 text-xs ml-1">
-                              ×{item.count}
-                            </span>
-                          )}
-                        </span>
-                        <span
-                          className={`text-sm ${
-                            item.is_checked
-                              ? 'text-gray-400'
-                              : 'text-gray-500'
-                          }`}
-                        >
-                          {item.amount}
-                        </span>
+                      <li key={item.name}>
+                        <label className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg cursor-pointer select-none hover:bg-gray-50 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={item.is_checked}
+                            onChange={(e) =>
+                              handleCheck(item.ids, e.target.checked)
+                            }
+                            className="w-4 h-4 cursor-pointer accent-green-600 shrink-0"
+                          />
+                          <span
+                            className={`flex-1 text-sm ${
+                              item.is_checked
+                                ? 'text-gray-400 line-through'
+                                : 'text-gray-800'
+                            }`}
+                          >
+                            {item.name}
+                            {item.count > 1 && (
+                              <span className="text-gray-400 text-xs ml-1">
+                                ×{item.count}
+                              </span>
+                            )}
+                          </span>
+                          <span
+                            className={`text-sm ${
+                              item.is_checked
+                                ? 'text-gray-400'
+                                : 'text-gray-500'
+                            }`}
+                          >
+                            {item.amount}
+                          </span>
+                        </label>
                       </li>
                     ))}
                   </ul>

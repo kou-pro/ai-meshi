@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
@@ -15,33 +16,33 @@ export default function FollowButton({
   const [isLoading, setIsLoading] = useState(false)
 
   const handleClick = async () => {
+    if (isLoading) return
     setIsLoading(true)
 
-    if (isFollowing) {
-      // アンフォロー
-      const res = await fetchWithAuthClient(`/api/follows/${targetUserId}`, {
-        method: 'DELETE',
-      })
-      if (res.status === 401) {
-        setIsLoading(false)
-        return
-      }
-      if (res.ok) setIsFollowing(false)
-    } else {
-      // フォロー
-      const res = await fetchWithAuthClient('/api/follows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ following_id: targetUserId }),
-      })
-      if (res.status === 401) {
-        setIsLoading(false)
-        return
-      }
-      if (res.ok) setIsFollowing(true)
-    }
+    try {
+      const res = isFollowing
+        ? await fetchWithAuthClient(`/api/follows/${targetUserId}`, {
+            method: 'DELETE',
+          })
+        : await fetchWithAuthClient('/api/follows', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ following_id: targetUserId }),
+          })
 
-    setIsLoading(false)
+      if (res.status === 401) return
+      if (res.ok) {
+        setIsFollowing(!isFollowing)
+      } else {
+        // 4xx/5xx を silent failure させない
+        toast.error('フォロー状態の更新に失敗しました')
+      }
+    } catch {
+      // ネットワーク断時の uncaught promise rejection を捕捉
+      toast.error('通信エラーが発生しました')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

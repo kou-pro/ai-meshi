@@ -45,20 +45,18 @@ export default function CommentSection({
     setLoading(true)
     setError('')
 
-    const res = await fetchWithAuthClient(`/api/comments/${recipeId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ comment: { body } }),
-    })
-
-    if (res.status === 401) {
-      setLoading(false)
-      return
-    }
-
-    // res.json() は応答が JSON でない場合 (500 HTML エラーページ等) に throw する。
-    // try/catch で囲んで loading 永続化を防ぐ。
+    // fetchWithAuthClient 自体の throw (ネットワーク断) も含めて全体を try で囲む。
+    // res.json() も応答が JSON でない場合 (500 HTML エラーページ等) に throw するため
+    // 同じ try ブロックで捕捉する。
     try {
+      const res = await fetchWithAuthClient(`/api/comments/${recipeId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: { body } }),
+      })
+
+      if (res.status === 401) return
+
       if (res.ok) {
         const newComment = await res.json()
         setComments([newComment, ...comments])
@@ -70,7 +68,7 @@ export default function CommentSection({
         setError(data?.errors?.[0] || 'コメントの投稿に失敗しました')
       }
     } catch {
-      setError('コメントの投稿に失敗しました')
+      setError('通信エラーが発生しました')
     } finally {
       setLoading(false)
     }
@@ -79,20 +77,25 @@ export default function CommentSection({
   const handleDelete = async (commentId: number) => {
     if (!confirm('削除しますか？')) return
 
-    const res = await fetchWithAuthClient(
-      `/api/comments/${recipeId}/${commentId}`,
-      {
-        method: 'DELETE',
-      },
-    )
+    try {
+      const res = await fetchWithAuthClient(
+        `/api/comments/${recipeId}/${commentId}`,
+        {
+          method: 'DELETE',
+        },
+      )
 
-    if (res.status === 401) return
-    if (res.ok) {
-      setComments(comments.filter((c) => c.id !== commentId))
-      // page.tsx メタ行のコメント件数バッジを更新するため Server Component を再取得
-      router.refresh()
-    } else {
-      toast.error('削除に失敗しました')
+      if (res.status === 401) return
+      if (res.ok) {
+        setComments(comments.filter((c) => c.id !== commentId))
+        // page.tsx メタ行のコメント件数バッジを更新するため Server Component を再取得
+        router.refresh()
+      } else {
+        toast.error('削除に失敗しました')
+      }
+    } catch {
+      // ネットワーク断時の uncaught promise rejection を捕捉
+      toast.error('通信エラーが発生しました')
     }
   }
 

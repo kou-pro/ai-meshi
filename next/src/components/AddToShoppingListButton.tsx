@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ShoppingCart, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 type Props = {
@@ -40,39 +41,45 @@ export default function AddToShoppingListButton({
   const handleAdd = async (force = false) => {
     setStatus('loading')
 
-    const res = await fetchWithAuthClient('/api/shopping-list', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        recipe_id: recipeId,
-        ingredients,
-        force,
-      }),
-    })
+    try {
+      const res = await fetchWithAuthClient('/api/shopping-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipe_id: recipeId,
+          ingredients,
+          force,
+        }),
+      })
 
-    if (res.status === 401) {
-      setStatus('idle')
-      return
-    }
-    if (res.status === 409) {
-      const confirmed = window.confirm(
-        'このレシピはすでに買い物リストに追加されています。\nもう一度追加しますか？',
-      )
-      if (confirmed) {
-        await handleAdd(true)
-      } else {
-        setStatus('idle')
+      if (res.status === 401) return
+      if (res.status === 409) {
+        const confirmed = window.confirm(
+          'このレシピはすでに買い物リストに追加されています。\nもう一度追加しますか？',
+        )
+        if (confirmed) {
+          await handleAdd(true)
+        }
+        return
       }
-      return
-    }
 
-    if (res.ok) {
-      setStatus('added')
-      // 既存タイマーがあればキャンセルしてから新規予約 (連打対策)
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
-      resetTimerRef.current = setTimeout(() => setStatus('idle'), 3000)
-    } else {
-      setStatus('idle')
+      if (res.ok) {
+        setStatus('added')
+        // 既存タイマーがあればキャンセルしてから新規予約 (連打対策)
+        if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+        resetTimerRef.current = setTimeout(() => setStatus('idle'), 3000)
+        return
+      }
+
+      // 4xx/5xx は silent failure せず toast でユーザーに通知 (Next.js 公式: event handler 内エラーは UI で伝える)
+      toast.error('買い物リストへの追加に失敗しました')
+    } catch {
+      // ネットワーク断時の uncaught promise rejection を捕捉
+      toast.error('通信エラーが発生しました')
+    } finally {
+      // status が 'added' に遷移した場合は idle に戻さない (3 秒間「追加しました」表示が必要)
+      // それ以外 (エラー or 409 キャンセル) は idle に戻す
+      setStatus((prev) => (prev === 'added' ? 'added' : 'idle'))
     }
   }
 

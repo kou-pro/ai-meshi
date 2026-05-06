@@ -48,10 +48,17 @@ export default function LikeButton({
       })
 
       if (res.status === 401) return
-      if (!res.ok) return
+      if (!res.ok) {
+        // 4xx/5xx を silent failure させない
+        toast.error('いいねの更新に失敗しました')
+        return
+      }
 
       const data = await res.json()
       setLiked(data.liked_by_current_user)
+    } catch {
+      // ネットワーク断時の uncaught promise rejection を捕捉
+      toast.error('通信エラーが発生しました')
     } finally {
       // ネットワーク断などで throw された場合も isLoading を必ず戻す
       setIsLoading(false)

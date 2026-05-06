@@ -19,6 +19,7 @@ import {
   ShoppingBasket,
   type LucideIcon,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
 // カテゴリの表示順を定義（スーパーの売り場順）
@@ -167,22 +168,33 @@ export default function ShoppingListClient({ initialItems }: Props) {
   })
 
   // チェック状態を更新する
+  // 楽観的更新を行うため、API 失敗時は state を rollback + toast 通知 (silent failure 防止)
   const handleCheck = async (ids: number[], checked: boolean) => {
+    // rollback 用に元の状態を保存
+    const prevItems = items
     setItems((prev) =>
       prev.map((item) =>
         ids.includes(item.id) ? { ...item, is_checked: checked } : item,
       ),
     )
 
-    for (const id of ids) {
-      const res = await fetchWithAuthClient('/api/shopping-list', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, is_checked: checked }),
-      })
-      if (res.status === 401) {
-        return
+    try {
+      for (const id of ids) {
+        const res = await fetchWithAuthClient('/api/shopping-list', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, is_checked: checked }),
+        })
+        if (res.status === 401) return
+        if (!res.ok) {
+          setItems(prevItems)
+          toast.error('チェック状態の保存に失敗しました')
+          return
+        }
       }
+    } catch {
+      setItems(prevItems)
+      toast.error('通信エラーが発生しました')
     }
   }
 
@@ -190,15 +202,23 @@ export default function ShoppingListClient({ initialItems }: Props) {
   const handleDeleteByRecipe = async (recipeId: number) => {
     if (!confirm('このレシピの食材をすべて削除しますか？')) return
 
+    const prevItems = items
     setItems((prev) => prev.filter((item) => item.recipe_id !== recipeId))
 
-    const res = await fetchWithAuthClient('/api/shopping-list', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'recipe', recipe_id: recipeId }),
-    })
-    if (res.status === 401) {
-      return
+    try {
+      const res = await fetchWithAuthClient('/api/shopping-list', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'recipe', recipe_id: recipeId }),
+      })
+      if (res.status === 401) return
+      if (!res.ok) {
+        setItems(prevItems)
+        toast.error('レシピ食材の削除に失敗しました')
+      }
+    } catch {
+      setItems(prevItems)
+      toast.error('通信エラーが発生しました')
     }
   }
 
@@ -206,15 +226,23 @@ export default function ShoppingListClient({ initialItems }: Props) {
   const handleDeleteAll = async () => {
     if (!confirm('買い物リストをすべて削除しますか？')) return
 
+    const prevItems = items
     setItems([])
 
-    const res = await fetchWithAuthClient('/api/shopping-list', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'all' }),
-    })
-    if (res.status === 401) {
-      return
+    try {
+      const res = await fetchWithAuthClient('/api/shopping-list', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'all' }),
+      })
+      if (res.status === 401) return
+      if (!res.ok) {
+        setItems(prevItems)
+        toast.error('買い物リストの全削除に失敗しました')
+      }
+    } catch {
+      setItems(prevItems)
+      toast.error('通信エラーが発生しました')
     }
   }
 
@@ -222,15 +250,23 @@ export default function ShoppingListClient({ initialItems }: Props) {
   const handleDeleteChecked = async () => {
     if (!confirm('チェック済みの食材を削除しますか？')) return
 
+    const prevItems = items
     setItems((prev) => prev.filter((item) => !item.is_checked))
 
-    const res = await fetchWithAuthClient('/api/shopping-list', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'checked' }),
-    })
-    if (res.status === 401) {
-      return
+    try {
+      const res = await fetchWithAuthClient('/api/shopping-list', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'checked' }),
+      })
+      if (res.status === 401) return
+      if (!res.ok) {
+        setItems(prevItems)
+        toast.error('チェック済み項目の削除に失敗しました')
+      }
+    } catch {
+      setItems(prevItems)
+      toast.error('通信エラーが発生しました')
     }
   }
 

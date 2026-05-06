@@ -61,22 +61,27 @@ export default function ScoreSection({
   }, [])
 
   const saveScores = async (taste: number, ease: number, cost: number) => {
-    const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/score`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        taste_score: taste,
-        ease_score: ease,
-        cost_score: cost,
-      }),
-    })
-    if (res.status === 401) return
-    // 成功時はサイレント (Google Docs / Figma / Notion 等の業界標準)
-    // 星の色変化自体が視覚的フィードバックになるため、
-    // クリックの度にトーストを出すと過剰で邪魔になる。
-    // エラー時のみユーザーに気付かせるためトーストを出す。
-    if (!res.ok) {
-      toast.error('評価の保存に失敗しました')
+    try {
+      const res = await fetchWithAuthClient(`/api/recipes/${recipeId}/score`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taste_score: taste,
+          ease_score: ease,
+          cost_score: cost,
+        }),
+      })
+      if (res.status === 401) return
+      // 成功時はサイレント (Google Docs / Figma / Notion 等の業界標準)
+      // 星の色変化自体が視覚的フィードバックになるため、
+      // クリックの度にトーストを出すと過剰で邪魔になる。
+      // エラー時のみユーザーに気付かせるためトーストを出す。
+      if (!res.ok) {
+        toast.error('評価の保存に失敗しました')
+      }
+    } catch {
+      // setTimeout 内のデバウンス呼び出しで unhandled promise rejection になるのを防ぐ
+      toast.error('通信エラーで評価を保存できませんでした')
     }
   }
 

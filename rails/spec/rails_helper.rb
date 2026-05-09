@@ -11,6 +11,8 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # return unless Rails.env.test?
 require 'rspec/rails'
 require 'factory_bot_rails'  # ← ここを追加
+require 'webmock/rspec'      # 外部 API のモック (OpenAI 等) を有効化
+require 'shoulda/matchers'   # validation/association を 1 行で書ける matcher
 
 # Add additional requires below this line. Rails is not loaded until this point!
 
@@ -33,6 +35,10 @@ begin
 rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
+
+# WebMock: テスト中の外部通信を完全禁止する。localhost (MySQL 等) は許可。
+# OpenAI 等の外部 API を叩くテストでは stub_request で意図的にモックする。
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
@@ -62,4 +68,18 @@ RSpec.configure do |config|
 
   # FactoryBot を create(:user) などで使えるようにする
   config.include FactoryBot::Syntax::Methods
+
+  # Faker のロケールを日本語に設定 (Faker::Food.dish → "肉じゃが" 等)
+  config.before(:suite) do
+    Faker::Config.locale = :ja
+  end
+end
+
+# shoulda-matchers の RSpec 統合 (公式推奨設定)
+# これで `it { should validate_presence_of(:title) }` のような 1 行記述が使える
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
 end

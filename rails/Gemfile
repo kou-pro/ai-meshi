@@ -45,9 +45,18 @@ group :test do
   gem "factory_bot_rails"
   # テストフレームワーク rspec を導入する
   gem "rspec-rails"
+
+  # validation / association / callback 等の RSpec マッチャーを 1 行で書ける
+  gem "shoulda-matchers", "~> 7.0"
+
+  # 外部 API (OpenAI 等) のモック用
+  gem "webmock", "~> 3.26"
 end
 
 group :development, :test do
+  # ダミーデータを生成する (テスト用 + 開発時の seed 用)
+  gem "faker", "~> 3.8"
+
   # pry コンソールを使えるようにする。
   gem "pry-byebug"
   gem "pry-doc"

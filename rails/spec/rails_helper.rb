@@ -1,6 +1,9 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 require 'spec_helper'
-ENV['RAILS_ENV'] ||= 'test'
+# Docker 環境で RAILS_ENV=development がセットされている場合でも
+# テスト実行時は確実に test 環境にするため、||= ではなく = で強制する。
+# rails_helper.rb は RSpec 専用ファイルなので test 固定で問題ない。
+ENV['RAILS_ENV'] = 'test'
 require_relative '../config/environment'
 
 

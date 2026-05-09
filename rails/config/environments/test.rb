@@ -65,6 +65,7 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
-  # RSpec request spec 用
+  # RSpec request spec で Rails のデフォルト host (www.example.com) を許可する。
+  # rails_helper.rb で RAILS_ENV=test を強制しているため、この設定が確実に効く。
   config.hosts << "www.example.com"
 end

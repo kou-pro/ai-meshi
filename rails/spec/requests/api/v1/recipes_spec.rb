@@ -37,4 +37,38 @@ RSpec.describe "Api::V1::Recipes", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/recipes/:id" do
+    let(:recipe) { create(:recipe, user: user, content: "テスト内容") }
+
+    context "存在するレシピ ID の場合" do
+      it "200 OK を返す" do
+        get "/api/v1/recipes/#{recipe.id}"
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "レシピの基本情報を返す" do
+        get "/api/v1/recipes/#{recipe.id}"
+        json = JSON.parse(response.body)
+        expect(json["id"]).to eq(recipe.id)
+        expect(json["title"]).to eq(recipe.title)
+        expect(json["content"]).to eq("テスト内容")
+      end
+
+      it "user の情報がネストされて返る" do
+        recipe.user.update!(name: "テストユーザー")
+        get "/api/v1/recipes/#{recipe.id}"
+        json = JSON.parse(response.body)
+        expect(json["user"]["id"]).to eq(user.id)
+        expect(json["user"]["name"]).to eq("テストユーザー")
+      end
+
+      it "未ログインなので liked_by_current_user は false" do
+        get "/api/v1/recipes/#{recipe.id}"
+        json = JSON.parse(response.body)
+        expect(json["liked_by_current_user"]).to eq(false)
+        expect(json["bookmarked_by_current_user"]).to eq(false)
+      end
+    end
+  end
 end

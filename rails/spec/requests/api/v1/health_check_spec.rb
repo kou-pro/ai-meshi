@@ -1,15 +1,16 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::HealthCheck", type: :request do
-  describe "GET api/v1/health_check" do
-    subject { get(api_v1_health_check_path) }
+  describe "GET /api/v1/health_check" do
+    it "200 OK を返す" do
+      get "/api/v1/health_check"
+      expect(response).to have_http_status(:ok)
+    end
 
-    it "正常にレスポンスが返る" do
-      subject
-
-      res = response.parsed_body
-      expect(res["message"]).to eq "Success Health Check!"
-      expect(response).to have_http_status(:success)
+    it "メッセージが正しい JSON を返す" do
+      get "/api/v1/health_check"
+      json = JSON.parse(response.body)
+      expect(json["message"]).to eq("Success Health Check!")
     end
   end
 end

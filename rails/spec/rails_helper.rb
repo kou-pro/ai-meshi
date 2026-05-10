@@ -27,7 +27,7 @@ require 'shoulda/matchers'   # validation/association を 1 行で書ける matc
 # end with _spec.rb. You can configure this pattern with the --pattern
 # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
 #
-# Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
+Rails.root.glob('spec/support/**/*.rb').sort_by(&:to_s).each { |f| require f }
 
 # Ensures that the test database schema matches the current schema file.
 # If there are pending migrations it will invoke `db:test:prepare` to
@@ -71,6 +71,9 @@ RSpec.configure do |config|
 
   # FactoryBot を create(:user) などで使えるようにする
   config.include FactoryBot::Syntax::Methods
+
+  # Request Spec で sign_in_and_get_headers を使えるようにする
+  config.include AuthHelper, type: :request
 
   # Faker のロケールを日本語に設定 (Faker::Food.dish → "肉じゃが" 等)
   config.before(:suite) do

@@ -40,7 +40,7 @@ RSpec.describe "Api::V1::Recipes", type: :request do
 
       it "レシピの基本情報を返す" do
         get "/api/v1/recipes/#{recipe.id}"
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json["id"]).to eq(recipe.id)
         expect(json["title"]).to eq(recipe.title)
         expect(json["content"]).to eq("テスト内容")
@@ -49,16 +49,16 @@ RSpec.describe "Api::V1::Recipes", type: :request do
       it "user の情報がネストされて返る" do
         recipe.user.update!(name: "テストユーザー")
         get "/api/v1/recipes/#{recipe.id}"
-        json = JSON.parse(response.body)
+        json = response.parsed_body
         expect(json["user"]["id"]).to eq(user.id)
         expect(json["user"]["name"]).to eq("テストユーザー")
       end
 
       it "未ログインなので liked_by_current_user は false" do
         get "/api/v1/recipes/#{recipe.id}"
-        json = JSON.parse(response.body)
-        expect(json["liked_by_current_user"]).to eq(false)
-        expect(json["bookmarked_by_current_user"]).to eq(false)
+        json = response.parsed_body
+        expect(json["liked_by_current_user"]).to be(false)
+        expect(json["bookmarked_by_current_user"]).to be(false)
       end
     end
   end
@@ -146,6 +146,113 @@ RSpec.describe "Api::V1::Recipes", type: :request do
         expect {
           delete "/api/v1/recipes/#{recipe.id}", headers: auth_headers
         }.not_to change { Recipe.count }
+      end
+    end
+  end
+
+  describe "POST /api/v1/recipes/generate" do
+    let(:openai_url) { "https://api.openai.com/v1/chat/completions" }
+
+    context "未認証の場合" do
+      it "401または403を返す" do
+        post "/api/v1/recipes/generate", params: { ingredients: "豚肉、玉ねぎ" }
+        expect(response).to have_http_status(:forbidden).or(
+          have_http_status(:unauthorized),
+        )
+      end
+    end
+
+    context "OpenAI が正常な JSON を返す場合" do
+      let(:openai_response_body) do
+        {
+          choices: [
+            {
+              message: {
+                content: {
+                  title: "AI生成カレー",
+                  servings: 2,
+                  ingredients: [],
+                  steps: ["切る", "煮る"],
+                  hashtags: ["和食"],
+                }.to_json,
+              },
+            },
+          ],
+        }.to_json
+      end
+
+      before do
+        stub_request(:post, openai_url).
+          to_return(
+            status: 200,
+            body: openai_response_body,
+            headers: { "Content-Type" => "application/json" },
+          )
+      end
+
+      it "201 Created を返す" do
+        auth_headers = sign_in_and_get_headers(user)
+        post "/api/v1/recipes/generate",
+             params: { ingredients: "豚肉、玉ねぎ", is_published: true },
+             headers: auth_headers
+        expect(response).to have_http_status(:created)
+      end
+
+      it "Recipe が 1 件作成される" do
+        auth_headers = sign_in_and_get_headers(user)
+        expect {
+          post "/api/v1/recipes/generate",
+               params: { ingredients: "豚肉、玉ねぎ", is_published: true },
+               headers: auth_headers
+        }.to change { user.recipes.count }.by(1)
+      end
+    end
+
+    context "OpenAI が不正な JSON を返す場合" do
+      before do
+        stub_request(:post, openai_url).
+          to_return(
+            status: 200,
+            body: {
+              choices: [{ message: { content: "これは JSON ではない" } }],
+            }.to_json,
+            headers: { "Content-Type" => "application/json" },
+          )
+      end
+
+      it "422 を返す" do
+        auth_headers = sign_in_and_get_headers(user)
+        post "/api/v1/recipes/generate",
+             params: { ingredients: "豚肉", is_published: true },
+             headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
+      end
+    end
+
+    context "Recipe バリデーション失敗の場合 (title 空)" do
+      before do
+        stub_request(:post, openai_url).
+          to_return(
+            status: 200,
+            body: {
+              choices: [
+                {
+                  message: {
+                    content: { title: "", servings: 2, ingredients: [], steps: [], hashtags: [] }.to_json,
+                  },
+                },
+              ],
+            }.to_json,
+            headers: { "Content-Type" => "application/json" },
+          )
+      end
+
+      it "422 を返す" do
+        auth_headers = sign_in_and_get_headers(user)
+        post "/api/v1/recipes/generate",
+             params: { ingredients: "豚肉", is_published: true },
+             headers: auth_headers
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

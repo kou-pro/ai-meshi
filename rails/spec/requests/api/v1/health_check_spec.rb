@@ -9,7 +9,7 @@ RSpec.describe "Api::V1::HealthCheck", type: :request do
 
     it "メッセージが正しい JSON を返す" do
       get "/api/v1/health_check"
-      json = JSON.parse(response.body)
+      json = response.parsed_body
       expect(json["message"]).to eq("Success Health Check!")
     end
   end

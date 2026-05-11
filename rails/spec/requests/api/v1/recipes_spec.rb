@@ -256,4 +256,92 @@ RSpec.describe "Api::V1::Recipes", type: :request do
       end
     end
   end
+
+  describe "GET /api/v1/recipes/published" do
+    let!(:published_recipe) { create(:recipe, user: user, title: "公開レシピ", is_published: true) }
+    let!(:draft_recipe) { create(:recipe, user: user, title: "下書きレシピ", is_published: false) }
+
+    it "公開レシピのみ返し、ページネーション情報を含む" do
+      get "/api/v1/recipes/published"
+      expect(response).to have_http_status(:ok)
+      json = response.parsed_body
+      titles = json["items"].map {|r| r["title"] }
+      expect(titles).to include("公開レシピ")
+      expect(titles).not_to include("下書きレシピ")
+      expect(json).to include("current_page", "next_page", "has_next_page", "total_count")
+    end
+
+    it "query パラメータで検索できる" do
+      create(:recipe, user: user, title: "カレーライス", is_published: true)
+      get "/api/v1/recipes/published", params: { query: "カレー" }
+      expect(response).to have_http_status(:ok)
+      titles = response.parsed_body["items"].map {|r| r["title"] }
+      expect(titles).to include("カレーライス")
+      expect(titles).not_to include("公開レシピ")
+    end
+  end
+
+  describe "GET /api/v1/recipes/popular" do
+    let!(:published_recipe) { create(:recipe, user: user, title: "公開人気レシピ", is_published: true) }
+    let!(:draft_recipe) { create(:recipe, user: user, title: "下書きレシピ", is_published: false) }
+
+    it "公開レシピのみ返す" do
+      get "/api/v1/recipes/popular"
+      expect(response).to have_http_status(:ok)
+      titles = response.parsed_body.map {|r| r["title"] }
+      expect(titles).to include("公開人気レシピ")
+      expect(titles).not_to include("下書きレシピ")
+    end
+  end
+
+  describe "GET /api/v1/recipes/popular_tags" do
+    before do
+      create(:recipe, user: user, is_published: true, hashtags: ["#和食", "#簡単"])
+      create(:recipe, user: user, is_published: true, hashtags: ["#和食"])
+    end
+
+    it "タグの集計を返す" do
+      get "/api/v1/recipes/popular_tags"
+      expect(response).to have_http_status(:ok)
+      json = response.parsed_body
+      expect(json).to have_key("tags")
+      tag_names = json["tags"].map {|t| t["tag"] }
+      expect(tag_names).to include("#和食", "#簡単")
+    end
+  end
+
+  describe "PATCH /api/v1/recipes/:id/publish" do
+    let(:recipe) { create(:recipe, user: user, is_published: false) }
+
+    context "未認証の場合" do
+      it "401または403を返す" do
+        patch "/api/v1/recipes/#{recipe.id}/publish", params: { is_published: true }
+        expect(response).to have_http_status(:forbidden).or(
+          have_http_status(:unauthorized),
+        )
+      end
+    end
+
+    context "自分のレシピを公開する場合" do
+      it "200 OK + is_published が true に更新される" do
+        auth_headers = sign_in_and_get_headers(user)
+        patch "/api/v1/recipes/#{recipe.id}/publish",
+              params: { is_published: true },
+              headers: auth_headers
+        expect(response).to have_http_status(:ok)
+        expect(recipe.reload.is_published).to be(true)
+      end
+    end
+
+    context "他人のレシピを公開しようとした場合" do
+      it "404 を返す" do
+        other_user = create(:user, password: "password", password_confirmation: "password")
+        auth_headers = sign_in_and_get_headers(other_user)
+        patch "/api/v1/recipes/#{recipe.id}/publish",
+              params: { is_published: true },
+              headers: auth_headers
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
 end

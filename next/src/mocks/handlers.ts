@@ -20,4 +20,14 @@ export const handlers = [
   http.delete('/api/bookmarks/:recipeId', () => {
     return HttpResponse.json({ bookmarked: false })
   }),
+
+  // POST /api/follows → フォロー作成
+  http.post('/api/follows', () => {
+    return HttpResponse.json({ following: true })
+  }),
+
+  // DELETE /api/follows/:targetUserId → フォロー解除
+  http.delete('/api/follows/:targetUserId', () => {
+    return HttpResponse.json({ following: false })
+  }),
 ]

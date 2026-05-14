@@ -1,3 +1,4 @@
+import 'client-only'
 import { toast } from 'sonner'
 
 export async function fetchWithAuthClient(

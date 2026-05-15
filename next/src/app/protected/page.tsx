@@ -1,7 +1,7 @@
 // app/protected/page.tsx
 
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import { LogoutButton } from '@/components/LogoutButton'
 
 export const dynamic = 'force-dynamic'
@@ -13,29 +13,10 @@ export default async function ProtectedPage() {
     throw new Error('Server configuration error')
   }
 
-  const cookieStore = await cookies()
+  // 認証ヘッダー / Cookie 欠落時の redirect / cache: 'no-store' は fetchWithAuth が処理する。
+  const res = await fetchWithAuth(`${RAILS_URL}/api/v1/users/me`)
 
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  if (!accessToken || !client || !uid) {
-    // ▼ Server Component内では redirect() を使う
-    // return <div>...</div> より redirect() の方が正しい
-    // middlewareで弾かれるケースがほとんどだが、二重チェックとして残す
-    redirect('/login')
-  }
-
-  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
-    cache: 'no-store',
-    headers: {
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-      'Content-Type': 'application/json',
-    },
-  })
-
+  // res.ok=false (401 等) のときは再ログインへ誘導
   if (!res.ok) {
     redirect('/login')
   }

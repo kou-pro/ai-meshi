@@ -1,5 +1,4 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import ShoppingListClient from '@/components/ShoppingListClient'
 
 export const dynamic = 'force-dynamic'
@@ -22,38 +21,15 @@ async function fetchShoppingList(): Promise<ShoppingListItem[]> {
     return []
   }
 
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  if (!accessToken || !client || !uid) return []
-
-  const res = await fetch(`${RAILS_URL}/api/v1/shopping_list_items`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-    cache: 'no-store',
-  })
+  // 認証ヘッダー / Cookie 欠落時の redirect / cache: 'no-store' は fetchWithAuth が処理する。
+  const res = await fetchWithAuth(`${RAILS_URL}/api/v1/shopping_list_items`)
 
   if (!res.ok) return []
   return res.json()
 }
 
 export default async function ShoppingListPage() {
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  if (!accessToken || !client || !uid) {
-    redirect('/login')
-  }
-
+  // Cookie 欠落時の /login redirect は fetchShoppingList 内の fetchWithAuth が処理する。
   const items = await fetchShoppingList()
 
   return <ShoppingListClient initialItems={items} />

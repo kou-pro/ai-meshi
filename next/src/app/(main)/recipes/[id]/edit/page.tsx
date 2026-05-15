@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import EditRecipeForm from './EditRecipeForm'
 
 export const dynamic = 'force-dynamic'
@@ -15,21 +15,8 @@ async function fetchRecipe(id: string): Promise<Recipe | null> {
   const RAILS_URL = process.env.RAILS_API_URL
   if (!RAILS_URL) return null
 
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-  if (!accessToken || !client || !uid) return null
-
-  const res = await fetch(`${RAILS_URL}/api/v1/recipes/${id}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-    cache: 'no-store',
-  })
+  // 認証ヘッダー / Cookie 欠落時の redirect / cache: 'no-store' は fetchWithAuth が処理する。
+  const res = await fetchWithAuth(`${RAILS_URL}/api/v1/recipes/${id}`)
 
   if (!res.ok) return null
   return res.json()
@@ -55,12 +42,7 @@ export default async function EditRecipePage({
 }) {
   const { id } = await params
 
-  // 認証必須
-  const cookieStore = await cookies()
-  if (!cookieStore.get('access-token')?.value) {
-    redirect('/login')
-  }
-
+  // 認証必須 (Cookie 欠落時の /login redirect は fetchWithAuth が処理する)
   const recipe = await fetchRecipe(id)
   if (!recipe) {
     notFound()

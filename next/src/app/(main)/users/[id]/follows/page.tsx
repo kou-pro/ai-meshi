@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getCurrentUserId } from '@/lib/getCurrentUser'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 import FollowsClient from './FollowsClient'
 
 export const dynamic = 'force-dynamic'
@@ -19,21 +19,8 @@ async function fetchUsersByTab(
   const RAILS_URL = process.env.RAILS_API_URL
   if (!RAILS_URL) return []
 
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-  if (!accessToken || !client || !uid) return []
-
-  const res = await fetch(`${RAILS_URL}/api/v1/users/${userId}/${tab}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-    cache: 'no-store',
-  })
+  // 認証ヘッダー / Cookie 欠落時の redirect / cache: 'no-store' は fetchWithAuth が処理する。
+  const res = await fetchWithAuth(`${RAILS_URL}/api/v1/users/${userId}/${tab}`)
 
   if (!res.ok) return []
   return res.json()

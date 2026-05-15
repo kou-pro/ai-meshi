@@ -1,8 +1,7 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import RecipeCard from '@/components/RecipeCard'
 import { BookmarkCheck } from 'lucide-react'
+import { fetchWithAuth } from '@/lib/fetchWithAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,24 +24,9 @@ async function fetchSavedRecipes(): Promise<Recipe[]> {
     return []
   }
 
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  // 未ログインならリダイレクト
-  if (!accessToken || !client || !uid) {
-    redirect('/login')
-  }
-
-  const res = await fetch(`${RAILS_URL}/api/v1/bookmarks`, {
-    headers: {
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-    cache: 'no-store',
-  })
+  // 認証ヘッダー / Cookie 欠落時の /login redirect / cache: 'no-store' は
+  // fetchWithAuth が公式 DAL パターンで処理する。
+  const res = await fetchWithAuth(`${RAILS_URL}/api/v1/bookmarks`)
 
   if (!res.ok) return []
   return res.json()

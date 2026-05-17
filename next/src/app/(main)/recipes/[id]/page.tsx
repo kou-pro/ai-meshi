@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getCurrentUserId } from '@/lib/getCurrentUser'
 import {
   ListChecks,
   ChefHat,
@@ -105,50 +106,20 @@ async function fetchComments(id: string): Promise<Comment[]> {
   return res.json()
 }
 
-async function fetchCurrentUserId(
-  accessToken: string,
-  client: string,
-  uid: string,
-): Promise<number | null> {
-  const RAILS_URL = process.env.RAILS_API_URL
-  if (!RAILS_URL) return null
-
-  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-  })
-  if (!res.ok) return null
-  const data = await res.json()
-  return data.id
-}
-
 export default async function RecipeDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
 
-  const isLoggedIn = !!(accessToken && client && uid)
-
-  // 3 つの fetch を並列実行: 互いに依存しないため Promise.all で
-  // 逐次 await の RTT 合算を解消 (推定 ~2 RTT 短縮)。
   const [recipe, comments, currentUserId] = await Promise.all([
     fetchRecipe(id),
     fetchComments(id),
-    isLoggedIn
-      ? fetchCurrentUserId(accessToken!, client!, uid!)
-      : Promise.resolve(null),
+    getCurrentUserId(),
   ])
+
+  const isLoggedIn = currentUserId !== null
 
   if (!recipe) return notFound()
 
@@ -197,9 +168,6 @@ export default async function RecipeDetailPage({
         </div>
       </div>
 
-      {/* 2. タイトルブロック
-          タイトル左 + オーナーなら「⋯ 管理」ドロップダウン右
-          メタ情報 (アバター・名前・日付・人数) は title 下に配置 */}
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-3xl font-bold text-gray-800 flex-1 min-w-0">

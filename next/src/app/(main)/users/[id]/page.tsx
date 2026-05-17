@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import RecipeCard from '@/components/RecipeCard'
 import FollowButton from '@/components/FollowButton'
+import { getCurrentUserId } from '@/lib/getCurrentUser'
 
 type Recipe = {
   id: number
@@ -61,34 +62,6 @@ async function fetchUserRecipes(
   return res.json()
 }
 
-async function fetchCurrentUserId(): Promise<number | null> {
-  const RAILS_URL = process.env.RAILS_API_URL
-  if (!RAILS_URL) {
-    console.error('RAILS_API_URL is not set in environment variables')
-    return null
-  }
-
-  const cookieStore = await cookies()
-  const accessToken = cookieStore.get('access-token')?.value
-  const client = cookieStore.get('client')?.value
-  const uid = cookieStore.get('uid')?.value
-
-  if (!accessToken || !client || !uid) return null
-
-  const res = await fetch(`${RAILS_URL}/api/v1/users/me`, {
-    headers: {
-      'access-token': accessToken,
-      client: client,
-      uid: uid,
-    },
-    cache: 'no-store',
-  })
-
-  if (!res.ok) return null
-  const data = await res.json()
-  return data.id
-}
-
 export default async function UserRecipesPage({
   params,
 }: {
@@ -97,12 +70,11 @@ export default async function UserRecipesPage({
   const { id } = await params
   const [data, currentUserId] = await Promise.all([
     fetchUserRecipes(id),
-    fetchCurrentUserId(),
+    getCurrentUserId(),
   ])
 
   if (!data) return notFound()
 
-  // 自分自身のページではフォローボタンを表示しない
   const isOwnPage = currentUserId === data.user.id
 
   return (
@@ -123,13 +95,15 @@ export default async function UserRecipesPage({
           href={`/users/${id}/follows?tab=following`}
           className="text-gray-600 hover:text-green-600"
         >
-          <span className="font-bold">{data.user.following_count}</span> フォロー中
+          <span className="font-bold">{data.user.following_count}</span>{' '}
+          フォロー中
         </Link>
         <Link
           href={`/users/${id}/follows?tab=followers`}
           className="text-gray-600 hover:text-green-600"
         >
-          <span className="font-bold">{data.user.followers_count}</span> フォロワー
+          <span className="font-bold">{data.user.followers_count}</span>{' '}
+          フォロワー
         </Link>
       </div>
 

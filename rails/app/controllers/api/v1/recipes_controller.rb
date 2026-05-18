@@ -111,9 +111,10 @@ class Api::V1::RecipesController < ApplicationController
     elsif query
       keywords = query.split(/[\s　]+/)
       keywords.each do |keyword|
+        escaped = ActiveRecord::Base.sanitize_sql_like(keyword)
         recipes = recipes.where(
           "recipes.title LIKE :kw OR recipes.content LIKE :kw",
-          kw: "%#{keyword}%",
+          kw: "%#{escaped}%",
         )
       end
     end

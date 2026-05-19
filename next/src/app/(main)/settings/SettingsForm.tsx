@@ -63,7 +63,7 @@ export default function SettingsForm({
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">マイページ</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">設定</h1>
 
         {message && <p className="text-green-600 text-sm mb-4">{message}</p>}
 

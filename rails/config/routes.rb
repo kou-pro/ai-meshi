@@ -10,6 +10,7 @@ Rails.application.routes.draw do
                                         omniauth_callbacks: "auth/omniauth_callbacks",
                                         registrations: "overrides/registrations",
                                         confirmations: "overrides/confirmations",
+                                        passwords: "auth/passwords",
                                       }
   mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
   namespace :api do

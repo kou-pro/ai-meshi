@@ -2,7 +2,7 @@
   "containerDefinitions": [
     {
       "name": "rails",
-      "image": "077369590690.dkr.ecr.ap-northeast-1.amazonaws.com/ai-meshi-rails:latest",
+      "image": "__AWS_ACCOUNT_ID__.dkr.ecr.ap-northeast-1.amazonaws.com/ai-meshi-rails:latest",
       "cpu": 0,
       "portMappings": [
         {
@@ -72,30 +72,30 @@
       "secrets": [
         {
           "name": "GOOGLE_CLIENT_SECRET",
-          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:077369590690:secret:ai-meshi-rails-secrets-152MIi:GOOGLE_CLIENT_SECRET::"
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:__AWS_ACCOUNT_ID__:secret:ai-meshi-rails-secrets-152MIi:GOOGLE_CLIENT_SECRET::"
         },
         {
           "name": "GOOGLE_CLIENT_ID",
-          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:077369590690:secret:ai-meshi-rails-secrets-152MIi:GOOGLE_CLIENT_ID::"
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:__AWS_ACCOUNT_ID__:secret:ai-meshi-rails-secrets-152MIi:GOOGLE_CLIENT_ID::"
         },
         {
           "name": "DATABASE_URL",
-          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:077369590690:secret:ai-meshi-rails-secrets-152MIi:DATABASE_URL::"
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:__AWS_ACCOUNT_ID__:secret:ai-meshi-rails-secrets-152MIi:DATABASE_URL::"
         },
         {
           "name": "OPENAI_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:077369590690:secret:ai-meshi-rails-secrets-152MIi:OPENAI_API_KEY::"
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:__AWS_ACCOUNT_ID__:secret:ai-meshi-rails-secrets-152MIi:OPENAI_API_KEY::"
         },
         {
           "name": "RAILS_MASTER_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:077369590690:secret:ai-meshi-rails-secrets-152MIi:RAILS_MASTER_KEY::"
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:__AWS_ACCOUNT_ID__:secret:ai-meshi-rails-secrets-152MIi:RAILS_MASTER_KEY::"
         }
       ]
     }
   ],
   "family": "ai-meshi-task-definition-backend",
-  "taskRoleArn": "arn:aws:iam::077369590690:role/ai-meshi-ecs-task-role",
-  "executionRoleArn": "arn:aws:iam::077369590690:role/ecsTaskExecutionRole",
+  "taskRoleArn": "ai-meshi-ecs-task-role",
+  "executionRoleArn": "ecsTaskExecutionRole",
   "networkMode": "awsvpc",
   "volumes": [],
   "placementConstraints": [],

@@ -13,22 +13,21 @@ class User < ApplicationRecord
   # OmniAuth コールバックから User を取得 or 作成する。
   #
   # 1. provider + uid で既存連携済みユーザーを検索（最優先）
-  # 2. email_verified=true のときに限り、同じ email の既存ユーザーと自動連携
-  #    （メール+パスワード登録 → Google ログインへの統合シナリオ）
-  # 3. それ以外は新規作成
-  #
-  # email_verified=false の場合に自動連携しないのは、未確認 email を使った
-  # アカウント乗っ取りリスクを排除するため。Google 個人アカウントは通常 true。
+  # 2. email_verified=true でなければ nil を返して処理中断
+  #    （未確認 email でのアカウント乗っ取りリスクを排除）
+  # 3. 同じ email の既存ユーザーがあれば自動連携
+  # 4. なければ新規作成
   def self.from_omniauth(auth)
     user = find_by(provider: auth.provider, uid: auth.uid)
     return user if user
 
-    if auth.dig("extra", "raw_info", "email_verified") && auth.info.email.present?
-      user = find_by(email: auth.info.email)
-      if user
-        user.update!(provider: auth.provider, uid: auth.uid)
-        return user
-      end
+    email_verified = auth.dig("extra", "raw_info", "email_verified")
+    return nil unless email_verified && auth.info.email.present?
+
+    user = find_by(email: auth.info.email)
+    if user
+      user.update!(provider: auth.provider, uid: auth.uid)
+      return user
     end
 
     create!(

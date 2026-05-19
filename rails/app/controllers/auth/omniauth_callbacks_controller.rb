@@ -9,7 +9,8 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
   def omniauth_success
     @resource = User.from_omniauth(request.env["omniauth.auth"])
 
-    if @resource.persisted?
+    # email_verified=false 等で from_omniauth が nil を返した場合も else 分岐に流す
+    if @resource&.persisted?
       @token = @resource.create_token
       @resource.save!
 

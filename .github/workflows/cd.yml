@@ -68,6 +68,10 @@ jobs:
             --push
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_RAILS:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Substitute AWS Account ID placeholder
+        run: |
+          sed -i "s/__AWS_ACCOUNT_ID__/${{ secrets.AWS_ACCOUNT_ID }}/g" ${{ env.ECS_TASK_DEFINITION_BACKEND }}
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -120,6 +124,10 @@ jobs:
             ./next \
             --push
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_NEXT:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Substitute AWS Account ID placeholder
+        run: |
+          sed -i "s/__AWS_ACCOUNT_ID__/${{ secrets.AWS_ACCOUNT_ID }}/g" ${{ env.ECS_TASK_DEFINITION_FRONTEND }}
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def

@@ -184,14 +184,16 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def generate
-    ingredients = params[:ingredients]
+    input = generate_params
+
+    ingredients = input[:ingredients]
 
     # フロントから選択条件を受け取る
     # .presence → 未選択（nil・空）の場合は nil を返す
-    servings   = params[:servings].presence
-    genre      = params[:genre].presence
-    scene      = params[:scene].presence
-    conditions = Array(params[:conditions]).compact_blank
+    servings   = input[:servings].presence
+    genre      = input[:genre].presence
+    scene      = input[:scene].presence
+    conditions = Array(input[:conditions]).compact_blank
 
     # 選択された条件だけ hints 配列に追加する
     hints = []
@@ -221,6 +223,7 @@ class Api::V1::RecipesController < ApplicationController
           },
         ],
         temperature: 0.7,
+        response_format: { type: "json_object" },
       },
     )
 
@@ -233,7 +236,7 @@ class Api::V1::RecipesController < ApplicationController
       ingredients: recipe_data.fetch("ingredients", []),
       steps: recipe_data.fetch("steps", []),
       hashtags: recipe_data.fetch("hashtags", []),
-      is_published: ActiveModel::Type::Boolean.new.cast(params[:is_published]),
+      is_published: ActiveModel::Type::Boolean.new.cast(input[:is_published]),
     )
 
     if recipe.save
@@ -244,12 +247,24 @@ class Api::V1::RecipesController < ApplicationController
   rescue JSON::ParserError
     render json: { error: "レシピの生成に失敗しました" }, status: :unprocessable_content
   rescue => e
-    render json: { error: e.message }, status: :internal_server_error
+    Rails.logger.error("Recipe generation error: #{e.full_message}")
+    render json: { error: "レシピの生成に失敗しました" }, status: :internal_server_error
   end
 
   private
 
     def recipe_params
       params.require(:recipe).permit(:title, :content, :image, :taste_score, :ease_score, :cost_score, steps: [])
+    end
+
+    def generate_params
+      params.permit(
+        :ingredients,
+        :servings,
+        :genre,
+        :scene,
+        :is_published,
+        conditions: [],
+      )
     end
 end

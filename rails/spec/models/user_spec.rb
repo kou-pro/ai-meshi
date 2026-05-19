@@ -122,5 +122,46 @@ RSpec.describe User, type: :model do
         expect(user.confirmed_at).not_to be_nil
       end
     end
+
+    context "email_verified=false の場合 (未検証 email でのアカウント乗っ取り防御)" do
+      let(:auth) do
+        OmniAuth::AuthHash.new(
+          provider: "google_oauth2",
+          uid: "google-fake",
+          info: { email: "victim@example.com", name: "Fake User" },
+          extra: { raw_info: { email_verified: false } },
+        )
+      end
+
+      it "nil を返す" do
+        expect(User.from_omniauth(auth)).to be_nil
+      end
+
+      it "User は作成されない" do
+        expect {
+          User.from_omniauth(auth)
+        }.not_to change { User.count }
+      end
+    end
+
+    context "email_verified クレームが auth に含まれない場合" do
+      let(:auth) do
+        OmniAuth::AuthHash.new(
+          provider: "google_oauth2",
+          uid: "google-no-verified",
+          info: { email: "unverified@example.com", name: "Unverified User" },
+        )
+      end
+
+      it "nil を返す" do
+        expect(User.from_omniauth(auth)).to be_nil
+      end
+
+      it "User は作成されない" do
+        expect {
+          User.from_omniauth(auth)
+        }.not_to change { User.count }
+      end
+    end
   end
 end

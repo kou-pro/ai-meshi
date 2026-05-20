@@ -10,9 +10,15 @@ class Overrides::ConfirmationsController < DeviseTokenAuth::ConfirmationsControl
     if @resource.errors.empty?
       yield @resource if block_given?
 
+      # create_token は呼ぶたびに新しいトークンを生成するため、必ず 1 回だけ呼んで
+      # 同じ token/client をフロントに渡す。save! しないと tokens カラムが
+      # DB に永続化されず、フロントからの後続リクエストが 401 になる。
+      token = @resource.create_token
+      @resource.save!
+
       redirect_header_options = { account_confirmation_success: true }
-      redirect_headers = build_redirect_headers(@resource.create_token.token,
-                                                @resource.create_token.client,
+      redirect_headers = build_redirect_headers(token.token,
+                                                token.client,
                                                 redirect_header_options)
       redirect_to(@resource.build_auth_url(params[:redirect_url],
                                            redirect_headers),

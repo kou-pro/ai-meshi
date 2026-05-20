@@ -3,6 +3,8 @@ Rails.application.routes.draw do
   match "/omniauth/:provider/callback", to: "auth/omniauth_callbacks#omniauth_success", via: [:get, :post]
   get "/omniauth/failure", to: "auth/omniauth_callbacks#omniauth_failure"
   get "/omniauth/:provider", to: "auth/omniauth_callbacks#passthru"
+  # 短命コードと本物のトークンを交換する Token Endpoint (RFC 6749 §4.1 相当)
+  post "/auth/exchange", to: "auth/exchange#create"
   # ▼ 後ろに移動
   mount_devise_token_auth_for "User", at: "auth",
                                       controllers: {

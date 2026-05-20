@@ -14,15 +14,16 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       @token = @resource.create_token
       @resource.save!
 
-      access_token = @token.token
-      client       = @token.client
-      uid          = URI.encode_www_form_component(@resource.uid)
+      # RFC 6749 §4.1 準拠: 本物のトークンを URL クエリに乗せず、短命コードで包む。
+      # Next.js が POST /auth/exchange で本物のトークンに交換する。
+      code = AuthExchangeCode.encode(
+        access_token: @token.token,
+        client: @token.client,
+        uid: @resource.uid,
+      )
 
       redirect_to(
-        "#{ENV.fetch("FRONT_DOMAIN")}/api/auth/google/callback?" \
-        "access-token=#{access_token}" \
-        "&client=#{client}" \
-        "&uid=#{uid}",
+        "#{ENV.fetch("FRONT_DOMAIN")}/api/auth/google/callback?code=#{CGI.escape(code)}",
         allow_other_host: true,
       )
     else

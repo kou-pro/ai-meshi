@@ -16,13 +16,19 @@ class Overrides::ConfirmationsController < DeviseTokenAuth::ConfirmationsControl
       token = @resource.create_token
       @resource.save!
 
-      redirect_header_options = { account_confirmation_success: true }
-      redirect_headers = build_redirect_headers(token.token,
-                                                token.client,
-                                                redirect_header_options)
-      redirect_to(@resource.build_auth_url(params[:redirect_url],
-                                           redirect_headers),
-                  allow_other_host: true)
+      # RFC 6749 §4.1 準拠: 本物のトークンを URL クエリに乗せず、短命コードで包む。
+      # Next.js が POST /auth/exchange で本物のトークンに交換する。
+      code = AuthExchangeCode.encode(
+        access_token: token.token,
+        client: token.client,
+        uid: @resource.uid,
+        expiry: token.expiry,
+      )
+
+      redirect_to(
+        "#{params[:redirect_url]}?code=#{CGI.escape(code)}&account_confirmation_success=true",
+        allow_other_host: true,
+      )
     else
       redirect_to "#{params[:redirect_url]}?account_confirmation_success=false",
                   allow_other_host: true

@@ -7,9 +7,10 @@ RSpec.describe "Auth::Confirmations", type: :request do
 
     # Devise の Recoverable / Confirmable と同じパターン：raw_token を生成して
     # hashed_token を DB に保存し、raw_token をリンクパラメータとして使う。
+    # テスト用フィクスチャの直書き込みなので validations / callbacks は意図的にスキップ。
     def issue_confirmation_token(user)
       raw_token, hashed_token = Devise.token_generator.generate(User, :confirmation_token)
-      user.update_columns(
+      user.update_columns( # rubocop:disable Rails/SkipsModelValidations
         confirmation_token: hashed_token,
         confirmation_sent_at: Time.current,
       )

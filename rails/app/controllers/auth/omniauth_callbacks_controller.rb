@@ -18,8 +18,8 @@ class Auth::OmniauthCallbacksController < DeviseTokenAuth::OmniauthCallbacksCont
       # Next.js が POST /auth/exchange で本物のトークンに交換する。
       code = AuthExchangeCode.encode(
         access_token: @token.token,
-        client:       @token.client,
-        uid:          @resource.uid,
+        client: @token.client,
+        uid: @resource.uid,
       )
 
       redirect_to(

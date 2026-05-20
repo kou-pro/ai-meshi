@@ -5,9 +5,9 @@ RSpec.describe "Auth::Exchange", type: :request do
     let(:payload_args) do
       {
         access_token: "abc123",
-        client:       "client_xyz",
-        uid:          "user@example.com",
-        expiry:       1_781_827_344,
+        client: "client_xyz",
+        uid: "user@example.com",
+        expiry: 1_781_827_344,
       }
     end
 

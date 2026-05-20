@@ -20,9 +20,9 @@ class Overrides::ConfirmationsController < DeviseTokenAuth::ConfirmationsControl
       # Next.js が POST /auth/exchange で本物のトークンに交換する。
       code = AuthExchangeCode.encode(
         access_token: token.token,
-        client:       token.client,
-        uid:          @resource.uid,
-        expiry:       token.expiry,
+        client: token.client,
+        uid: @resource.uid,
+        expiry: token.expiry,
       )
 
       redirect_to(

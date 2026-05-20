@@ -32,7 +32,7 @@ RSpec.describe "Auth::Confirmations", type: :request do
       expect(user.reload.confirmed_at).to be_present
     end
 
-    it "リダイレクト URL に乗る access-token が User.tokens の client と整合する" do
+    it "リダイレクト URL に access-token は乗らず、短命コード (code) のみ乗る" do
       raw_token = issue_confirmation_token(user)
 
       get "/auth/confirmation", params: {
@@ -43,18 +43,34 @@ RSpec.describe "Auth::Confirmations", type: :request do
 
       location = response.location
       query = Rack::Utils.parse_nested_query(URI.parse(location).query)
-      access_token = query["access-token"]
-      client = query["client"]
 
-      expect(access_token).to be_present
-      expect(client).to be_present
+      # 短命コードのみが乗る (RFC 6749 §4.1 準拠)
+      expect(query["code"]).to be_present
+      expect(query["account_confirmation_success"]).to eq("true")
 
-      # User.tokens[client] に該当エントリが存在し、その token_hash と
-      # フロントが送る access-token が devise_token_auth の照合ロジックで一致する。
+      # 本物のアクセストークンは URL に絶対に乗らない
+      expect(query).not_to have_key("access-token")
+      expect(query).not_to have_key("client")
+      expect(query).not_to have_key("uid")
+    end
+
+    it "リダイレクト URL の短命コードを decode すると User.tokens の client と整合する" do
+      raw_token = issue_confirmation_token(user)
+
+      get "/auth/confirmation", params: {
+        confirmation_token: raw_token,
+        redirect_url: redirect_url,
+        config: "default",
+      }
+
+      query = Rack::Utils.parse_nested_query(URI.parse(response.location).query)
+      payload = AuthExchangeCode.decode(query["code"])
+
+      expect(payload).to be_present
       user.reload
-      expect(user.tokens.keys).to include(client)
-      stored_hash = user.tokens[client]["token"]
-      expect(BCrypt::Password.new(stored_hash)).to eq(access_token)
+      expect(user.tokens.keys).to include(payload[:client])
+      stored_hash = user.tokens[payload[:client]]["token"]
+      expect(BCrypt::Password.new(stored_hash)).to eq(payload[:access_token])
     end
   end
 end

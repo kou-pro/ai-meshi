@@ -10,6 +10,8 @@ function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const confirmationError = searchParams.get('confirmation_error') === 'true'
+  const passwordResetSuccess =
+    searchParams.get('password_reset_success') === 'true'
   const nextPath = getSafeNextPath(searchParams.get('next'))
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -69,6 +71,16 @@ function LoginContent() {
               リンクの有効期限が切れているか、すでに使用済みの可能性があります。
               <br />
               改めて新規登録 or 確認メールの再送をお試しください。
+            </p>
+          </div>
+        )}
+
+        {passwordResetSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded p-3 mb-4">
+            <p className="text-sm text-green-700 leading-relaxed">
+              パスワードを更新しました。
+              <br />
+              新しいパスワードでログインしてください。
             </p>
           </div>
         )}

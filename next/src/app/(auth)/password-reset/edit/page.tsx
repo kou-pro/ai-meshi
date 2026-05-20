@@ -37,7 +37,9 @@ function PasswordResetEditPageContent() {
     })
 
     if (res.ok) {
-      router.push('/login')
+      // ログイン画面側で「パスワードを更新しました」メッセージを表示するため
+      // 成功フラグをクエリで付与する。
+      router.push('/login?password_reset_success=true')
     } else {
       setError('パスワードの再設定に失敗しました。再度お試しください。')
     }

@@ -3,6 +3,18 @@ require "rails_helper"
 RSpec.describe Recipe, type: :model do
   describe "バリデーション" do
     it { is_expected.to validate_presence_of(:title) }
+
+    describe "スコア (0〜5の整数・未評価はnil許可)" do
+      %i[taste_score ease_score cost_score].each do |attr|
+        it {
+          expect(subject).to validate_numericality_of(attr).
+                               only_integer.
+                               is_greater_than_or_equal_to(0).
+                               is_less_than_or_equal_to(5).
+                               allow_nil
+        }
+      end
+    end
   end
 
   describe "アソシエーション" do

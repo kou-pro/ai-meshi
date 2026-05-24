@@ -14,8 +14,10 @@ class Api::V1::ShoppingListItemsController < ApplicationController
         ingredient_category: item.ingredient_category,
         is_checked: item.is_checked,
         recipe_id: item.recipe_id,
-        recipe_title: item.recipe.title,
-        recipe_image_url: item.recipe.image.attached? ? url_for(item.recipe.image) : nil,
+        # 元レシピが削除済み(recipe_id=NULL)の場合は recipe が nil。安全参照で nil を返し、
+        # フロント側で「このレシピは削除されました」墓標表示に切り替える。
+        recipe_title: item.recipe&.title,
+        recipe_image_url: item.recipe&.image&.attached? ? url_for(item.recipe.image) : nil,
       }
     }
   end
@@ -70,9 +72,10 @@ class Api::V1::ShoppingListItemsController < ApplicationController
   end
 
   def destroy_by_recipe
-    current_user.shopping_list_items.
-      where(recipe_id: params[:recipe_id]).
-      destroy_all
+    rid = params[:recipe_id].presence
+    # recipe_id が空/"null"(削除済みレシピのグループ)の場合は recipe_id IS NULL の項目を対象にする
+    condition = (rid && rid != "null") ? { recipe_id: rid } : { recipe_id: nil }
+    current_user.shopping_list_items.where(condition).destroy_all
     render json: { message: "削除しました" }
   end
 

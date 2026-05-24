@@ -4,6 +4,9 @@ class Recipe < ApplicationRecord
   has_one_attached :image
   has_many :comments, dependent: :destroy
   has_many :bookmarks, dependent: :destroy
+  # レシピ削除時、買い物リスト項目は食材スナップショットを保持したまま残す。
+  # recipe_id を NULL にする(:nullify)ことで「削除されたレシピ」として参照を切る。
+  has_many :shopping_list_items, dependent: :nullify
 
   validates :title, presence: true
   # スコアは0〜5の星評価。未評価は nil を許可し、範囲外・非整数を弾く。

@@ -65,8 +65,9 @@ type ShoppingListItem = {
   ingredient_amount: string
   ingredient_category: string
   is_checked: boolean
-  recipe_id: number
-  recipe_title: string
+  // 元レシピが削除されると recipe_id / recipe_title は null になる（墓標表示に切替）
+  recipe_id: number | null
+  recipe_title: string | null
   recipe_image_url: string | null
 }
 
@@ -115,20 +116,24 @@ export default function ShoppingListClient({ initialItems }: Props) {
   // レシピごとにグループ化
   const groupedByRecipe = items.reduce(
     (acc, item) => {
-      if (!acc[item.recipe_id]) {
-        acc[item.recipe_id] = {
+      // 削除済みレシピ(recipe_id=null)の食材は "deleted" キーに集約
+      const key = item.recipe_id ?? 'deleted'
+      if (!acc[key]) {
+        acc[key] = {
+          recipe_id: item.recipe_id,
           recipe_title: item.recipe_title,
           recipe_image_url: item.recipe_image_url,
           items: [],
         }
       }
-      acc[item.recipe_id].items.push(item)
+      acc[key].items.push(item)
       return acc
     },
     {} as Record<
-      number,
+      string,
       {
-        recipe_title: string
+        recipe_id: number | null
+        recipe_title: string | null
         recipe_image_url: string | null
         items: ShoppingListItem[]
       }
@@ -198,8 +203,8 @@ export default function ShoppingListClient({ initialItems }: Props) {
     }
   }
 
-  // レシピごと削除
-  const handleDeleteByRecipe = async (recipeId: number) => {
+  // レシピごと削除（recipeId=null は削除済みレシピの食材グループ）
+  const handleDeleteByRecipe = async (recipeId: number | null) => {
     if (!confirm('このレシピの食材をすべて削除しますか？')) return
 
     const prevItems = items
@@ -326,52 +331,72 @@ export default function ShoppingListClient({ initialItems }: Props) {
           </h2>
 
           <div className="flex flex-col gap-3">
-            {Object.entries(groupedByRecipe).map(([recipeId, group]) => (
-              <div
-                key={recipeId}
-                className="border border-gray-200 rounded-xl p-3 flex gap-3"
-              >
-                {/* レシピ画像 */}
-                <Link
-                  href={`/recipes/${recipeId}`}
-                  className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
+            {Object.entries(groupedByRecipe).map(([key, group]) => {
+              // recipe_id が null = 元レシピ削除済み。リンクを張らず墓標表示にする
+              const isDeleted = group.recipe_id == null
+              const recipeImg = group.recipe_image_url
+                ? group.recipe_image_url.replace(
+                    'http://rails:3000',
+                    process.env.NEXT_PUBLIC_RAILS_URL ?? '',
+                  )
+                : '/default-recipe.jpg'
+              return (
+                <div
+                  key={key}
+                  className="border border-gray-200 rounded-xl p-3 flex gap-3"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={
-                      group.recipe_image_url
-                        ? group.recipe_image_url.replace(
-                            'http://rails:3000',
-                            process.env.NEXT_PUBLIC_RAILS_URL ?? '',
-                          )
-                        : '/default-recipe.jpg'
-                    }
-                    alt={group.recipe_title}
-                    className="w-full h-full object-cover"
-                  />
-                </Link>
+                  {/* レシピ画像（削除済みはリンク無し） */}
+                  {isDeleted ? (
+                    <div className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src="/default-recipe.jpg"
+                        alt="削除されたレシピ"
+                        className="w-full h-full object-cover opacity-50"
+                      />
+                    </div>
+                  ) : (
+                    <Link
+                      href={`/recipes/${group.recipe_id}`}
+                      className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={recipeImg}
+                        alt={group.recipe_title ?? ''}
+                        className="w-full h-full object-cover"
+                      />
+                    </Link>
+                  )}
 
-                {/* レシピ情報 */}
-                <div className="flex-1 min-w-0 flex flex-col">
-                  <Link
-                    href={`/recipes/${recipeId}`}
-                    className="font-bold text-sm text-gray-900 line-clamp-2 hover:text-green-600"
-                  >
-                    {group.recipe_title}
-                  </Link>
-                  <p className="text-xs text-gray-400 mt-1">
-                    食材 {group.items.length}件
-                  </p>
-                  <button
-                    onClick={() => handleDeleteByRecipe(Number(recipeId))}
-                    className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
-                  >
-                    <TrashIcon className="w-3.5 h-3.5" />
-                    削除
-                  </button>
+                  {/* レシピ情報 */}
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    {isDeleted ? (
+                      <span className="font-bold text-sm text-gray-400 line-clamp-2">
+                        このレシピは削除されました
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/recipes/${group.recipe_id}`}
+                        className="font-bold text-sm text-gray-900 line-clamp-2 hover:text-green-600"
+                      >
+                        {group.recipe_title}
+                      </Link>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      食材 {group.items.length}件
+                    </p>
+                    <button
+                      onClick={() => handleDeleteByRecipe(group.recipe_id)}
+                      className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                      削除
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
 
           {/* 全削除ボタン */}

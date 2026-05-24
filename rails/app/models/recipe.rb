@@ -6,6 +6,10 @@ class Recipe < ApplicationRecord
   has_many :bookmarks, dependent: :destroy
 
   validates :title, presence: true
+  # スコアは0〜5の星評価。未評価は nil を許可し、範囲外・非整数を弾く。
+  validates :taste_score, :ease_score, :cost_score,
+            numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 5 },
+            allow_nil: true
 
   validate :acceptable_image, if: :image_attached?
 

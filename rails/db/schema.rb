@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_18_145639) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_24_122241) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -60,8 +60,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_18_145639) do
   end
 
   create_table "follows", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.integer "follower_id", null: false
-    t.integer "following_id", null: false
+    t.bigint "follower_id", null: false
+    t.bigint "following_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["follower_id", "following_id"], name: "index_follows_on_follower_id_and_following_id", unique: true
@@ -141,6 +141,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_18_145639) do
   add_foreign_key "bookmarks", "users"
   add_foreign_key "comments", "recipes"
   add_foreign_key "comments", "users"
+  add_foreign_key "follows", "users", column: "follower_id"
+  add_foreign_key "follows", "users", column: "following_id"
   add_foreign_key "likes", "recipes"
   add_foreign_key "likes", "users"
   add_foreign_key "recipes", "users"

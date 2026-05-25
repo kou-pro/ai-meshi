@@ -14,8 +14,10 @@ class Api::V1::ShoppingListItemsController < ApplicationController
         ingredient_category: item.ingredient_category,
         is_checked: item.is_checked,
         recipe_id: item.recipe_id,
-        recipe_title: item.recipe.title,
-        recipe_image_url: item.recipe.image.attached? ? url_for(item.recipe.image) : nil,
+        # スナップショット(recipe_title)を優先。未設定の旧データは存命レシピから補完。
+        # レシピ削除済みなら recipe は nil → スナップショットのみが残り「○○（削除済み）」表示に使う。
+        recipe_title: item.recipe_title || item.recipe&.title,
+        recipe_image_url: item.recipe&.image&.attached? ? url_for(item.recipe.image) : nil,
       }
     }
   end
@@ -33,6 +35,9 @@ class Api::V1::ShoppingListItemsController < ApplicationController
       return
     end
 
+    # レシピ名をスナップショット保存（レシピ削除後も墓標で「○○（削除済み）」表示するため）
+    recipe_title = Recipe.find_by(id: recipe_id)&.title
+
     ingredients.each do |ingredient|
       # IngredientFormatter (Service Object) に整形を委譲。
       # 旧実装の素朴な連結 ("#{quantity}#{unit}") では
@@ -44,6 +49,7 @@ class Api::V1::ShoppingListItemsController < ApplicationController
       )
       current_user.shopping_list_items.create!(
         recipe_id: recipe_id,
+        recipe_title: recipe_title,
         ingredient_name: ingredient["name"],
         ingredient_amount: amount,
         ingredient_category: ingredient["category"],
@@ -70,9 +76,16 @@ class Api::V1::ShoppingListItemsController < ApplicationController
   end
 
   def destroy_by_recipe
-    current_user.shopping_list_items.
-      where(recipe_id: params[:recipe_id]).
-      destroy_all
+    rid = params[:recipe_id].presence
+    condition =
+      if rid && rid != "null"
+        { recipe_id: rid }
+      else
+        # 公開終了(削除済み)グループは recipe_id IS NULL の中から recipe_title で絞る
+        # (複数の公開終了レシピを一括削除しないため)
+        { recipe_id: nil, recipe_title: params[:recipe_title].presence }
+      end
+    current_user.shopping_list_items.where(condition).destroy_all
     render json: { message: "削除しました" }
   end
 

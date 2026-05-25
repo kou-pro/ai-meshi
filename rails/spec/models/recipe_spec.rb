@@ -22,7 +22,26 @@ RSpec.describe Recipe, type: :model do
     it { is_expected.to have_many(:likes).dependent(:destroy) }
     it { is_expected.to have_many(:comments).dependent(:destroy) }
     it { is_expected.to have_many(:bookmarks).dependent(:destroy) }
+    it { is_expected.to have_many(:shopping_list_items).dependent(:nullify) }
     it { is_expected.to have_one_attached(:image) }
+  end
+
+  describe "削除時の挙動" do
+    it "買い物リストに登録されたレシピを削除しても、項目は食材とレシピ名スナップショットを保持して残る" do
+      user = create(:user)
+      recipe = create(:recipe, user: user)
+      recipe_title = recipe.title
+      item = ShoppingListItem.create!(
+        user: user, recipe: recipe, recipe_title: recipe_title, ingredient_name: "玉ねぎ",
+      )
+
+      expect { recipe.destroy! }.not_to raise_error
+      item.reload
+      expect(item.recipe_id).to be_nil
+      expect(item.ingredient_name).to eq("玉ねぎ")
+      # レシピ名スナップショットは削除後も残り、墓標「○○（削除済み）」表示に使う
+      expect(item.recipe_title).to eq(recipe_title)
+    end
   end
 
   describe "カスタムバリデーション (acceptable_image)" do

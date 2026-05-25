@@ -3,7 +3,8 @@ require "rails_helper"
 RSpec.describe ShoppingListItem, type: :model do
   describe "アソシエーション" do
     it { is_expected.to belong_to(:user) }
-    it { is_expected.to belong_to(:recipe) }
+    # 元レシピ削除時に recipe_id が NULL になり得るため optional
+    it { is_expected.to belong_to(:recipe).optional }
   end
 
   describe "バリデーション" do

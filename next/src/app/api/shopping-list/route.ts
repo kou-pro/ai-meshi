@@ -126,7 +126,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { type, id, recipe_id } = body
+  const { type, id, recipe_id, recipe_title } = body
   const { accessToken, client, uid } = await getAuthHeaders()
 
   if (!accessToken || !client || !uid) {
@@ -139,8 +139,8 @@ export async function DELETE(request: NextRequest) {
     // 1件削除
     url = `${RAILS_URL}/api/v1/shopping_list_items/${id}`
   } else if (type === 'recipe') {
-    // レシピごと削除
-    url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_by_recipe?recipe_id=${recipe_id}`
+    // レシピごと削除（公開終了グループは recipe_id が null のため recipe_title で絞る）
+    url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_by_recipe?recipe_id=${recipe_id ?? ''}&recipe_title=${encodeURIComponent(recipe_title ?? '')}`
   } else if (type === 'checked') {
     // チェック済み削除
     url = `${RAILS_URL}/api/v1/shopping_list_items/destroy_checked`

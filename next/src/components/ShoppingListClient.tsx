@@ -116,8 +116,10 @@ export default function ShoppingListClient({ initialItems }: Props) {
   // レシピごとにグループ化
   const groupedByRecipe = items.reduce(
     (acc, item) => {
-      // 削除済みレシピ(recipe_id=null)の食材は "deleted" キーに集約
-      const key = item.recipe_id ?? 'deleted'
+      // 公開終了(recipe_id=null)は recipe_id で区別できないため、
+      // スナップショットした recipe_title でグループを分ける(同名同士のみ合体)。
+      const key =
+        item.recipe_id != null ? `r${item.recipe_id}` : `d:${item.recipe_title ?? ''}`
       if (!acc[key]) {
         acc[key] = {
           recipe_id: item.recipe_id,
@@ -203,18 +205,31 @@ export default function ShoppingListClient({ initialItems }: Props) {
     }
   }
 
-  // レシピごと削除（recipeId=null は削除済みレシピの食材グループ）
-  const handleDeleteByRecipe = async (recipeId: number | null) => {
+  // レシピごと削除（recipeId=null は公開終了グループ → recipe_title で対象を絞る）
+  const handleDeleteByRecipe = async (
+    recipeId: number | null,
+    recipeTitle: string | null,
+  ) => {
     if (!confirm('このレシピの食材をすべて削除しますか？')) return
 
     const prevItems = items
-    setItems((prev) => prev.filter((item) => item.recipe_id !== recipeId))
+    setItems((prev) =>
+      prev.filter((item) =>
+        recipeId != null
+          ? item.recipe_id !== recipeId
+          : !(item.recipe_id == null && item.recipe_title === recipeTitle),
+      ),
+    )
 
     try {
       const res = await fetchWithAuthClient('/api/shopping-list', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'recipe', recipe_id: recipeId }),
+        body: JSON.stringify({
+          type: 'recipe',
+          recipe_id: recipeId,
+          recipe_title: recipeTitle,
+        }),
       })
       if (res.status === 401) return
       if (!res.ok) {
@@ -373,7 +388,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
                   <div className="flex-1 min-w-0 flex flex-col">
                     {isDeleted ? (
                       <span className="font-bold text-sm text-gray-400 line-clamp-2">
-                        このレシピは削除されました
+                        {group.recipe_title
+                          ? `${group.recipe_title}（公開終了）`
+                          : 'このレシピは公開終了しました'}
                       </span>
                     ) : (
                       <Link
@@ -387,7 +404,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
                       食材 {group.items.length}件
                     </p>
                     <button
-                      onClick={() => handleDeleteByRecipe(group.recipe_id)}
+                      onClick={() =>
+                        handleDeleteByRecipe(group.recipe_id, group.recipe_title)
+                      }
                       className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
                     >
                       <TrashIcon className="w-3.5 h-3.5" />

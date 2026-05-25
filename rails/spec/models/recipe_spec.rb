@@ -27,15 +27,20 @@ RSpec.describe Recipe, type: :model do
   end
 
   describe "削除時の挙動" do
-    it "買い物リストに登録されたレシピを削除しても、項目は recipe_id=nil で残る" do
+    it "買い物リストに登録されたレシピを削除しても、項目は食材とレシピ名スナップショットを保持して残る" do
       user = create(:user)
       recipe = create(:recipe, user: user)
-      item = ShoppingListItem.create!(user: user, recipe: recipe, ingredient_name: "玉ねぎ")
+      recipe_title = recipe.title
+      item = ShoppingListItem.create!(
+        user: user, recipe: recipe, recipe_title: recipe_title, ingredient_name: "玉ねぎ",
+      )
 
       expect { recipe.destroy! }.not_to raise_error
       item.reload
       expect(item.recipe_id).to be_nil
       expect(item.ingredient_name).to eq("玉ねぎ")
+      # レシピ名スナップショットは削除後も残り、墓標「○○（削除済み）」表示に使う
+      expect(item.recipe_title).to eq(recipe_title)
     end
   end
 

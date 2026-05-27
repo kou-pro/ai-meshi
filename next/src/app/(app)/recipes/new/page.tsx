@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 import RecipeGenerationModal from '@/components/RecipeGenerationModal'
@@ -62,6 +62,7 @@ export default function NewRecipePage() {
   const [isPublished, setIsPublished] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
 
   const handleSubmit = async () => {
     if (!ingredients.trim()) return
@@ -90,20 +91,21 @@ export default function NewRecipePage() {
 
     const data = await res.json()
     if (res.ok) {
-      router.push(`/recipes/${data.id}`)
-    } else {
-      setError(data.error || 'レシピの生成に失敗しました')
+      setLoading(false)
+      startTransition(() => {
+        router.push(`/recipes/${data.id}`)
+      })
+      return
     }
+
+    setError(data.error || 'レシピの生成に失敗しました')
     setLoading(false)
   }
 
   return (
     <>
-      <RecipeGenerationModal isOpen={loading} />
+      <RecipeGenerationModal isOpen={loading || isPending} />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-        {/* Hero: 他ページ (保存済みレシピ等) のタイトルパターンに揃えて
-            text-2xl + アイコン w-7 h-7 + flex items-center gap-2。
-            このページは hero 配置のため justify-center で中央寄せ + サブコピー追加。 */}
         <div className="text-center mb-10">
           <h1 className="text-2xl font-bold text-gray-800 mb-3 flex items-center justify-center gap-2">
             <SparklesIcon className="w-7 h-7 text-green-600" />

@@ -293,6 +293,8 @@ export default function ShoppingListClient({ initialItems }: Props) {
   // 統計
   const recipeCount = Object.keys(groupedByRecipe).length
   const itemCount = Object.keys(mergedItems).length
+  // チェック済み件数（0件なら「チェック済み項目を削除」ボタンを無効化する）
+  const checkedCount = items.filter((item) => item.is_checked).length
 
   if (items.length === 0) {
     return (
@@ -502,7 +504,8 @@ export default function ShoppingListClient({ initialItems }: Props) {
           {/* チェック済み削除ボタン */}
           <button
             onClick={handleDeleteChecked}
-            className="mt-6 w-full py-2.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg flex items-center justify-center gap-2 hover:bg-green-100 transition-colors"
+            disabled={checkedCount === 0}
+            className="mt-6 w-full py-2.5 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg flex items-center justify-center gap-2 hover:bg-green-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-50"
           >
             <CheckCircleIcon className="w-4 h-4" />
             チェック済み項目を削除

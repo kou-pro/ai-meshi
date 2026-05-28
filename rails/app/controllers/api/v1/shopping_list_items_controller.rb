@@ -10,7 +10,16 @@ class Api::V1::ShoppingListItemsController < ApplicationController
       {
         id: item.id,
         ingredient_name: item.ingredient_name,
-        ingredient_amount: item.ingredient_amount,
+        # 新スキーマの集約フィールド (フロントが正確な値を直接使えるよう全て返す)
+        quantity: item.quantity,
+        unit: item.unit,
+        added_count: item.added_count,
+        # 表示用文字列は DB に保存せず、IngredientFormatter で都度組み立てる。
+        # (DRY/3NF: quantity + unit を真実源とし、表示文字列はその派生)
+        ingredient_amount: IngredientFormatter.call(
+          quantity: item.quantity,
+          unit: item.unit,
+        ),
         ingredient_category: item.ingredient_category,
         is_checked: item.is_checked,
         recipe_id: item.recipe_id,
@@ -22,41 +31,22 @@ class Api::V1::ShoppingListItemsController < ApplicationController
     }
   end
 
+  # 買い物リストに食材を追加する。
+  #
+  # 同一キー (user_id, recipe_id, ingredient_name, unit) は upsert され、
+  # quantity が加算される (Shopify Cart 等の業界標準と同じ集約モデル)。
+  # 実ロジックは ShoppingListItemUpserter Service Object に委譲する
+  # (Skinny Controller 原則)。
+  #
+  # 注: 旧実装にあった force パラメータ・409 ロジックは撤廃済み。
+  #     追加すれば自然に集約されるため、UI 側で「もう一度追加しますか?」の
+  #     確認ダイアログも不要になる。
   def create
-    recipe_id   = params[:recipe_id]
-    ingredients = params[:ingredients]
-    force       = params[:force]
-
-    already_exists = current_user.shopping_list_items.
-                       exists?(recipe_id: recipe_id)
-
-    if !force && already_exists
-      render json: { error: "すでに追加済みです" }, status: :conflict
-      return
-    end
-
-    # レシピ名をスナップショット保存（レシピ削除後も墓標で「○○（削除済み）」表示するため）
-    recipe_title = Recipe.find_by(id: recipe_id)&.title
-
-    ingredients.each do |ingredient|
-      # IngredientFormatter (Service Object) に整形を委譲。
-      # 旧実装の素朴な連結 ("#{quantity}#{unit}") では
-      # "適量g" や "1大さじ" のような壊れ表記が発生していたため、
-      # 業界標準 (大さじ前置 / 「適量」等の単位省略) に準拠した整形を行う。
-      amount = IngredientFormatter.call(
-        quantity: ingredient["quantity"],
-        unit: ingredient["unit"],
-      )
-      current_user.shopping_list_items.create!(
-        recipe_id: recipe_id,
-        recipe_title: recipe_title,
-        ingredient_name: ingredient["name"],
-        ingredient_amount: amount,
-        ingredient_category: ingredient["category"],
-        is_checked: false,
-      )
-    end
-
+    ShoppingListItemUpserter.call(
+      user: current_user,
+      recipe_id: params[:recipe_id],
+      ingredients: params[:ingredients],
+    )
     render json: { message: "追加しました" }, status: :created
   end
 

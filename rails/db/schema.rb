@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_25_004135) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_28_071658) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -104,10 +104,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_25_004135) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "ingredient_name"
-    t.string "ingredient_amount"
     t.string "ingredient_category"
     t.string "recipe_title"
+    t.decimal "quantity", precision: 10, scale: 3
+    t.string "unit", null: false
+    t.integer "added_count", default: 1, null: false
     t.index ["recipe_id"], name: "index_shopping_list_items_on_recipe_id"
+    t.index ["user_id", "recipe_id", "ingredient_name", "unit"], name: "index_shopping_list_items_on_aggregation_key", unique: true
     t.index ["user_id"], name: "index_shopping_list_items_on_user_id"
   end
 

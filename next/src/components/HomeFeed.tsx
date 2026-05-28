@@ -116,15 +116,24 @@ export default function HomeFeed({
     setInputValue(e.target.value)
   }
 
-  // 検索実行: URL 更新 + 1 ページ目から再取得
   const handleSearch = async () => {
-    const newQuery = inputValue
-    // 検索時はタグも併用は許さず、検索ワード優先 (既存挙動を維持)
-    updateUrl({ query: newQuery, tag: '' })
+    const trimmed = inputValue.trim()
+    // 先頭 `#` + 1文字以上の本体があればハッシュタグ検索
+    const isHashtagSearch = trimmed.startsWith('#') && trimmed.length > 1
+    const newQuery = isHashtagSearch ? '' : trimmed
+    const newTag = isHashtagSearch ? trimmed.slice(1) : ''
+
+    // 検索時はタグとキーワードを排他的に扱う (既存挙動を維持)
+    updateUrl({ query: newQuery, tag: newTag })
 
     setLoading(true)
     try {
-      const res = await fetchFeed({ sort, query: newQuery, tag: '', page: 1 })
+      const res = await fetchFeed({
+        sort,
+        query: newQuery,
+        tag: newTag,
+        page: 1,
+      })
       if (res.status === 401) return
       if (!res.ok) {
         toast.error('レシピの取得に失敗しました')

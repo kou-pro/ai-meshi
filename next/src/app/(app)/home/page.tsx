@@ -89,7 +89,6 @@ export default async function HomePage({
         initialHasNextPage={data.has_next_page}
         initialSort={sort}
         initialQuery={query}
-        initialTag={tag}
         isLoggedIn={isLoggedIn}
       />
     </div>

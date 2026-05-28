@@ -6,6 +6,11 @@ export const dynamic = 'force-dynamic'
 type ShoppingListItem = {
   id: number
   ingredient_name: string
+  // 集約モデル (Shopify Cart 等の業界標準) のフィールド
+  quantity: string | null
+  unit: string
+  added_count: number
+  // 表示用文字列 (Server 側で IngredientFormatter で組み立て)
   ingredient_amount: string
   ingredient_category: string
   is_checked: boolean

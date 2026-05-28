@@ -51,7 +51,7 @@ class IngredientFormatter
   end
 
   def initialize(quantity:, unit:)
-    @quantity = quantity.to_s.strip
+    @quantity = normalize_quantity(quantity)
     @unit = unit.to_s.strip
   end
 
@@ -69,4 +69,23 @@ class IngredientFormatter
     # それ以外は数量+単位 (例: "100g", "2本")
     "#{@quantity}#{@unit}"
   end
+
+  private
+
+    # 数量を人間向け表示文字列に正規化する。
+    #
+    # 新スキーマでは ShoppingListItem.quantity は BigDecimal で渡ってくるが、
+    # 素朴な to_s は "0.2e1" のような工学表記になることがある。
+    # 整数値の場合は ".0" を付けず "2"、小数の場合は "2.5" のように
+    # 自然な表記に整形する。
+    #
+    # 既存の文字列(AI 出力直後の "2" "適量" 等)もそのまま受け付ける。
+    def normalize_quantity(qty)
+      case qty
+      when BigDecimal
+        qty.frac.zero? ? qty.to_i.to_s : qty.to_s("F")
+      else
+        qty.to_s.strip
+      end
+    end
 end

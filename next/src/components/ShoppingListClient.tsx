@@ -40,32 +40,32 @@ const CATEGORY_ORDER = [
 ]
 
 // カテゴリ別アイコン（Lucide React）+ 緑系のテーマ色
-const CATEGORY_ICONS: Record<
-  string,
-  { Icon: LucideIcon; colorClass: string }
-> = {
-  野菜: { Icon: Carrot, colorClass: 'text-green-600' },
-  果物: { Icon: Apple, colorClass: 'text-red-500' },
-  肉類: { Icon: Beef, colorClass: 'text-rose-500' },
-  魚介: { Icon: Fish, colorClass: 'text-blue-500' },
-  乳製品: { Icon: Milk, colorClass: 'text-sky-500' },
-  卵: { Icon: Egg, colorClass: 'text-amber-500' },
-  '豆腐・大豆': { Icon: Bean, colorClass: 'text-amber-700' },
-  穀物: { Icon: Wheat, colorClass: 'text-yellow-600' },
-  主食: { Icon: Sandwich, colorClass: 'text-orange-500' },
-  調味料: { Icon: CookingPot, colorClass: 'text-amber-600' },
-  薬味: { Icon: Leaf, colorClass: 'text-emerald-600' },
-  たんぱく質: { Icon: Egg, colorClass: 'text-amber-500' },
-  その他: { Icon: Package, colorClass: 'text-gray-500' },
-}
+const CATEGORY_ICONS: Record<string, { Icon: LucideIcon; colorClass: string }> =
+  {
+    野菜: { Icon: Carrot, colorClass: 'text-green-600' },
+    果物: { Icon: Apple, colorClass: 'text-red-500' },
+    肉類: { Icon: Beef, colorClass: 'text-rose-500' },
+    魚介: { Icon: Fish, colorClass: 'text-blue-500' },
+    乳製品: { Icon: Milk, colorClass: 'text-sky-500' },
+    卵: { Icon: Egg, colorClass: 'text-amber-500' },
+    '豆腐・大豆': { Icon: Bean, colorClass: 'text-amber-700' },
+    穀物: { Icon: Wheat, colorClass: 'text-yellow-600' },
+    主食: { Icon: Sandwich, colorClass: 'text-orange-500' },
+    調味料: { Icon: CookingPot, colorClass: 'text-amber-600' },
+    薬味: { Icon: Leaf, colorClass: 'text-emerald-600' },
+    たんぱく質: { Icon: Egg, colorClass: 'text-amber-500' },
+    その他: { Icon: Package, colorClass: 'text-gray-500' },
+  }
 
 type ShoppingListItem = {
   id: number
   ingredient_name: string
+  quantity: string | null
+  unit: string
+  added_count: number
   ingredient_amount: string
   ingredient_category: string
   is_checked: boolean
-  // 元レシピが削除されると recipe_id / recipe_title は null になる（墓標表示に切替）
   recipe_id: number | null
   recipe_title: string | null
   recipe_image_url: string | null
@@ -119,7 +119,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
       // 公開終了(recipe_id=null)は recipe_id で区別できないため、
       // スナップショットした recipe_title でグループを分ける(同名同士のみ合体)。
       const key =
-        item.recipe_id != null ? `r${item.recipe_id}` : `d:${item.recipe_title ?? ''}`
+        item.recipe_id != null
+          ? `r${item.recipe_id}`
+          : `d:${item.recipe_title ?? ''}`
       if (!acc[key]) {
         acc[key] = {
           recipe_id: item.recipe_id,
@@ -407,7 +409,10 @@ export default function ShoppingListClient({ initialItems }: Props) {
                     </p>
                     <button
                       onClick={() =>
-                        handleDeleteByRecipe(group.recipe_id, group.recipe_title)
+                        handleDeleteByRecipe(
+                          group.recipe_id,
+                          group.recipe_title,
+                        )
                       }
                       className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
                     >
@@ -477,11 +482,6 @@ export default function ShoppingListClient({ initialItems }: Props) {
                             }`}
                           >
                             {item.name}
-                            {item.count > 1 && (
-                              <span className="text-gray-400 text-xs ml-1">
-                                ×{item.count}
-                              </span>
-                            )}
                           </span>
                           <span
                             className={`text-sm ${

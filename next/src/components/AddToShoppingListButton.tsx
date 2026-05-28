@@ -38,9 +38,13 @@ export default function AddToShoppingListButton({
     }
   }, [])
 
-  const handleAdd = async (force = false) => {
+  const handleAdd = async () => {
     setStatus('loading')
 
+    // 集約モデル (Shopify Cart 等の業界標準) に移行したため、サーバ側で
+    // 同一キーを upsert (quantity 加算) する。クライアントは「すでに追加済みです」
+    // 409 を考慮する必要が無くなり、force パラメータ・confirm ダイアログを撤廃。
+    // 再度ボタンを押せば自然に quantity が加算される設計。
     try {
       const res = await fetchWithAuthClient('/api/shopping-list', {
         method: 'POST',
@@ -48,20 +52,10 @@ export default function AddToShoppingListButton({
         body: JSON.stringify({
           recipe_id: recipeId,
           ingredients,
-          force,
         }),
       })
 
       if (res.status === 401) return
-      if (res.status === 409) {
-        const confirmed = window.confirm(
-          'このレシピはすでに買い物リストに追加されています。\nもう一度追加しますか？',
-        )
-        if (confirmed) {
-          await handleAdd(true)
-        }
-        return
-      }
 
       if (res.ok) {
         setStatus('added')
@@ -78,7 +72,6 @@ export default function AddToShoppingListButton({
       toast.error('通信エラーが発生しました')
     } finally {
       // status が 'added' に遷移した場合は idle に戻さない (3 秒間「追加しました」表示が必要)
-      // それ以外 (エラー or 409 キャンセル) は idle に戻す
       setStatus((prev) => (prev === 'added' ? 'added' : 'idle'))
     }
   }
@@ -89,7 +82,7 @@ export default function AddToShoppingListButton({
   return (
     <button
       type="button"
-      onClick={() => handleAdd(false)}
+      onClick={handleAdd}
       disabled={isLoading}
       className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors disabled:opacity-60 ${
         isAdded

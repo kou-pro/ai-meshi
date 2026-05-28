@@ -32,7 +32,8 @@ RSpec.describe Recipe, type: :model do
       recipe = create(:recipe, user: user)
       recipe_title = recipe.title
       item = ShoppingListItem.create!(
-        user: user, recipe: recipe, recipe_title: recipe_title, ingredient_name: "玉ねぎ",
+        user: user, recipe: recipe, recipe_title: recipe_title,
+        ingredient_name: "玉ねぎ", unit: "個",
       )
 
       expect { recipe.destroy! }.not_to raise_error

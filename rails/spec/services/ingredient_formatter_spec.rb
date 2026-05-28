@@ -163,6 +163,30 @@ RSpec.describe IngredientFormatter do
         expect(call_formatter("1", "小さじ")).to eq("小さじ1")
       end
     end
+
+    context "BigDecimal 入力 (新スキーマ shopping_list_items.quantity 対応)" do
+      # 集約モデル移行後、ShoppingListItem.quantity は BigDecimal で渡る。
+      # 素朴な to_s は工学表記 ('0.2e1' 等) になるため normalize_quantity で整形する。
+      it "BigDecimal(2) + 個 → '2個' (整数値は '.0' を付けない)" do
+        expect(call_formatter(BigDecimal(2), "個")).to eq("2個")
+      end
+
+      it "BigDecimal('2.5') + 個 → '2.5個' (小数はそのまま)" do
+        expect(call_formatter(BigDecimal("2.5"), "個")).to eq("2.5個")
+      end
+
+      it "BigDecimal(1) + 大さじ → '大さじ1' (前置単位 + 整数)" do
+        expect(call_formatter(BigDecimal(1), "大さじ")).to eq("大さじ1")
+      end
+
+      it "BigDecimal('0.5') + カップ → 'カップ0.5' (前置単位 + 小数)" do
+        expect(call_formatter(BigDecimal("0.5"), "カップ")).to eq("カップ0.5")
+      end
+
+      it "BigDecimal(100) + g → '100g'" do
+        expect(call_formatter(BigDecimal(100), "g")).to eq("100g")
+      end
+    end
   end
 
   describe "定数の不変性" do

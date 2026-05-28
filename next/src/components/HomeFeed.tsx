@@ -25,36 +25,14 @@ type Props = {
   initialHasNextPage: boolean
   initialSort: SortOption
   initialQuery: string
-  initialTag: string
   isLoggedIn: boolean
 }
 
-/**
- * # URL 状態管理 (Next.js 16 公式パターン)
- *
- * sort / query / tag は URL のクエリパラメータを真理値とする:
- * - リロードしても URL から復元される
- * - ブックマーク・共有可能
- * - ナビゲーションリンクから「ホーム」に戻ると default に戻る (業界標準)
- *
- * URL 更新には `window.history.pushState` を使う:
- * - Next.js が pushState を monkey patch しているため useSearchParams が同期する
- * - Server Component (page.tsx) は再評価されない (高速)
- * - Client state (recipes 累積、検索入力等) は維持される
- *
- * 出典: https://nextjs.org/docs/app/getting-started/linking-and-navigating#native-history-api
- *
- * # ページ番号は state のまま (URL 化しない)
- * 「もっと見る」式は累積ロード前提。?page=3 を URL に入れる Amazon/Cookpad の
- * ページネーションとは設計思想が異なる。SNS 系 (Twitter/Instagram/TikTok) と
- * 同様、URL に page を持たないのが業界一般的。
- */
 export default function HomeFeed({
   initialRecipes,
   initialHasNextPage,
   initialSort,
   initialQuery,
-  initialTag,
   isLoggedIn,
 }: Props) {
   const searchParams = useSearchParams()
@@ -63,8 +41,8 @@ export default function HomeFeed({
   const sortRaw = searchParams.get('sort')
   const sort: SortOption =
     sortRaw === 'popular' || sortRaw === 'following' ? sortRaw : initialSort
-  const query = searchParams.get('query') ?? initialQuery
-  const activeTag = searchParams.get('tag') ?? initialTag
+  const query = searchParams.get('query') ?? ''
+  const activeTag = searchParams.get('tag') ?? ''
 
   // 「もっと見る」累積、検索ボックスの入力値、loading は Client state
   const [recipes, setRecipes] = useState<Recipe[]>(initialRecipes)
@@ -82,15 +60,9 @@ export default function HomeFeed({
       else params.delete(key)
     }
     const qs = params.toString()
-    window.history.pushState(
-      null,
-      '',
-      qs ? `?${qs}` : window.location.pathname,
-    )
+    window.history.pushState(null, '', qs ? `?${qs}` : window.location.pathname)
   }
 
-  // 共通の fetch 処理 (sort/query/tag/page を渡してデータ取得)
-  // Client から /api/home-feed (Next.js BFF) を経由して Rails を呼ぶ
   const fetchFeed = async ({
     sort: s,
     query: q,
@@ -117,7 +89,12 @@ export default function HomeFeed({
 
     setLoading(true)
     try {
-      const res = await fetchFeed({ sort: newSort, query, tag: activeTag, page: 1 })
+      const res = await fetchFeed({
+        sort: newSort,
+        query,
+        tag: activeTag,
+        page: 1,
+      })
       if (res.status === 401) return
       if (!res.ok) {
         toast.error('レシピの取得に失敗しました')
@@ -216,7 +193,12 @@ export default function HomeFeed({
     setLoading(true)
     const nextPage = page + 1
     try {
-      const res = await fetchFeed({ sort, query, tag: activeTag, page: nextPage })
+      const res = await fetchFeed({
+        sort,
+        query,
+        tag: activeTag,
+        page: nextPage,
+      })
       if (res.status === 401) return
       if (!res.ok) {
         toast.error('レシピの取得に失敗しました')

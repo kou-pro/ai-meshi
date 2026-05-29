@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
+import UserAvatar from '@/components/UserAvatar'
 
 type Comment = {
   id: number
@@ -14,6 +15,7 @@ type Comment = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 
@@ -155,16 +157,16 @@ export default function CommentSection({
                 className="border border-gray-100 rounded-lg p-3"
               >
                 <div className="flex items-start gap-2.5">
-                  {/* 左上: 丸アバター (プロフィール遷移リンク)
-                      アイコン (絵文字) は視覚的なラベルにならないため aria-label で補う。
-                      React 公式: "icon buttons where visible text is absent" は aria-label 必要。
-                      https://react.dev/learn/accessibility */}
                   <Link
                     href={`/users/${comment.user.id}`}
                     aria-label={`${comment.user.name}のプロフィール`}
-                    className="shrink-0 w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base hover:opacity-80 transition-opacity"
+                    className="shrink-0 hover:opacity-80 transition-opacity"
                   >
-                    👤
+                    <UserAvatar
+                      imageUrl={comment.user.image_url}
+                      name={comment.user.name}
+                      size="md"
+                    />
                   </Link>
 
                   {/* 右側コンテンツ */}

@@ -16,6 +16,13 @@ RSpec.describe "Api::V1::Comments", type: :request do
       expect(json.length).to eq(1)
       expect(json.first["body"]).to eq("コメント1")
     end
+
+    it "user キーに image_url を含み、画像未添付なら nil を返す (Avatar 表示用)" do
+      get "/api/v1/recipes/#{recipe.id}/comments"
+      user_json = response.parsed_body.first["user"]
+      expect(user_json).to include("id", "name", "image_url")
+      expect(user_json["image_url"]).to be_nil
+    end
   end
 
   describe "POST /api/v1/recipes/:recipe_id/comments" do

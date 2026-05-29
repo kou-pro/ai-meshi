@@ -17,6 +17,7 @@ import SaveButton from '@/components/SaveButton'
 import RecipeOwnerActions from '@/components/RecipeOwnerActions'
 import ScoreSection from '@/components/ScoreSection'
 import RecipeImageUploader from '@/components/RecipeImageUploader'
+import UserAvatar from '@/components/UserAvatar'
 import { formatIngredientAmount } from '@/lib/formatIngredientAmount'
 
 type Ingredient = {
@@ -46,6 +47,7 @@ type RecipeDetail = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 
@@ -56,6 +58,7 @@ type Comment = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 
@@ -183,9 +186,17 @@ export default async function RecipeDetailPage({
           )}
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
-          <span className="w-6 h-6 rounded-full bg-gray-200 inline-flex items-center justify-center text-xs">
-            👤
-          </span>
+          <Link
+            href={`/users/${recipe.user.id}`}
+            aria-label={`${recipe.user.name}のプロフィール`}
+            className="shrink-0 hover:opacity-80 transition-opacity"
+          >
+            <UserAvatar
+              imageUrl={recipe.user.image_url}
+              name={recipe.user.name}
+              size="sm"
+            />
+          </Link>
           <Link
             href={`/users/${recipe.user.id}`}
             className="hover:text-green-600"

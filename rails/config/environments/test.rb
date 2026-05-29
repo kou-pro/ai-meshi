@@ -5,6 +5,10 @@ require "active_support/core_ext/integer/time"
 # your test database is "scratch space" for the test suite and is wiped
 # and recreated between test runs. Don't rely on the data there!
 
+# ActiveStorage の rails_blob_url(host:) は host 引数が必須。
+# 本番では task-definition で RAILS_PUBLIC_URL が渡されるが、CI / ローカル test では
+ENV["RAILS_PUBLIC_URL"] ||= "http://localhost:3001"
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 

@@ -8,6 +8,12 @@ class Recipe < ApplicationRecord
   # recipe_id を NULL にする(:nullify)ことで「削除されたレシピ」として参照を切る。
   has_many :shopping_list_items, dependent: :nullify
 
+  def image_url(host:)
+    return nil unless image.attached?
+
+    Rails.application.routes.url_helpers.rails_blob_url(image, host: host)
+  end
+
   validates :title, presence: true
   # スコアは0〜5の星評価。未評価は nil を許可し、範囲外・非整数を弾く。
   validates :taste_score, :ease_score, :cost_score,

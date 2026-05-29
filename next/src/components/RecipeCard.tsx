@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Heart, MessageCircle } from 'lucide-react'
 
 type Props = {
@@ -40,17 +41,15 @@ export default function RecipeCard({
 }: Props) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full relative">
-      {/* 画像: 単独 Link は不要。カード全体が stretched link で詳細ページへ。 */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={
-          imageUrl
-            ? imageUrl.replace('http://rails:3000', process.env.NEXT_PUBLIC_RAILS_URL)
-            : '/default-recipe.jpg'
-        }
-        alt={title}
-        className="w-full h-48 object-cover shrink-0"
-      />
+      <div className="relative w-full h-48 shrink-0">
+        <Image
+          src={imageUrl ?? '/default-recipe.jpg'}
+          alt={title}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
+        />
+      </div>
 
       <div className="p-4 flex flex-col flex-1">
         {/* タイトル (stretched link)

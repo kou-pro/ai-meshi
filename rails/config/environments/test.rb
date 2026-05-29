@@ -7,7 +7,7 @@ require "active_support/core_ext/integer/time"
 
 # ActiveStorage の rails_blob_url(host:) は host 引数が必須。
 # 本番では task-definition で RAILS_PUBLIC_URL が渡されるが、CI / ローカル test では
-ENV["RAILS_PUBLIC_URL"] ||= "http://localhost:3001"
+ENV["RAILS_PUBLIC_URL"] ||= "http://localhost:3000"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.

@@ -14,7 +14,7 @@ class Api::V1::RecipesController < ApplicationController
         created_at: recipe.created_at,
         likes_count: recipe.likes_count,
         comments_count: recipe.comments_count,
-        image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+        image_url: recipe.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
         user: {
           id: recipe.user.id,
           name: recipe.user.name,
@@ -49,7 +49,7 @@ class Api::V1::RecipesController < ApplicationController
       likes_count: recipe.likes.count,
       liked_by_current_user: liked_by_current_user,
       bookmarked_by_current_user: bookmarked_by_current_user,
-      image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+      image_url: recipe.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
       taste_score: recipe.taste_score,
       ease_score: recipe.ease_score,
       cost_score: recipe.cost_score,
@@ -136,7 +136,7 @@ class Api::V1::RecipesController < ApplicationController
           title: recipe.title,
           created_at: recipe.created_at,
           likes_count: recipe.likes_count,
-          image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+          image_url: recipe.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
           user: {
             id: recipe.user.id,
             name: recipe.user.name,
@@ -162,7 +162,7 @@ class Api::V1::RecipesController < ApplicationController
         title: recipe.title,
         created_at: recipe.created_at,
         likes_count: recipe.likes_count,
-        image_url: recipe.image.attached? ? url_for(recipe.image) : nil,
+        image_url: recipe.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
         user: {
           id: recipe.user.id,
           name: recipe.user.name,

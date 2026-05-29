@@ -26,21 +26,11 @@ class Api::V1::ShoppingListItemsController < ApplicationController
         # スナップショット(recipe_title)を優先。未設定の旧データは存命レシピから補完。
         # レシピ削除済みなら recipe は nil → スナップショットのみが残り「○○（削除済み）」表示に使う。
         recipe_title: item.recipe_title || item.recipe&.title,
-        recipe_image_url: item.recipe&.image&.attached? ? url_for(item.recipe.image) : nil,
+        recipe_image_url: item.recipe&.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
       }
     }
   end
 
-  # 買い物リストに食材を追加する。
-  #
-  # 同一キー (user_id, recipe_id, ingredient_name, unit) は upsert され、
-  # quantity が加算される (Shopify Cart 等の業界標準と同じ集約モデル)。
-  # 実ロジックは ShoppingListItemUpserter Service Object に委譲する
-  # (Skinny Controller 原則)。
-  #
-  # 注: 旧実装にあった force パラメータ・409 ロジックは撤廃済み。
-  #     追加すれば自然に集約されるため、UI 側で「もう一度追加しますか?」の
-  #     確認ダイアログも不要になる。
   def create
     ShoppingListItemUpserter.call(
       user: current_user,

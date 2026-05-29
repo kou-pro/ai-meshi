@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
 import {
@@ -353,24 +354,24 @@ export default function ShoppingListClient({ initialItems }: Props) {
             {Object.entries(groupedByRecipe).map(([key, group]) => {
               // recipe_id が null = 元レシピ削除済み。リンクを張らず墓標表示にする
               const isDeleted = group.recipe_id == null
-              const recipeImg = group.recipe_image_url
-                ? group.recipe_image_url.replace(
-                    'http://rails:3000',
-                    process.env.NEXT_PUBLIC_RAILS_URL ?? '',
-                  )
-                : '/default-recipe.jpg'
+              // Rails 側で rails_blob_url(host:) により公開 URL として返るため、
+              // フロント側でホスト書き換えは不要。
+              const recipeImg = group.recipe_image_url ?? '/default-recipe.jpg'
               return (
                 <div
                   key={key}
                   className="border border-gray-200 rounded-xl p-3 flex gap-3"
                 >
-                  {/* レシピ画像（削除済みはリンク無し） */}
+                  {/* レシピ画像（削除済みはリンク無し）
+                      next/image (公式) で webp/avif + lazy + CLS 防止。
+                      80x80 固定サイズなので fill ではなく width/height を指定。 */}
                   {isDeleted ? (
                     <div className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src="/default-recipe.jpg"
                         alt="削除されたレシピ"
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover opacity-50"
                       />
                     </div>
@@ -379,10 +380,11 @@ export default function ShoppingListClient({ initialItems }: Props) {
                       href={`/recipes/${group.recipe_id}`}
                       className="shrink-0 block w-20 h-20 rounded-lg overflow-hidden bg-gray-100"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={recipeImg}
                         alt={group.recipe_title ?? ''}
+                        width={80}
+                        height={80}
                         className="w-full h-full object-cover"
                       />
                     </Link>

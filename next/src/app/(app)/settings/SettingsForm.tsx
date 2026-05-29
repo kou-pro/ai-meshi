@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { LogoutButton } from '@/components/LogoutButton'
 
@@ -71,10 +72,11 @@ export default function SettingsForm({
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 mb-3">
             {imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={imageUrl}
                 alt="プロフィール画像"
+                width={96}
+                height={96}
                 className="w-full h-full object-cover"
               />
             ) : (

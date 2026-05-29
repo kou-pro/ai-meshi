@@ -18,6 +18,7 @@ import RecipeOwnerActions from '@/components/RecipeOwnerActions'
 import ScoreSection from '@/components/ScoreSection'
 import RecipeImageUploader from '@/components/RecipeImageUploader'
 import UserAvatar from '@/components/UserAvatar'
+import Image from 'next/image'
 import { formatIngredientAmount } from '@/lib/formatIngredientAmount'
 
 type Ingredient = {
@@ -130,20 +131,14 @@ export default async function RecipeDetailPage({
 
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* 1. ヒーロー画像 (全幅・16:9 で max-h 制約) + 右上にアクションアイコン群 */}
-      <div className="relative w-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={
-            recipe.image_url
-              ? recipe.image_url.replace(
-                  'http://rails:3000',
-                  process.env.NEXT_PUBLIC_RAILS_URL ?? '',
-                )
-              : '/default-recipe.jpg'
-          }
+      <div className="relative w-full aspect-video max-h-110 rounded-2xl overflow-hidden">
+        <Image
+          src={recipe.image_url ?? '/default-recipe.jpg'}
           alt={recipe.image_url ? recipe.title : ''}
-          className="w-full aspect-video rounded-2xl object-cover max-h-110"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 1024px"
+          className="object-cover"
         />
         {/* オーナー: カメラアイコンで画像追加・差し替え (左上または既定の RecipeImageUploader 配置) */}
         {isOwner && (

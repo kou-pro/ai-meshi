@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 type Size = 'sm' | 'md' | 'lg'
 
 type Props = {
@@ -7,10 +9,10 @@ type Props = {
   className?: string
 }
 
-const sizeClasses: Record<Size, string> = {
-  sm: 'w-6 h-6 text-xs',
-  md: 'w-9 h-9 text-base',
-  lg: 'w-24 h-24 text-3xl',
+const sizes: Record<Size, { px: number; cls: string }> = {
+  sm: { px: 24, cls: 'w-6 h-6 text-xs' },
+  md: { px: 36, cls: 'w-9 h-9 text-base' },
+  lg: { px: 96, cls: 'w-24 h-24 text-3xl' },
 }
 
 export default function UserAvatar({
@@ -19,22 +21,23 @@ export default function UserAvatar({
   size = 'md',
   className = '',
 }: Props) {
-  const sizeClass = sizeClasses[size]
+  const { px, cls } = sizes[size]
 
   if (imageUrl) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={imageUrl}
         alt={name}
-        className={`${sizeClass} shrink-0 rounded-full object-cover ${className}`}
+        width={px}
+        height={px}
+        className={`${cls} shrink-0 rounded-full object-cover ${className}`}
       />
     )
   }
 
   return (
     <span
-      className={`${sizeClass} shrink-0 rounded-full bg-gray-200 inline-flex items-center justify-center text-gray-500 ${className}`}
+      className={`${cls} shrink-0 rounded-full bg-gray-200 inline-flex items-center justify-center text-gray-500 ${className}`}
       aria-hidden="true"
     >
       👤

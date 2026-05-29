@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 import FollowButton from '@/components/FollowButton'
@@ -104,10 +105,11 @@ export default function FollowsClient({
                 className="flex items-center gap-3 hover:opacity-80"
               >
                 {user.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={user.image_url}
                     alt={user.name}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full object-cover"
                   />
                 ) : (

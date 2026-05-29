@@ -31,13 +31,13 @@ const sampleComment = (
     id: number
     body: string
     created_at: string
-    user: { id: number; name: string }
+    user: { id: number; name: string; image_url: string | null }
   }> = {},
 ) => ({
   id: 1,
   body: 'おいしそうですね！',
   created_at: '2026-05-13T10:00:00Z',
-  user: { id: 2, name: 'たろう' },
+  user: { id: 2, name: 'たろう', image_url: null },
   ...overrides,
 })
 
@@ -109,7 +109,7 @@ describe('CommentSection', () => {
       render(
         <CommentSection
           recipeId={1}
-          initialComments={[sampleComment({ user: { id: 1, name: '自分' } })]}
+          initialComments={[sampleComment({ user: { id: 1, name: '自分', image_url: null } })]}
           isLoggedIn={true}
           currentUserId={1}
         />,
@@ -124,7 +124,7 @@ describe('CommentSection', () => {
       render(
         <CommentSection
           recipeId={1}
-          initialComments={[sampleComment({ user: { id: 2, name: '他人' } })]}
+          initialComments={[sampleComment({ user: { id: 2, name: '他人', image_url: null } })]}
           isLoggedIn={true}
           currentUserId={1}
         />,
@@ -256,7 +256,7 @@ describe('CommentSection', () => {
             sampleComment({
               id: 10,
               body: '消えるコメント',
-              user: { id: 1, name: '自分' },
+              user: { id: 1, name: '自分', image_url: null },
             }),
           ]}
           isLoggedIn={true}
@@ -291,7 +291,7 @@ describe('CommentSection', () => {
             sampleComment({
               id: 10,
               body: '残るコメント',
-              user: { id: 1, name: '自分' },
+              user: { id: 1, name: '自分', image_url: null },
             }),
           ]}
           isLoggedIn={true}

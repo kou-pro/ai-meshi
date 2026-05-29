@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, MessageCircle } from 'lucide-react'
+import UserAvatar from '@/components/UserAvatar'
 
 type Props = {
   id: number
@@ -8,6 +9,7 @@ type Props = {
   imageUrl: string | null
   userName: string
   userId: number
+  userImageUrl: string | null
   createdAt: string
   likesCount: number
   isPublished?: boolean
@@ -34,6 +36,7 @@ export default function RecipeCard({
   imageUrl,
   userName,
   userId,
+  userImageUrl,
   createdAt,
   likesCount,
   isPublished,
@@ -74,16 +77,16 @@ export default function RecipeCard({
 
         {/* フッター: mt-auto で下端に固定 */}
         <div className="mt-auto flex items-center justify-between text-xs text-gray-400">
-          <div>
-            {/* ユーザー名リンクは relative + z-10 で stretched link より上に配置。
-                これだけ別リンクとして機能する。 */}
+          <div className="flex items-center gap-1.5">
             <Link
               href={`/users/${userId}`}
-              className="relative z-10 hover:text-green-600"
+              aria-label={`${userName}のプロフィール`}
+              className="relative z-10 inline-flex items-center gap-1 hover:text-green-600"
             >
-              {userName}
+              <UserAvatar imageUrl={userImageUrl} name={userName} size="sm" />
+              <span>{userName}</span>
             </Link>
-            <span className="mx-1">・</span>
+            <span>・</span>
             <span>{new Date(createdAt).toLocaleDateString('ja-JP')}</span>
           </div>
           <div className="flex items-center gap-3">

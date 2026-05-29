@@ -33,6 +33,7 @@ export default function RecipeList({ recipes }: Props) {
             imageUrl={recipe.image_url}
             userName={recipe.user.name}
             userId={recipe.user.id}
+            userImageUrl={recipe.user.image_url}
             createdAt={recipe.created_at}
             likesCount={recipe.likes_count}
             isPublished={recipe.is_published}

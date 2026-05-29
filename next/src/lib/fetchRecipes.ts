@@ -12,6 +12,7 @@ export type Recipe = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 

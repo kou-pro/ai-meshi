@@ -2,8 +2,9 @@ class Api::V1::RecipesController < ApplicationController
   before_action :authenticate_user!, except: [:published, :show, :popular, :popular_tags]
 
   def index
+    # N+1 回避: 投稿者の image (ActiveStorage) も含めて先読み (RecipeCard のアバター表示用)
     recipes = current_user.recipes.
-                includes(image_attachment: :blob).
+                includes(image_attachment: :blob, user: { image_attachment: :blob }).
                 order(created_at: :desc)
 
     render json: recipes.map {|recipe|
@@ -18,6 +19,7 @@ class Api::V1::RecipesController < ApplicationController
         user: {
           id: recipe.user.id,
           name: recipe.user.name,
+          image_url: recipe.user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
         },
       }
     }
@@ -99,10 +101,10 @@ class Api::V1::RecipesController < ApplicationController
     if sort_order == "following" && current_user
       following_ids = current_user.following.pluck(:id)
       recipes = Recipe.where(is_published: true, user_id: following_ids).
-                  includes(:user, image_attachment: :blob)
+                  includes(image_attachment: :blob, user: { image_attachment: :blob })
     else
       recipes = Recipe.where(is_published: true).
-                  includes(:user, image_attachment: :blob)
+                  includes(image_attachment: :blob, user: { image_attachment: :blob })
     end
 
     if tag
@@ -140,6 +142,7 @@ class Api::V1::RecipesController < ApplicationController
           user: {
             id: recipe.user.id,
             name: recipe.user.name,
+            image_url: recipe.user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
           },
         }
       },
@@ -152,7 +155,7 @@ class Api::V1::RecipesController < ApplicationController
 
   def popular
     recipes = Recipe.where(is_published: true).
-                includes(:user, image_attachment: :blob).
+                includes(image_attachment: :blob, user: { image_attachment: :blob }).
                 order(likes_count: :desc, created_at: :desc).
                 limit(6)
 
@@ -166,6 +169,7 @@ class Api::V1::RecipesController < ApplicationController
         user: {
           id: recipe.user.id,
           name: recipe.user.name,
+          image_url: recipe.user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
         },
       }
     }

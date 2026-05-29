@@ -19,7 +19,7 @@ type Recipe = {
   image_url: string | null
   created_at: string
   likes_count: number
-  user: { id: number; name: string }
+  user: { id: number; name: string; image_url: string | null }
 }
 
 type Tag = {
@@ -234,6 +234,7 @@ function TopPageContent() {
                     imageUrl={recipe.image_url}
                     userName={recipe.user.name}
                     userId={recipe.user.id}
+                    userImageUrl={recipe.user.image_url}
                     createdAt={recipe.created_at}
                     likesCount={recipe.likes_count}
                   />

@@ -14,6 +14,7 @@ type Recipe = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 
@@ -83,6 +84,7 @@ export default async function SavedRecipesPage() {
             imageUrl={recipe.image_url}
             userName={recipe.user.name}
             userId={recipe.user.id}
+            userImageUrl={recipe.user.image_url}
             createdAt={recipe.created_at}
             likesCount={recipe.likes_count}
           />

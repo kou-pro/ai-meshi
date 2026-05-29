@@ -19,6 +19,7 @@ type UserRecipesResponse = {
   user: {
     id: number
     name: string
+    image_url: string | null
     following_count: number
     followers_count: number
   }
@@ -170,6 +171,7 @@ export default async function UserRecipesPage({
             imageUrl={recipe.image_url ?? null}
             userName={data.user.name}
             userId={data.user.id}
+            userImageUrl={data.user.image_url}
             createdAt={recipe.created_at}
             likesCount={recipe.likes_count}
             isPublished={isOwnPage ? recipe.is_published : undefined}

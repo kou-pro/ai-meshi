@@ -8,6 +8,7 @@ const baseProps = {
   imageUrl: 'http://example.com/image.jpg',
   userName: 'テストユーザー',
   userId: 42,
+  userImageUrl: null,
   createdAt: '2026-05-12T00:00:00Z',
   likesCount: 10,
 }

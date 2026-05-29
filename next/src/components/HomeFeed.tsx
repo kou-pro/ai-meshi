@@ -17,6 +17,7 @@ type Recipe = {
   user: {
     id: number
     name: string
+    image_url: string | null
   }
 }
 
@@ -345,6 +346,7 @@ export default function HomeFeed({
               imageUrl={recipe.image_url}
               userName={recipe.user.name}
               userId={recipe.user.id}
+              userImageUrl={recipe.user.image_url}
               createdAt={recipe.created_at}
               likesCount={recipe.likes_count}
             />

@@ -24,7 +24,8 @@ class Api::V1::RecipesController < ApplicationController
   end
 
   def show
-    recipe = Recipe.find(params[:id])
+    # 投稿者の image (ActiveStorage) を 1 クエリで先読みする (Avatar 表示用)。
+    recipe = Recipe.includes(user: { image_attachment: :blob }).find(params[:id])
     # ログイン済みの場合だけ自分がいいねしているか確認する
     liked_by_current_user = current_user ? current_user.likes.exists?(recipe: recipe) : false
     # ログイン済みであれば、ログイン中のユーザーに詳細ページのレシピが保存されているかを問い合わせる
@@ -43,6 +44,7 @@ class Api::V1::RecipesController < ApplicationController
       user: {
         id: recipe.user.id,
         name: recipe.user.name,
+        image_url: recipe.user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
       },
       likes_count: recipe.likes.count,
       liked_by_current_user: liked_by_current_user,

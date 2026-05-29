@@ -41,6 +41,18 @@ class User < ApplicationRecord
 
   has_one_attached :image
   has_many :recipes, dependent: :destroy
+
+  # プロフィール画像の絶対 URL を返す。
+  # 添付がなければ nil。host は Next.js BFF から到達可能な公開ホストを呼び出し側が渡す。
+  # 既存 users_controller の rails_blob_url 直書きを DRY 化するためのメソッド (Skinny Controller)。
+  # 出典: Active Storage 公式ガイド
+  #   https://guides.rubyonrails.org/active_storage_overview.html#linking-to-files
+  def image_url(host:)
+    return nil unless image.attached?
+
+    Rails.application.routes.url_helpers.rails_blob_url(image, host: host)
+  end
+
   has_many :likes, dependent: :destroy
   has_many :liked_recipes, through: :likes, source: :recipe
   has_many :comments, dependent: :destroy

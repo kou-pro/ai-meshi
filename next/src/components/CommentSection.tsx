@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -132,12 +133,6 @@ export default function CommentSection({
         </p>
       )}
 
-      {/* コメント一覧
-          - 左上: 丸アバター
-          - アバターの右: 名前
-          - 名前の下: コメント本文
-          - 右上: 投稿日時 (日付 + 時刻)
-          - 自分のコメントなら日時の右にゴミ箱アイコン */}
       {comments.length === 0 ? (
         <p className="text-sm text-gray-500">まだコメントはありません</p>
       ) : (
@@ -160,17 +155,29 @@ export default function CommentSection({
                 className="border border-gray-100 rounded-lg p-3"
               >
                 <div className="flex items-start gap-2.5">
-                  {/* 左上: 丸アバター */}
-                  <div className="shrink-0 w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base">
+                  {/* 左上: 丸アバター (プロフィール遷移リンク)
+                      アイコン (絵文字) は視覚的なラベルにならないため aria-label で補う。
+                      React 公式: "icon buttons where visible text is absent" は aria-label 必要。
+                      https://react.dev/learn/accessibility */}
+                  <Link
+                    href={`/users/${comment.user.id}`}
+                    aria-label={`${comment.user.name}のプロフィール`}
+                    className="shrink-0 w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-base hover:opacity-80 transition-opacity"
+                  >
                     👤
-                  </div>
+                  </Link>
 
                   {/* 右側コンテンツ */}
                   <div className="flex-1 min-w-0">
                     {/* ヘッダ行: 左に名前 / 右に日時 + (自分なら) 削除アイコン */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="text-sm font-medium text-gray-800 truncate">
-                        {comment.user.name}
+                        <Link
+                          href={`/users/${comment.user.id}`}
+                          className="hover:text-green-600 hover:underline"
+                        >
+                          {comment.user.name}
+                        </Link>
                       </div>
                       <div className="shrink-0 flex items-center gap-1.5">
                         <span className="text-xs text-gray-400 whitespace-nowrap">

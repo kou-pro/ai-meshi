@@ -416,9 +416,9 @@ export default function ShoppingListClient({ initialItems }: Props) {
                           group.recipe_title,
                         )
                       }
-                      className="mt-auto self-start flex items-center gap-1 text-xs text-red-500 hover:text-red-600"
+                      className="mt-auto self-end inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 transition-colors"
                     >
-                      <TrashIcon className="w-3.5 h-3.5" />
+                      <TrashIcon className="w-4 h-4" />
                       削除
                     </button>
                   </div>

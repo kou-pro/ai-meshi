@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
+import { Search, X } from 'lucide-react'
 import RecipeCard from '@/components/RecipeCard'
 import { fetchWithAuthClient } from '@/lib/fetchWithAuthClient'
 
@@ -51,6 +52,19 @@ export default function HomeFeed({
   const [page, setPage] = useState(1)
   const [inputValue, setInputValue] = useState(initialQuery)
   const [loading, setLoading] = useState(false)
+
+  // URL の query を Single Source of Truth (SSOT) として、検索バーの inputValue を
+  // URL に追従させる。
+  // 旧実装は inputValue が初期値のあと React state として独立しており、ロゴクリック
+  // で /home に戻った直後に「URL は query 無いのに検索バーは前のキーワードが残ったまま」
+  // 状態になり、続けてソート切替するとユーザーが「検索結果内で並べ替えた」と誤認する
+  // UX 問題があった。
+  // URL を真値にすることで Twitter / X / Instagram / YouTube / Cookpad と同じ
+  // 「ロゴ → クリア / ソート切替 → query 維持」の業界標準挙動になる。
+  // 出典: https://buildui.com/posts/how-to-control-a-react-component-with-the-url
+  useEffect(() => {
+    setInputValue(query)
+  }, [query])
 
   // URL 更新ヘルパー (公式パターン: window.history.pushState)
   // Next.js が pushState を monkey patch するため useSearchParams が自動同期する。
@@ -243,43 +257,53 @@ export default function HomeFeed({
         </div>
       )}
 
-      {/* 検索フォーム */}
+      {/* 検索フォーム: leading icon (虫眼鏡) + clear ✕ + 検索ボタンを inline 配置で
+          Cookpad / Instagram / X のモバイル標準パターンに揃える。
+          (sticky で上部追従する案は不採用、通常レイアウト) */}
       <div className="mb-6">
-        <div className="flex gap-2">
+        <div className="relative">
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+            aria-hidden="true"
+          />
           <input
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="料理名や #タグ で検索"
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm"
+            aria-label="レシピ検索"
+            className="w-full border border-gray-300 rounded-full pl-9 pr-24 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          {inputValue && (
+            <button
+              onClick={handleReset}
+              aria-label="検索をクリア"
+              className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+            className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 bg-green-600 text-white rounded-full text-xs font-medium hover:bg-green-700 disabled:opacity-50"
           >
             検索
           </button>
-          {(query || activeTag) && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 text-sm"
-            >
-              リセット
-            </button>
-          )}
         </div>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-gray-400 mt-1 px-1">
           複数語はスペース区切りで検索できます
         </p>
       </div>
 
-      {/* ソート切り替え */}
-      <div className="flex gap-2 mb-6">
+      {/* ソート切り替え: モバイル時 overflow-x-auto で横スクロール可能 chips
+          (Material Design 3: 'Chips work best in horizontally scrollable rows')。
+          スクロールバーは見た目を整えるため -mx-4 + px-4 でカード端まで広げる。 */}
+      <div className="flex gap-2 mb-6 overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 pb-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         <button
           onClick={() => handleSortChange('newest')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
+          className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium ${
             sort === 'newest'
               ? 'bg-green-500 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -289,7 +313,7 @@ export default function HomeFeed({
         </button>
         <button
           onClick={() => handleSortChange('popular')}
-          className={`px-4 py-2 rounded-full text-sm font-medium ${
+          className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium ${
             sort === 'popular'
               ? 'bg-green-500 text-white'
               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -301,7 +325,7 @@ export default function HomeFeed({
         {isLoggedIn && (
           <button
             onClick={() => handleSortChange('following')}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
+            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium ${
               sort === 'following'
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

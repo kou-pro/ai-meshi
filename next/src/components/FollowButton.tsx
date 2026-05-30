@@ -49,7 +49,7 @@ export default function FollowButton({
     <button
       onClick={handleClick}
       disabled={isLoading}
-      className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+      className={`w-28 h-10 px-3 py-2 rounded-full text-sm font-medium border transition-colors whitespace-nowrap ${
         isFollowing
           ? 'border-gray-300 bg-white text-gray-600 hover:bg-red-50 hover:text-red-500 hover:border-red-300'
           : 'border-green-600 bg-green-600 text-white hover:bg-green-700'

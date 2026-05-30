@@ -84,6 +84,25 @@ RSpec.describe "Api::V1::Users", type: :request do
       expect(json.length).to eq(1)
       expect(json.first["id"]).to eq(other_user.id)
     end
+
+    context "閲覧者基準の is_followed_by_me" do
+      it "認証済みかつ表示対象を current_user がフォロー中なら true" do
+        target = create(:user)
+        create(:follow, follower: user, following: target)
+        auth_headers = sign_in_and_get_headers(user)
+
+        get "/api/v1/users/#{user.id}/following", headers: auth_headers
+        expect(response.parsed_body.first["is_followed_by_me"]).to be(true)
+      end
+
+      it "未認証なら false で返る" do
+        target = create(:user)
+        create(:follow, follower: user, following: target)
+
+        get "/api/v1/users/#{user.id}/following"
+        expect(response.parsed_body.first["is_followed_by_me"]).to be(false)
+      end
+    end
   end
 
   describe "GET /api/v1/users/:id/followers" do
@@ -96,6 +115,30 @@ RSpec.describe "Api::V1::Users", type: :request do
       json = response.parsed_body
       expect(json.length).to eq(1)
       expect(json.first["id"]).to eq(follower_user.id)
+    end
+
+    context "閲覧者基準の is_followed_by_me" do
+      it "相互フォロー (followers 一覧の人を current_user もフォロー中) なら true" do
+        other = create(:user)
+        # other → user (other がこの user のフォロワー)
+        create(:follow, follower: other, following: user)
+        # user → other (相互フォロー)
+        create(:follow, follower: user, following: other)
+        auth_headers = sign_in_and_get_headers(user)
+
+        get "/api/v1/users/#{user.id}/followers", headers: auth_headers
+        expect(response.parsed_body.first["is_followed_by_me"]).to be(true)
+      end
+
+      it "非相互フォロー (followers のみ) なら false" do
+        other = create(:user)
+        # other → user のみ (user → other は無し)
+        create(:follow, follower: other, following: user)
+        auth_headers = sign_in_and_get_headers(user)
+
+        get "/api/v1/users/#{user.id}/followers", headers: auth_headers
+        expect(response.parsed_body.first["is_followed_by_me"]).to be(false)
+      end
     end
   end
 end

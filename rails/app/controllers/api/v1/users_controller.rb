@@ -1,3 +1,5 @@
+require "set"
+
 module Api
   module V1
     class UsersController < ApplicationController
@@ -38,27 +40,20 @@ module Api
       end
 
       # フォロー中一覧
+      # 閲覧者 (current_user) 基準の is_followed_by_me を含めて返す。これは
+      # 「current_user がこの一覧内の各ユーザーをフォロー中か」を示すフラグで、
+      # FollowsClient の FollowButton 初期状態に使う。
       def following
         user = User.find(params[:id])
-        render json: user.following.map {|u|
-          {
-            id: u.id,
-            name: u.name,
-            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL")) : nil,
-          }
-        }
+        render json: serialize_users(user.following)
       end
 
       # フォロワー一覧
+      # フォロワー一覧では特に「相互フォロー」のケース判定が重要。
+      # current_user 自身が一覧内の followers をフォロー中なら is_followed_by_me=true。
       def followers
         user = User.find(params[:id])
-        render json: user.followers.map {|u|
-          {
-            id: u.id,
-            name: u.name,
-            image_url: u.image.attached? ? rails_blob_url(u.image, host: ENV.fetch("RAILS_PUBLIC_URL")) : nil,
-          }
-        }
+        render json: serialize_users(user.followers)
       end
 
       def recipes
@@ -99,6 +94,30 @@ module Api
           },
         }
       end
+
+      private
+
+        # following / followers の共通シリアライズ。
+        # N+1 回避のため image_attachment を eager load し、閲覧者の following ID は
+        # 表示対象ユーザーに絞って一度だけ取得する。
+        def serialize_users(users_relation)
+          users = users_relation.includes(image_attachment: :blob).to_a
+          user_ids = users.map(&:id)
+          my_following_ids = if current_user
+                               current_user.following.where(id: user_ids).pluck(:id).to_set
+                             else
+                               Set.new
+                             end
+
+          users.map {|u|
+            {
+              id: u.id,
+              name: u.name,
+              image_url: u.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
+              is_followed_by_me: my_following_ids.include?(u.id),
+            }
+          }
+        end
     end
   end
 end

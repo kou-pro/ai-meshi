@@ -9,6 +9,7 @@ type UserItem = {
   id: number
   name: string
   image_url: string | null
+  is_followed_by_me: boolean
 }
 
 /** Rails API から指定タブのユーザーリストを取得（Server-side） */

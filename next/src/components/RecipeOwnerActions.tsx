@@ -172,18 +172,19 @@ export default function RecipeOwnerActions({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* トリガー: 「⋯ 管理」 */}
+      {/* トリガー: レシピ管理メニュー */}
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={loading}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+        className="inline-flex w-10 h-10 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-gray-700 shadow-sm hover:bg-gray-200 hover:text-gray-900 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="レシピ管理メニュー"
+        title="管理メニュー"
       >
-        <MoreHorizontal className="w-4 h-4" />
-        管理
+        <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
       </button>
 
       {/* ドロップダウン (右上から下方向に展開)

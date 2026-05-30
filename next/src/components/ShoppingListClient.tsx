@@ -357,6 +357,14 @@ export default function ShoppingListClient({ initialItems }: Props) {
               // Rails 側で rails_blob_url(host:) により公開 URL として返るため、
               // フロント側でホスト書き換えは不要。
               const recipeImg = group.recipe_image_url ?? '/default-recipe.jpg'
+              // レシピ追加回数: 1 食材ごとの added_count (PR #85 で導入) の最小値を
+              // レシピ自体の追加回数とみなす。
+              //   理由: 同じレシピを 2 回追加すると全食材が +1 されるが、他レシピと
+              //   共通の食材は更にカウントが上がる。レシピ単独の最小回数を取ることで
+              //   '共通食材が多いレシピ' でも誤って多くカウントされない。
+              const recipeAddedCount = group.items.length
+                ? Math.min(...group.items.map((i) => i.added_count))
+                : 1
               return (
                 <div
                   key={key}
@@ -392,11 +400,17 @@ export default function ShoppingListClient({ initialItems }: Props) {
 
                   {/* レシピ情報 */}
                   <div className="flex-1 min-w-0 flex flex-col">
+                    {/* タイトル + ×N (2 回以上追加した時だけ薄文字で表示) */}
                     {isDeleted ? (
                       <span className="font-bold text-sm text-gray-400 line-clamp-2">
                         {group.recipe_title
                           ? `${group.recipe_title}（公開終了）`
                           : 'このレシピは公開終了しました'}
+                        {recipeAddedCount > 1 && (
+                          <span className="text-xs text-gray-400 font-normal ml-1">
+                            × {recipeAddedCount}
+                          </span>
+                        )}
                       </span>
                     ) : (
                       <Link
@@ -404,6 +418,11 @@ export default function ShoppingListClient({ initialItems }: Props) {
                         className="font-bold text-sm text-gray-900 line-clamp-2 hover:text-green-600"
                       >
                         {group.recipe_title}
+                        {recipeAddedCount > 1 && (
+                          <span className="text-xs text-gray-400 font-normal ml-1">
+                            × {recipeAddedCount}
+                          </span>
+                        )}
                       </Link>
                     )}
                     <p className="text-xs text-gray-400 mt-1">

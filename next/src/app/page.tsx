@@ -104,8 +104,8 @@ function TopPageContent() {
             <Image
               src="/logo.png"
               alt="AI飯"
-              width={800}
-              height={436}
+              width={512}
+              height={255}
               className="w-auto h-28"
               priority
             />
@@ -120,8 +120,8 @@ function TopPageContent() {
             <Image
               src="/logo.png"
               alt="AI飯"
-              width={800}
-              height={436}
+              width={512}
+              height={255}
               className="w-auto h-16"
               priority
             />

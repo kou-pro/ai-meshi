@@ -42,9 +42,9 @@ export default async function Navbar() {
           <Image
             src="/logo.png"
             alt="AI飯"
-            width={800}
-            height={436}
-            className="w-auto h-32"
+            width={512}
+            height={255}
+            className="w-auto h-20"
           />
         </Link>
         {/* ナビリンク */}

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-type Size = 'sm' | 'md' | 'lg'
+type Size = 'sm' | 'md' | 'profile' | 'lg'
 
 type Props = {
   imageUrl: string | null
@@ -12,6 +12,7 @@ type Props = {
 const sizes: Record<Size, { px: number; cls: string }> = {
   sm: { px: 24, cls: 'w-6 h-6 text-xs' },
   md: { px: 36, cls: 'w-9 h-9 text-base' },
+  profile: { px: 64, cls: 'w-16 h-16 text-2xl' },
   lg: { px: 96, cls: 'w-24 h-24 text-3xl' },
 }
 

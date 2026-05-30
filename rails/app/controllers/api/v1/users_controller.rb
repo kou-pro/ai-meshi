@@ -57,7 +57,7 @@ module Api
       end
 
       def recipes
-        user = User.find(params[:id])
+        user = User.includes(image_attachment: :blob).find(params[:id])
 
         # 自分のページなら全レシピ、他人のページなら公開レシピのみ
         is_own_page = current_user&.id == user.id
@@ -78,6 +78,7 @@ module Api
           user: {
             id: user.id,
             name: user.name,
+            image_url: user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
             following_count: user.following.count,
             followers_count: user.followers.count,
           },

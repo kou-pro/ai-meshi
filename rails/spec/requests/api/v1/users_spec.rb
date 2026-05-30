@@ -71,6 +71,15 @@ RSpec.describe "Api::V1::Users", type: :request do
         expect(titles).to include("公開レシピ", "下書きレシピ")
       end
     end
+
+    context "user キーの image_url (見出し横アバター表示用)" do
+      it "user キーに image_url が含まれ、画像未添付なら nil を返す" do
+        get "/api/v1/users/#{user.id}/recipes"
+        user_json = response.parsed_body["user"]
+        expect(user_json).to include("id", "name", "image_url")
+        expect(user_json["image_url"]).to be_nil
+      end
+    end
   end
 
   describe "GET /api/v1/users/:id/following" do

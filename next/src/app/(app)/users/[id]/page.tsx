@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ChefHat } from 'lucide-react'
 import RecipeCard from '@/components/RecipeCard'
 import FollowButton from '@/components/FollowButton'
+import UserAvatar from '@/components/UserAvatar'
 import { getCurrentUserId } from '@/lib/getCurrentUser'
 
 type Recipe = {
@@ -105,19 +106,32 @@ export default async function UserRecipesPage({
     </div>
   )
 
-  // 空状態: タイトル中央寄せ (自分のページ) or タイトル+フォローボタン (他人のページ)
   if (isEmpty) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-8">
         {isOwnPage ? (
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
-            {data.user.name} さんのレシピ
-          </h1>
-        ) : (
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">
+          <div className="flex items-center justify-center gap-3 mb-4 min-w-0">
+            <UserAvatar
+              imageUrl={data.user.image_url}
+              name={data.user.name}
+              size="profile"
+            />
+            <h1 className="text-2xl font-bold text-gray-800 truncate">
               {data.user.name} さんのレシピ
             </h1>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <UserAvatar
+                imageUrl={data.user.image_url}
+                name={data.user.name}
+                size="profile"
+              />
+              <h1 className="text-2xl font-bold truncate">
+                {data.user.name} さんのレシピ
+              </h1>
+            </div>
             {currentUserId && (
               <FollowButton
                 targetUserId={data.user.id}
@@ -149,8 +163,18 @@ export default async function UserRecipesPage({
   // 通常表示
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{data.user.name} さんのレシピ</h1>
+      <div className="flex items-center justify-between mb-6 gap-3">
+        {/* 通常表示: アバター + 見出し を左グループ、FollowButton を右に配置。 */}
+        <div className="flex items-center gap-3 min-w-0">
+          <UserAvatar
+            imageUrl={data.user.image_url}
+            name={data.user.name}
+            size="profile"
+          />
+          <h1 className="text-2xl font-bold truncate">
+            {data.user.name} さんのレシピ
+          </h1>
+        </div>
         {/* 未ログインまたは自分のページはフォローボタンを表示しない */}
         {currentUserId && !isOwnPage && (
           <FollowButton

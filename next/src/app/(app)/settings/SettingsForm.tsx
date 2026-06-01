@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { LogoutButton } from '@/components/LogoutButton'
@@ -11,13 +11,6 @@ type Props = {
   initialImageUrl: string | null
 }
 
-/**
- * 設定フォーム（Client Component）。
- *
- * # 設計
- * - 初期値は親 Server Component (page.tsx) から props として渡される。
- * - 本コンポーネントは編集ロジック・送信処理・UI 状態のみを担う。
- */
 export default function SettingsForm({
   initialName,
   initialEmail,
@@ -26,12 +19,26 @@ export default function SettingsForm({
   const router = useRouter()
   const [name, setName] = useState(initialName)
   const [imageUrl, setImageUrl] = useState<string | null>(initialImageUrl)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // メールアドレスは現状読み取り専用
   const email = initialEmail
+  const displayUrl = previewUrl ?? imageUrl
+  const isLocalPreview = Boolean(previewUrl)
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setPreviewUrl(URL.createObjectURL(file))
+  }
 
   // 名前・画像を更新
   const handleSubmit = async () => {
@@ -44,21 +51,31 @@ export default function SettingsForm({
       formData.append('image', fileInputRef.current.files[0])
     }
 
-    const res = await fetch('/api/settings', {
-      method: 'PATCH',
-      body: formData,
-    })
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'PATCH',
+        body: formData,
+      })
 
-    if (res.ok) {
-      const data = await res.json()
-      setName(data.name ?? '')
-      setImageUrl(data.image_url ?? null)
-      setMessage('更新しました')
-      router.refresh()
-    } else {
+      if (res.ok) {
+        const data = await res.json()
+        setName(data.name ?? '')
+        setImageUrl(data.image_url ?? null)
+        setMessage('更新しました')
+        router.refresh()
+      } else {
+        setMessage('更新に失敗しました')
+      }
+    } catch {
       setMessage('更新に失敗しました')
+    } finally {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+        setPreviewUrl(null)
+      }
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -71,14 +88,23 @@ export default function SettingsForm({
         {/* ユーザー画像 */}
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 mb-3">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt="プロフィール画像"
-                width={96}
-                height={96}
-                className="w-full h-full object-cover"
-              />
+            {displayUrl ? (
+              isLocalPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={displayUrl}
+                  alt="プロフィール画像"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={displayUrl}
+                  alt="プロフィール画像"
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-cover"
+                />
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 text-3xl">
                 👤
@@ -95,6 +121,7 @@ export default function SettingsForm({
             type="file"
             accept="image/png,image/jpeg"
             ref={fileInputRef}
+            onChange={handleFileChange}
             className="hidden"
           />
         </div>

@@ -4,7 +4,7 @@ class Api::V1::BookmarksController < ApplicationController
   # 保存済みレシピ一覧を返す
   def index
     recipes = current_user.bookmarked_recipes.
-                includes(:user, image_attachment: :blob).
+                includes(image_attachment: :blob, user: { image_attachment: :blob }).
                 order(created_at: :desc)
 
     render json: recipes.map {|recipe|
@@ -17,6 +17,7 @@ class Api::V1::BookmarksController < ApplicationController
         user: {
           id: recipe.user.id,
           name: recipe.user.name,
+          image_url: recipe.user.image_url(host: ENV.fetch("RAILS_PUBLIC_URL")),
         },
       }
     }

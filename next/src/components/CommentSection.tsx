@@ -26,11 +26,40 @@ type Props = {
   currentUserId: number | null
 }
 
-/**
- * コメントセクション。
- * 詳細ページ側で「コメント」見出しを表示するため、本コンポーネント内には
- * 見出し (h2) は持たず、入力フォームと一覧のみを描画する。
- */
+const relativeTimeFormatter = new Intl.RelativeTimeFormat('ja-JP', {
+  numeric: 'auto',
+})
+
+const formatRelativeDateTime = (dateTime: string, now = Date.now()) => {
+  const createdAt = new Date(dateTime).getTime()
+
+  if (Number.isNaN(createdAt)) return ''
+
+  const diffSeconds = Math.round((createdAt - now) / 1000)
+  const absSeconds = Math.abs(diffSeconds)
+  const toRelativeUnit = (secondsPerUnit: number) => {
+    const value = Math.trunc(diffSeconds / secondsPerUnit)
+    return value === 0 ? (diffSeconds < 0 ? -1 : 1) : value
+  }
+
+  if (absSeconds < 60) return 'たった今'
+  if (absSeconds < 60 * 60) {
+    return relativeTimeFormatter.format(toRelativeUnit(60), 'minute')
+  }
+  if (absSeconds < 60 * 60 * 24) {
+    return relativeTimeFormatter.format(toRelativeUnit(3600), 'hour')
+  }
+  if (absSeconds < 60 * 60 * 24 * 7) {
+    return relativeTimeFormatter.format(toRelativeUnit(86400), 'day')
+  }
+
+  return new Date(dateTime).toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+}
+
 export default function CommentSection({
   recipeId,
   initialComments,
@@ -151,6 +180,7 @@ export default function CommentSection({
                 minute: '2-digit',
               },
             )
+            const relativeLabel = formatRelativeDateTime(comment.created_at)
             return (
               <li
                 key={comment.id}
@@ -170,32 +200,35 @@ export default function CommentSection({
                   </Link>
 
                   {/* 右側コンテンツ */}
-                  <div className="flex-1 min-w-0">
-                    {/* ヘッダ行: 左に名前 / 右に日時 + (自分なら) 削除アイコン */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="text-sm font-medium text-gray-800 truncate">
+                  <div className="min-w-0 flex-1">
+                    {/* ヘッダ行: 左に名前と日時 / 右に削除アイコン */}
+                    <div className="flex items-start gap-2">
+                      <div className="min-w-0 flex-1">
                         <Link
                           href={`/users/${comment.user.id}`}
-                          className="hover:text-green-600 hover:underline"
+                          aria-label={`${comment.user.name}のプロフィール`}
+                          className="block text-sm font-medium leading-5 text-gray-800 break-words transition-colors hover:text-green-600"
                         >
                           {comment.user.name}
                         </Link>
+                        <time
+                          dateTime={comment.created_at}
+                          aria-label={dateTimeLabel}
+                          className="mt-0.5 block text-xs leading-4 text-gray-400"
+                        >
+                          {relativeLabel || dateTimeLabel}
+                        </time>
                       </div>
-                      <div className="shrink-0 flex items-center gap-1.5">
-                        <span className="text-xs text-gray-400 whitespace-nowrap">
-                          {dateTimeLabel}
-                        </span>
-                        {isMine && (
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(comment.id)}
-                            className="text-red-500 hover:text-red-700 transition-colors"
-                            aria-label="コメントを削除"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
+                      {isMine && (
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(comment.id)}
+                          className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                          aria-label="コメントを削除"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
 
                     {/* 名前の下にコメント本文 */}

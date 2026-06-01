@@ -27,6 +27,14 @@ RSpec.describe "Api::V1::Bookmarks", type: :request do
         expect(json.length).to eq(1)
         expect(json.first["id"]).to eq(recipe.id)
       end
+
+      it "user キーに image_url が含まれ、画像未添付なら nil を返す" do
+        auth_headers = sign_in_and_get_headers(user)
+        get "/api/v1/bookmarks", headers: auth_headers
+        user_json = response.parsed_body.first["user"]
+        expect(user_json).to include("id", "name", "image_url")
+        expect(user_json["image_url"]).to be_nil
+      end
     end
   end
 

@@ -10,13 +10,6 @@ class User < ApplicationRecord
 
   include DeviseTokenAuth::Concerns::User
 
-  # devise_token_auth ジェネレータ起源の未使用列を AR の attribute/SQL から除外。
-  # `image` は has_one_attached :image に accessor を乗っ取られた孤立 string 列、
-  # `nickname` はどこからも参照されない予約席。後続マイグレーションで DROP する前段として
-  # 公式推奨どおり先行投入する（稼働中プロセスが列を参照しなくなる）。
-  # 出典: https://api.rubyonrails.org/classes/ActiveRecord/ModelSchema/ClassMethods.html
-  self.ignored_columns += %w[nickname image]
-
   # OmniAuth コールバックから User を取得 or 作成する。
   #
   # 1. provider + uid で既存連携済みユーザーを検索（最優先）

@@ -151,7 +151,7 @@ ECSタスクは固定費を抑えるため public subnet に配置していま�
 | `follows` | ユーザー同士のフォロー関係 |
 | `shopping_list_items` | 買い物リスト。レシピ削除後も食材情報を保持 |
 
-画像は `User` / `Recipe` に対して `has_one_attached :image` で紐づけています。Active Storage の内部テーブルは図の可読性を優先して省略し、右下の注釈で補足しています。
+画像は `User` / `Recipe` に対して `has_one_attached :image` で紐づけています。Active Storage の内部テーブルは図の可読性を優先して省略しています。
 
 ## 使用技術 (フロントエンド)
 

@@ -22,8 +22,7 @@
 - [使用技術 (バックエンド)](#使用技術-バックエンド)
 - [使用技術 (インフラ・その他)](#使用技術-インフラその他)
 - [画面](#画面)
-- [技術選定・設計判断](#技術選定設計判断)
-- [セキュリティ・品質上の工夫](#セキュリティ品質上の工夫)
+- [工夫した点](#工夫した点)
 - [テスト・静的解析](#テスト静的解析)
 - [各種リンク](#各種リンク)
 
@@ -64,7 +63,7 @@
 
 ## 開発環境 (フロントエンド)
 
-フロントエンドは Next.js App Router で構築しています。Route Handler や Server Component 側の helper を BFF として利用し、Rails API が返す認証トークンを httpOnly Cookie として扱います。
+フロントエンドは Next.js（App Router）で構築しています。レシピの生成・投稿・検索、買い物リストなどの画面を表示し、ユーザーの操作を受け付ける部分を担当します。
 
 ```bash
 docker compose up -d
@@ -118,7 +117,7 @@ docker compose exec rails bin/rails db:create db:migrate db:seed
 
 1. ユーザーは `aimeshi.com` にHTTPSでアクセスします。
 2. Frontend ALB が Next.js の ECS Fargate タスクへリクエストを転送します。
-3. Next.js のサーバー側処理は BFF として、必要に応じて `api.aimeshi.com` へAPIリクエストを送ります。
+3. Next.js のサーバー側処理が、必要に応じて `api.aimeshi.com` へAPIリクエストを送ります。
 4. Backend ALB が Rails API の ECS Fargate タスクへリクエストを転送します。
 
 #### 外部連携
@@ -155,41 +154,40 @@ ECSタスクは固定費を抑えるため public subnet に配置していま�
 
 ## 使用技術 (フロントエンド)
 
-| 技術 | バージョン / 補足 | 選定理由 |
-| --- | --- | --- |
-| [Next.js](https://nextjs.org/docs) | 16.1.6 / App Router | BFFとしてサーバー側処理を使い、Rails APIのトークンをhttpOnly Cookieで扱うため |
-| [React](https://react.dev/) | 19.2.3 | 投稿・検索・買い物リストをコンポーネント単位で分割し、UI状態を管理しやすくするため |
-| [TypeScript](https://www.typescriptlang.org/) | 5.9.3 | APIレスポンスやフォーム値の型を明確にし、実装ミスを減らすため |
-| [Tailwind CSS](https://tailwindcss.com/docs) | 4.2.0 | 画面ごとの細かなUI調整を高速に行うため |
-| [SWR](https://swr.vercel.app/) | 2.4.0 | いいね・保存などの状態更新を軽く扱うため |
-| [Vitest](https://vitest.dev/) | 4.1.6 | 主要UIやユーティリティをフロントエンド側で検証するため |
+| 技術 | バージョン / 補足 |
+| --- | --- |
+| [Next.js](https://nextjs.org/docs) | 16.1.6 / App Router |
+| [React](https://react.dev/) | 19.2.3 |
+| [TypeScript](https://www.typescriptlang.org/) | 5.9.3 |
+| [Tailwind CSS](https://tailwindcss.com/docs) | 4.2.0 |
+| [Vitest](https://vitest.dev/) | 4.1.6 |
 
 ## 使用技術 (バックエンド)
 
-| 技術 | バージョン / 補足 | 選定理由 |
-| --- | --- | --- |
-| [Ruby](https://www.ruby-lang.org/) | 3.2.10 | Rails 7.2系と組み合わせてAPIを安定して構築するため |
-| [Rails](https://rubyonrails.org/) | 7.2.3 / API mode | 認証・DB・Active Storageを含むAPIを短期間で堅牢に構築するため |
-| [MySQL](https://www.mysql.com/) / [mysql2](https://github.com/brianmario/mysql2) | mysql2 0.5.7 | JSONカラムや一般的なRDB設計を使いながら、本番RDSへ接続するため |
-| [devise_token_auth](https://github.com/lynndylanhurley/devise_token_auth) | 1.2.6 | Rails APIでトークン認証を実装するため |
-| [omniauth-google-oauth2](https://github.com/zquestz/omniauth-google-oauth2) | 1.2.2 | GoogleログインをRails側で扱うため |
-| [ruby-openai](https://github.com/alexrudall/ruby-openai) | 8.3.0 | OpenAI APIをRailsから呼び出し、レシピ生成を実装するため |
-| [Active Storage](https://guides.rubyonrails.org/active_storage_overview.html) + [aws-sdk-s3](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3.html) | aws-sdk-s3 1.216.0 | レシピ画像・プロフィール画像をRails標準の仕組みでS3保存するため |
-| [RSpec Rails](https://github.com/rspec/rspec-rails) | rspec-rails 8.0.3 | モデル・リクエスト・サービス単位でバックエンドの振る舞いを検証するため |
-| [RuboCop](https://rubocop.org/) | 1.84.2 | Rubyコードの静的解析とスタイル統一のため |
+| 技術 | バージョン / 補足 |
+| --- | --- |
+| [Ruby](https://www.ruby-lang.org/) | 3.2.10 |
+| [Rails](https://rubyonrails.org/) | 7.2.3 / API mode |
+| [MySQL](https://www.mysql.com/) / [mysql2](https://github.com/brianmario/mysql2) | mysql2 0.5.7 |
+| [devise_token_auth](https://github.com/lynndylanhurley/devise_token_auth) | 1.2.6 |
+| [omniauth-google-oauth2](https://github.com/zquestz/omniauth-google-oauth2) | 1.2.2 |
+| [ruby-openai](https://github.com/alexrudall/ruby-openai) | 8.3.0 |
+| [Active Storage](https://guides.rubyonrails.org/active_storage_overview.html) + [aws-sdk-s3](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3.html) | aws-sdk-s3 1.216.0 |
+| [RSpec Rails](https://github.com/rspec/rspec-rails) | rspec-rails 8.0.3 |
+| [RuboCop](https://rubocop.org/) | 1.84.2 |
 
 ## 使用技術 (インフラ・その他)
 
-| 技術 | 用途 | 選定理由 |
-| --- | --- | --- |
-| [AWS ECS Fargate](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html) | Next.js / Rails API のコンテナ実行 | サーバー管理を抑えつつ、フロントとAPIを分離して運用するため |
-| [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) + [ACM](https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html) | HTTPS終端 | 独自ドメインでHTTPS通信を提供するため |
-| [Amazon RDS for MySQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html) | 本番DB | RailsのActive Recordと相性がよく、ポートフォリオ規模で運用しやすいため |
-| [S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) | 画像ストレージ | Active Storageと連携し、アップロード画像をアプリサーバー外に保存するため |
-| [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) | 機密情報管理 | APIキーやDB接続情報をECSタスク定義から安全に参照するため |
-| [GitHub Actions](https://docs.github.com/en/actions) | CI/CD | pushを契機にテスト・ビルド・ECSデプロイを自動化するため |
-| [ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) | Dockerイメージ管理 | ECSへデプロイするNext/RailsイメージをAWS内で管理するため |
-| [CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html) | ログ管理 | ECSタスクの標準出力ログを確認できるようにするため |
+| 技術 | 用途 |
+| --- | --- |
+| [AWS ECS Fargate](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html) | Next.js / Rails API のコンテナ実行 |
+| [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html) + [ACM](https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html) | HTTPS終端 |
+| [Amazon RDS for MySQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html) | 本番DB |
+| [S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html) | 画像ストレージ |
+| [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html) | 機密情報管理 |
+| [GitHub Actions](https://docs.github.com/en/actions) | CI/CD |
+| [ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) | Dockerイメージ管理 |
+| [CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html) | ログ管理 |
 
 ## 画面
 
@@ -270,51 +268,19 @@ ECSタスクは固定費を抑えるため public subnet に配置していま�
 
 フォロー / フォロワー一覧では、相互フォロー状態に応じてボタン表示を切り替えます。
 
-## 技術選定・設計判断
+## 工夫した点
 
-### Next.js BFF + httpOnly Cookie
+### 1. AI生成から買い物リストまでの導線
 
-Rails APIが返す devise_token_auth の認証トークンは、Next.js の Route Handler で受け取り、ブラウザには httpOnly Cookie として保存しています。
+AIが生成したレシピを単に表示するだけでなく、材料を買い物リストへ追加できるようにしました。献立決定と買い物準備を分断しないことで、実際の利用シーンに近い体験を目指しています。
 
-localStorageにトークンを置く構成も考えられますが、XSS発生時にJavaScriptからトークンを直接読まれるリスクを避けるため、BFF経由のCookie管理を選択しました。Cookieには本番環境で `Secure` を付与し、`SameSite=Lax` も設定しています。
+### 2. レシピ削除後の買い物リスト保持
 
-### S3 + CloudFrontの静的配信にしなかった理由
+レシピを削除しても買い物リスト上の食材情報は残るようにしました。買い物の途中でレシピが消えても必要な食材を見失わないよう、レシピ削除時は参照だけを外し（`dependent: :nullify`）、食材名・レシピ名はスナップショットとして保存しています。
 
-Next.js側でログイン・ログアウト・OAuthコールバックなどのRoute Handlerを使っています。そのため、`output: 'export'` による完全な静的ホスティングでは現在のBFF構成を動かせません。
+### 3. AWSコストとセキュリティのバランス
 
-このため、フロントエンドも ECS Fargate 上で Next.js standalone として動かしています。
-
-### OAuth短命コード交換フロー
-
-Google OAuthやメール確認後に、RailsからNext.jsへ本物の認証トークンをURLクエリで直接渡すと、ブラウザ履歴・Refererヘッダ・ログに残るリスクがあります。
-
-そこで、Rails側で30秒の短命コードを発行し、Next.jsがサーバー間POSTで本物のトークンと交換する構成にしました。Authorization Code Grantの考え方を参考に、トークン直渡しを避けています。
-
-### 買い物リストはレシピ削除後も残す
-
-レシピが削除されたときに買い物リストまで消えると、ユーザーが買い物中に必要な食材情報を失う可能性があります。
-
-そのため、`shopping_list_items.recipe_id` は `dependent: :nullify` で参照を外し、食材名やレシピ名はスナップショットとして残す設計にしました。
-
-### hashtagsはJSONカラムで保存
-
-ハッシュタグは `recipes.hashtags` のJSON配列に保存しています。タグ検索は `JSON_CONTAINS`、人気タグは公開レシピの `hashtags` を展開して頻度集計しています。
-
-タグ単位の詳細分析や複雑な検索が必要になった場合は、将来的に `tags` / `recipe_tags` テーブルへ正規化する想定です。
-
-## セキュリティ・品質上の工夫
-
-| 観点 | 実装 |
-| --- | --- |
-| トークン保管 | Next.js BFFがhttpOnly Cookieに保存。本番では `Secure`、CSRF軽減として `SameSite=Lax` |
-| OAuth | 短命コード交換フローにより、URL上に本物の認証トークンを出さない |
-| SQLインジェクション対策 | LIKE検索では `sanitize_sql_like` を使い、検索条件はプレースホルダで渡す |
-| シークレット管理 | 本番の機密情報はAWS Secrets ManagerからECSタスク定義で参照 |
-| AWS認証 | GitHub ActionsからAWSへはOIDCで一時クレデンシャルを取得 |
-| ネットワーク | ECSタスクの3000番はALB SGからのみ許可。RDSの3306番はRails ECS SGからのみ許可 |
-| 画像アップロード | Active StorageでPNG/JPEGとファイルサイズを検証 |
-| N+1対策 | Active Storageの画像参照は `includes(image_attachment: :blob)` でeager load |
-| 集計負荷対策 | いいね数・コメント数はcounter cacheで保持 |
+個人開発ではNAT Gatewayの固定費が重いため、ECSタスクはpublic subnetに配置しました。ただし、Security GroupでALBからの通信だけに絞り、RDSはprivate subnetに配置してRails ECSからのみ接続可能にしています。
 
 ## テスト・静的解析
 
@@ -329,24 +295,6 @@ docker compose exec next npm run test -- --run
 ```
 
 CIではRSpec、RuboCop、ESLintを実行しています。Vitestは主要コンポーネントの確認用として導入しています。
-
-## 工夫した点
-
-### 1. BFFで認証トークンを隠蔽
-
-ブラウザのJavaScriptから認証トークンを直接扱わないように、Next.js のサーバー側処理をBFFとして利用しました。ログイン後のトークンはhttpOnly Cookieに保存し、Rails APIへのリクエスト時だけBFFがヘッダーに変換して送信します。
-
-### 2. AI生成から買い物リストまでの導線
-
-AIが生成したレシピを単に表示するだけでなく、材料を買い物リストへ追加できるようにしました。献立決定と買い物準備を分断しないことで、実際の利用シーンに近い体験を目指しています。
-
-### 3. レシピ削除後の買い物リスト保持
-
-レシピを削除しても買い物リスト上の食材情報は残るようにしました。DBの外部キー制約とUXの両方を考え、`dependent: :nullify` とスナップショット保存を組み合わせています。
-
-### 4. AWSコストとセキュリティのバランス
-
-個人開発ではNAT Gatewayの固定費が重いため、ECSタスクはpublic subnetに配置しました。ただし、Security GroupでALBからの通信だけに絞り、RDSはprivate subnetに配置してRails ECSからのみ接続可能にしています。
 
 ## 各種リンク
 

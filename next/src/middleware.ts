@@ -2,7 +2,13 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 /**
- * Next.js 公式推奨の "Optimistic Check with Proxy" パターン。
+ * Next.js 公式推奨の "Optimistic Check" パターン。
+ *
+ * # middleware.ts (Edge) を使う理由
+ * Next.js 16 の新しい proxy.ts は Node.js ランタイム固定だが、デプロイ先の
+ * Cloudflare Workers 用アダプタ (@opennextjs/cloudflare) が Node.js
+ * middleware 未対応のため、Edge で動く旧 middleware.ts 形式を使う。
+ * アダプタが proxy.ts に対応したら戻してよい。
  *
  * # 役割
  * 1. ログイン済みかどうかの簡易判定 (Cookie 読み取りのみ)
@@ -18,7 +24,7 @@ import type { NextRequest } from 'next/server'
  * Rails (devise_token_auth) はログイン時に access-token と一緒に expiry
  * (UNIX timestamp 文字列) を返してくる。これを Cookie に保存しておくことで、
  * Rails に問い合わせずとも「もう Rails 側でトークンが無効化される時刻」を
- * 知ることができる。proxy.ts でこの値と現在時刻を比較し、期限を過ぎていれば
+ * 知ることができる。本ファイルでこの値と現在時刻を比較し、期限を過ぎていれば
  * 保護ページに進む前にログイン画面へリダイレクトする。
  *
  * これにより「期限切れ Cookie で /recipes/new に到達 → テキスト入力 →
@@ -31,7 +37,7 @@ import type { NextRequest } from 'next/server'
  * "must always validate the session on your server for protected actions
  * or pages" と注意書きあり)。
  */
-export default function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('access-token')?.value
   const client = request.cookies.get('client')?.value
   const uid = request.cookies.get('uid')?.value

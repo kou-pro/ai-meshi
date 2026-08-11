@@ -11,14 +11,16 @@ amazon:
   region: <%= ENV["AWS_REGION"] %>
   bucket: <%= ENV["AWS_BUCKET"] %>
 
-# Cloudflare R2 (S3 互換 API)。region は SDK 必須項目だが R2 では未使用のため auto 固定。
-# checksum 2 項目は aws-sdk-s3 1.178+ のデフォルト整合性チェックが R2 非対応のため必須。
-cloudflare:
+# Supabase Storage (S3 互換 API)。path-style アドレッシングが必須。
+# checksum 2 項目は aws-sdk-s3 1.178+ のデフォルト整合性チェックが
+# S3 互換ストレージで未対応の場合があるため無効化しておく。
+supabase:
   service: S3
-  endpoint: <%= ENV["R2_ENDPOINT"] %>
-  access_key_id: <%= ENV["R2_ACCESS_KEY_ID"] %>
-  secret_access_key: <%= ENV["R2_SECRET_ACCESS_KEY"] %>
-  region: auto
-  bucket: <%= ENV["R2_BUCKET"] %>
+  endpoint: <%= ENV["SUPABASE_S3_ENDPOINT"] %>
+  access_key_id: <%= ENV["SUPABASE_S3_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["SUPABASE_S3_SECRET_ACCESS_KEY"] %>
+  region: <%= ENV["SUPABASE_S3_REGION"] %>
+  bucket: <%= ENV["SUPABASE_S3_BUCKET"] %>
+  force_path_style: true
   request_checksum_calculation: when_required
   response_checksum_validation: when_required

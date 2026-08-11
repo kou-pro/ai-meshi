@@ -6,7 +6,7 @@ Rails.application.configure do
   config.eager_load = true
   config.consider_all_requests_local = false
   config.require_master_key = true
-  config.active_storage.service = :cloudflare
+  config.active_storage.service = :supabase
 
   # Force all access to the app over SSL
   config.force_ssl = true

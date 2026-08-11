@@ -3,10 +3,19 @@
   "name": "ai-meshi",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "routes": [
+    {
+      "pattern": "aimeshi.com",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "RAILS_API_URL": "https://api.aimeshi.com"
   },
   "services": [
     {

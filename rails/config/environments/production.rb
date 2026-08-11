@@ -6,7 +6,7 @@ Rails.application.configure do
   config.eager_load = true
   config.consider_all_requests_local = false
   config.require_master_key = true
-  config.active_storage.service = :amazon
+  config.active_storage.service = :cloudflare
 
   # Force all access to the app over SSL
   config.force_ssl = true
@@ -61,6 +61,8 @@ Rails.application.configure do
     "api.aimeshi.com",                # 独自ドメイン
     ".aimeshi.com",                   # サブドメイン（admin.aimeshi.com 等の将来対応）
   ]
+  # ホスティング先の一時 URL (例: xxx.onrender.com) での動作確認用
+  config.hosts << ENV["RAILS_ALLOWED_HOST"] if ENV["RAILS_ALLOWED_HOST"].present?
 
   # ALB(VPC 10.0.0.0/16)からのX-Forwarded-*ヘッダーを信頼する
   config.action_dispatch.trusted_proxies = [IPAddr.new("10.0.0.0/16")]

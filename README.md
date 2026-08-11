@@ -1,5 +1,10 @@
 # Ai-meshi
 
+> [!NOTE]
+> この README は、ポートフォリオとして公開していた当時 (AWS 運用時) の内容をそのまま残しています。
+> 現在はコスト面の理由から、インフラのみ AWS から無料枠中心の構成 (Cloudflare Workers / Render / TiDB Cloud / Supabase Storage) に移行して運用しており、本文中のインフラに関する記載 (本番環境・インフラ構成図など) は移行前のものです。アプリ自体は <https://aimeshi.com/> で引き続き稼働しています。
+> 公開当時のコード・README のスナップショットは [`portfolio-aws` ブランチ](https://github.com/kou-pro/ai-meshi/tree/portfolio-aws) から確認できます。
+
 冷蔵庫の残り物からAIが献立を提案し、投稿・共有・買い物リスト作成までつなげるSNS型レシピアプリです。
 
 フロントエンドには Next.js / React、バックエンドには Ruby on Rails API、インフラには AWS ECS Fargate / RDS / S3 を使用しています。AIで生成したレシピを保存・公開し、必要な材料を買い物リストへ送れる一連の体験を重視して開発しました。

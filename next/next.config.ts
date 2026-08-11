@@ -1,9 +1,12 @@
 import type { NextConfig } from 'next'
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
-    unoptimized: process.env.NODE_ENV !== 'production',
+    // Cloudflare Workers では Next.js の画像最適化サーバーが動かないため
+    // 最適化を無効にして原寸のまま配信する
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -27,3 +30,5 @@ const nextConfig: NextConfig = {
 }
 
 export default nextConfig
+
+initOpenNextCloudflareForDev()

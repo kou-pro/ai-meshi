@@ -20,4 +20,6 @@ test:
 production:
   <<: *default
   database: ai_meshi_production
-  url: <%= Rails.application.credentials.dig(:production, :database_url) %>
+  # TiDB Cloud への接続情報 (ホスト/ユーザー/TLS パラメータ含む) は
+  # ホスティング側の環境変数 DATABASE_URL で注入する
+  url: <%= ENV["DATABASE_URL"] %>

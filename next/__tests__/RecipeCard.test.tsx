@@ -21,7 +21,7 @@ describe('RecipeCard', () => {
 
   test('ユーザー名が表示される', () => {
     render(<RecipeCard {...baseProps} />)
-    expect(screen.getByRole('link', { name: 'テストユーザー' })).toBeDefined()
+    expect(screen.getByText('テストユーザー')).toBeDefined()
   })
 
   test('likes 数が表示される', () => {
@@ -37,7 +37,10 @@ describe('RecipeCard', () => {
 
   test('ユーザー名リンクが /users/:userId を指す', () => {
     render(<RecipeCard {...baseProps} userId={42} />)
-    const userLink = screen.getByRole('link', { name: 'テストユーザー' })
+    // リンクの accessible name は aria-label="○○のプロフィール" になる
+    const userLink = screen.getByRole('link', {
+      name: 'テストユーザーのプロフィール',
+    })
     expect(userLink.getAttribute('href')).toBe('/users/42')
   })
 
@@ -46,13 +49,17 @@ describe('RecipeCard', () => {
       <RecipeCard {...baseProps} imageUrl="https://example.com/recipe.jpg" />,
     )
     const img = screen.getByRole('img', { name: 'テストレシピ' })
-    expect(img.getAttribute('src')).toBe('https://example.com/recipe.jpg')
+    // next/image は src を /_next/image?url=<エンコード済みURL> 形式に変換する
+    // ことがあるため、デコードした上で元 URL が含まれることを確認する
+    const src = decodeURIComponent(img.getAttribute('src') ?? '')
+    expect(src).toContain('https://example.com/recipe.jpg')
   })
 
   test('imageUrl が null のとき /default-recipe.jpg にフォールバック', () => {
     render(<RecipeCard {...baseProps} imageUrl={null} />)
     const img = screen.getByRole('img', { name: 'テストレシピ' })
-    expect(img.getAttribute('src')).toBe('/default-recipe.jpg')
+    const src = decodeURIComponent(img.getAttribute('src') ?? '')
+    expect(src).toContain('/default-recipe.jpg')
   })
 
   test('createdAt が日本ロケールでフォーマットされて表示される', () => {
